@@ -1,0 +1,2524 @@
+---
+title: "ConditioningAnalysis"
+author: "KMG"
+date: "February 15, 2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+rm(list=ls())
+setwd("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Waddling/CSV_WaddleFiles")
+getwd()
+```
+
+#December 9
+
+##Read in files
+```{r}
+L153Dec9W<-read.csv("L153_Dec9_Waddle2.csv")
+L154Dec9W<-read.csv("L154_Dec9_Waddle2.csv")
+L156Dec9W<-read.csv("L156_Dec9_Waddle2.csv")
+L159Dec9W<-read.csv("L159_Dec9_Waddle2.csv")
+L161Dec9W<-read.csv("L161_Dec9_Waddle2.csv")
+#L162Dec9W<-read.csv("L162_Dec9_Waddle2.csv")
+L165Dec9W<-read.csv("L165_Dec9_Waddle5.csv",skip=15,header=T)
+L167Dec9W<-read.csv("L167_Dec9_Waddle5.csv",skip=15,header=T)
+```
+
+stringr
+split - file names
+str_split
+separate in dplyr
+
+```{r}
+#library(dplyr)
+#L153Dec9W<-L153Dec9W %>% mutate(diff=Time-lag(Time,default=first(Time)))
+
+L153Dec9W$ID<-rep(NA)
+L153Dec9W$ID<-L153Dec9W$ID[is.na(L153Dec9W$ID)]<- "L153"
+L154Dec9W$ID<-rep(NA)
+L154Dec9W$ID<-L154Dec9W$ID[is.na(L154Dec9W$ID)]<- "L154"
+L156Dec9W$ID<-rep(NA)
+L156Dec9W$ID<-L156Dec9W$ID[is.na(L156Dec9W$ID)]<- "L156"
+L159Dec9W$ID<-rep(NA)
+L159Dec9W$ID<-L159Dec9W$ID[is.na(L159Dec9W$ID)]<- "L159"
+L161Dec9W$ID<-rep(NA)
+L161Dec9W$ID<-L161Dec9W$ID[is.na(L161Dec9W$ID)]<- "L161"
+#L162Dec9W$ID<-rep(NA)
+#L162Dec9W$ID<-L162Dec9W$ID[is.na(L162Dec9W$ID)]<- "L162"
+L165Dec9W$ID<-rep(NA)
+L165Dec9W$ID<-L165Dec9W$ID[is.na(L165Dec9W$ID)]<- "L165"
+L167Dec9W$ID<-rep(NA)
+L167Dec9W$ID<-L167Dec9W$ID[is.na(L167Dec9W$ID)]<- "L167"
+```
+
+##Change Names in Files
+```{r}
+library(plyr)
+dfs_Dec9<-list(L153Dec9W,L154Dec9W,L156Dec9W,L159Dec9W,L161Dec9W,L165Dec9W,L167Dec9W)
+
+drops<-c("Total.length","FPS","Subject","Comment","Status")
+
+DropFunction<- function(x) {
+  x<-x[ , !(names(x) %in% drops)]
+  return(x)
+}
+
+
+Dec9_Waddle = ldply(dfs_Dec9,DropFunction)
+
+names(Dec9_Waddle)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
+  
+```
+
+##Combine Data to get TimeEl
+```{r}
+Dec9_StartTimes<-subset(Dec9_Waddle,Start_Stop== "START")
+names(Dec9_StartTimes)<- c("StartTime","Observer", "Behavior","Start","ID")
+Dec9_StopTimes<-subset(Dec9_Waddle,Start_Stop=="STOP")
+names(Dec9_StopTimes)<-c("StopTime","Observer", "Behavior","Stop","ID")
+```
+
+Not used.
+```{r}Dec9_L153W<-cbind(Dec9_L153_StartTimes,Dec9_L153_StopTimes)
+drop_some<-c("Start","Stop")
+Dec9_L153W<-Dec9_L153W[ , !(names(Dec9_L153W) %in% drop_some)]
+drop_some<-c("ID.1","Behavior.1")
+Dec9_L153W<-Dec9_L153W[ , !(names(Dec9_L153W) %in% drop_some)]
+library(dplyr)
+Dec9_L153W<-mutate(Dec9_L153W,TimeEl=StopTime-StartTime)
+```
+
+```{r}
+#library(data.table)
+#Dec9_StartTimes<-as.data.table(Dec9_StartTimes)
+#Dec9_StopTimes<-as.data.table(Dec9_StopTimes)
+#Dec9_StartTimes<-as.data.frame(Dec9_StartTimes)
+#Dec9_StopTimes<-as.data.frame(Dec9_StopTimes)
+#Dec9_StartTimes$StopTime<-NA
+#Dec9_StopTimes$StartTime<-NA
+#drops_start<-c("Start")
+#Dec9_StartTimes<-Dec9_StartTimes[ , !(names(Dec9_StartTimes) %in% drops_start)]
+#drops_stop<-c("Stop")
+#Dec9_StopTimes<-Dec9_StopTimes[ , !(names(Dec9_StopTimes) %in% drops_stop)]
+```
+
+```{r}
+Dec9_WaddleTimes<-cbind(Dec9_StartTimes,Dec9_StopTimes)
+names(Dec9_WaddleTimes)<-c("StartTime","Observer", "Behavior","Start","ID","StopTime","Obs.2", "Beh.2","Stop","ID.2")
+drops_doubles<-c("Start","Obs.2", "Beh.2","Stop","ID.2")
+Dec9_WaddleTimes<-Dec9_WaddleTimes[ , !(names(Dec9_WaddleTimes) %in% drops_doubles)]
+Dec9_WaddleTimes<-mutate(Dec9_WaddleTimes,TimeEl=StopTime-StartTime)
+Dec9_WaddleTimes<-mutate(Dec9_WaddleTimes,Minutes=StartTime/60)
+Dec9_WaddleTimes<-mutate(Dec9_WaddleTimes,Date=rep("Dec9"))
+```
+
+##Subset Data by ID to set acclimation and test periods
+
+```{r}
+library(dplyr)
+L153Dec9_W1<-filter(Dec9_WaddleTimes,ID=="L153")
+L153Dec9_W1$Observer<-rep(NA)
+L153Dec9_W1$Observer<-L153Dec9_W1$Observer[is.na(L153Dec9_W1$Observer)]<- "KaG"
+
+L154Dec9_W1<-filter(Dec9_WaddleTimes,ID=="L154")
+L154Dec9_W1$Observer<-rep(NA)
+L154Dec9_W1$Observer<-L154Dec9_W1$Observer[is.na(L154Dec9_W1$Observer)]<- "KaG"
+
+L156Dec9_W1<-filter(Dec9_WaddleTimes,ID=="L156")
+L156Dec9_W1$Observer<-rep(NA)
+L156Dec9_W1$Observer<-L156Dec9_W1$Observer[is.na(L156Dec9_W1$Observer)]<- "AnJ"
+
+L159Dec9_W1<-filter(Dec9_WaddleTimes,ID=="L159")
+L159Dec9_W1$Observer<-rep(NA)
+L159Dec9_W1$Observer<-L159Dec9_W1$Observer[is.na(L159Dec9_W1$Observer)]<- "AnJ"
+
+L161Dec9_W1<-filter(Dec9_WaddleTimes,ID=="L161")
+L161Dec9_W1$Observer<-rep(NA)
+L161Dec9_W1$Observer<-L161Dec9_W1$Observer[is.na(L161Dec9_W1$Observer)]<- "NiI"
+
+#L162Dec9_W1<-filter(Dec9_WaddleTimes,ID=="L162")
+L165Dec9_W1<-filter(Dec9_WaddleTimes,ID=="L165")
+L165Dec9_W1$Observer<-rep(NA)
+L165Dec9_W1$Observer<-L165Dec9_W1$Observer[is.na(L165Dec9_W1$Observer)]<- "NiI"
+
+L167Dec9_W1<-filter(Dec9_WaddleTimes,ID=="L167")
+L167Dec9_W1$Observer<-rep(NA)
+L167Dec9_W1$Observer<-L167Dec9_W1$Observer[is.na(L167Dec9_W1$Observer)]<- "MjH"
+```
+use string split
+```{r}
+library(dplyr)
+L153Dec9_W1_accl<-filter(L153Dec9_W1,Minutes<=21)
+L153Dec9_W1_test<-filter(L153Dec9_W1,Minutes>21 & Minutes<=41)
+L154Dec9_W1_accl<-filter(L154Dec9_W1,Minutes<=22)
+L154Dec9_W1_test<-filter(L154Dec9_W1,Minutes>22 & Minutes<=42)
+L156Dec9_W1_accl<-filter(L156Dec9_W1,Minutes<=21)
+L156Dec9_W1_test<-filter(L156Dec9_W1,Minutes>21 & Minutes<=41)
+L159Dec9_W1_accl<-filter(L159Dec9_W1,Minutes<=21)
+L159Dec9_W1_test<-filter(L159Dec9_W1,Minutes>21 & Minutes<=41)
+L161Dec9_W1_accl<-filter(L161Dec9_W1,Minutes<=21)
+L161Dec9_W1_test<-filter(L161Dec9_W1,Minutes>21 & Minutes<=41)
+#L162Dec9_W1_accl<-filter(L162Dec9_W1,Minutes<=21)
+#L162Dec9_W1_test<-filter(L162Dec9_W1,Minutes>21 & Minutes<=41)
+L165Dec9_W1_accl<-filter(L165Dec9_W1,Minutes<=22)
+L165Dec9_W1_test<-filter(L165Dec9_W1,Minutes>22 & Minutes<=41)
+L167Dec9_W1_accl<-filter(L167Dec9_W1,Minutes<=21)
+L167Dec9_W1_test<-filter(L167Dec9_W1,Minutes>21 & Minutes<=41)
+```
+
+```{r}
+library(dplyr)
+Dec9_W1_accl_BH<-rbind(L153Dec9_W1_accl,L156Dec9_W1_accl,L161Dec9_W1_accl,L165Dec9_W1_accl)
+Dec9_W1_test_BH<-rbind(L153Dec9_W1_test,L156Dec9_W1_test,L161Dec9_W1_test,L165Dec9_W1_test)
+library(dplyr)
+Dec9_W1_accl_BH<-mutate(Dec9_W1_accl_BH,Field=rep("BH"))
+Dec9_W1_accl_BH<-mutate(Dec9_W1_accl_BH,TimePer=rep("accl"))
+Dec9_W1_accl_BH<-mutate(Dec9_W1_accl_BH,FieldType=rep("conditioned"))
+Dec9_W1_test_BH<-mutate(Dec9_W1_test_BH,Field=rep("BH"))
+Dec9_W1_test_BH<-mutate(Dec9_W1_test_BH,TimePer=rep("test"))
+Dec9_W1_test_BH<-mutate(Dec9_W1_test_BH,FieldType=rep("conditioned"))
+```
+
+```{r}
+library(dplyr)
+Dec9_W1_accl_NB<-rbind(L154Dec9_W1_accl,L159Dec9_W1_accl, L167Dec9_W1_accl)
+Dec9_W1_test_NB<-rbind(L154Dec9_W1_test,L159Dec9_W1_test,L167Dec9_W1_test)
+library(dplyr)
+Dec9_W1_accl_NB<-mutate(Dec9_W1_accl_NB,Field=rep("NB"))
+Dec9_W1_accl_NB<-mutate(Dec9_W1_accl_NB,TimePer=rep("accl"))
+Dec9_W1_accl_NB<-mutate(Dec9_W1_accl_NB,FieldType=rep("control"))
+Dec9_W1_test_NB<-mutate(Dec9_W1_test_NB,Field=rep("NB"))
+Dec9_W1_test_NB<-mutate(Dec9_W1_test_NB,TimePer=rep("test"))
+Dec9_W1_test_NB<-mutate(Dec9_W1_test_NB,FieldType=rep("control"))
+```
+
+##Master Data Sets
+```{r}
+library(dplyr)
+Dec9_W1<-rbind(Dec9_W1_accl_BH,Dec9_W1_accl_NB,Dec9_W1_test_BH,Dec9_W1_test_NB)
+Dec9_W1<-mutate(Dec9_W1,Date=rep("Dec9"))
+Dec9_W1_BH<-rbind(Dec9_W1_accl_BH,Dec9_W1_test_BH)
+Dec9_W1_NB<-rbind(Dec9_W1_accl_NB,Dec9_W1_test_NB)
+```
+
+```{r}
+library(dplyr)
+Dec9_W1<-Dec9_W1 %>% group_by(ID,TimePer,Observer,Field,FieldType,Date) %>% summarise(TotalTimeEl=sum(TimeEl)) 
+Dec9_W1_test<-filter(Dec9_W1,TimePer=="test")
+```
+
+
+
+#Dec 9 Second Analysis
+
+```{r}
+L153Dec9_W2<-read.csv("L153_Dec9_Waddle4.csv",skip=15,header=T)
+L154Dec9_W2<-read.csv("L154_Dec9_Waddle4.csv",skip=15,header=T)
+L156Dec9_W2<-read.csv("L156_Dec9_Waddle4.csv",skip=15,header=T)
+L161Dec9_W2<-read.csv("L161_Dec9_Waddle4.csv",skip=15,header=T)
+L165Dec9_W2<-read.csv("L165_Dec9_Waddle5.csv",skip=15,header=T)
+L167Dec9_W2<-read.csv("L167_Dec9_Waddle4.csv",skip=15,header=T)
+```
+
+```{r}
+
+L153Dec9_W2$ID<-rep(NA)
+L153Dec9_W2ID<-L153Dec9_W2$ID[is.na(L153Dec9_W2$ID)]<- "L153"
+L154Dec9_W2$ID<-rep(NA)
+L154Dec9_W2$ID<-L154Dec9_W2$ID[is.na(L154Dec9_W2$ID)]<- "L154"
+L156Dec9_W2$ID<-rep(NA)
+L156Dec9_W2$ID<-L156Dec9_W2$ID[is.na(L156Dec9_W2$ID)]<- "L156"
+#L159Dec_9W2$ID<-rep(NA)
+#L159Dec_9W2$ID<-L159Dec9_W2$ID[is.na(L159Dec9_W2$ID)]<- "L159"
+L161Dec9_W2$ID<-rep(NA)
+L161Dec9_W2$ID<-L161Dec9_W2$ID[is.na(L161Dec9_W2$ID)]<- "L161"
+#L162Dec9_W2$ID<-rep(NA)
+#L162Dec9_W2$ID<-L162Dec9_W2$ID[is.na(L162Dec9_W2$ID)]<- "L162"
+L165Dec9_W2$ID<-rep(NA)
+L165Dec9_W2$ID<-L165Dec9_W2$ID[is.na(L165Dec9_W2$ID)]<- "L165"
+L167Dec9_W2$ID<-rep(NA)
+L167Dec9_W2$ID<-L167Dec9_W2$ID[is.na(L167Dec9_W2$ID)]<- "L167"
+```
+
+##Change Names in Files
+```{r}
+library(plyr)
+dfs_Dec9_2<-list(L153Dec9_W2,L154Dec9_W2,L156Dec9_W2,L165Dec9_W2,L167Dec9_W2,L161Dec9_W2)
+
+drops<-c("Total.length","FPS","Subject","Comment","Status")
+
+DropFunction<- function(x) {
+  x<-x[ , !(names(x) %in% drops)]
+  return(x)
+}
+
+Dec9_Waddle2 = ldply(dfs_Dec9_2,DropFunction)
+
+names(Dec9_Waddle2)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
+
+```
+
+##Combine Data to get TimeEl
+```{r}
+Dec9_StartTimes2<-subset(Dec9_Waddle2,Start_Stop== "START")
+names(Dec9_StartTimes2)<- c("StartTime","Observer", "Behavior","Start","ID")
+Dec9_StopTimes2<-subset(Dec9_Waddle2,Start_Stop=="STOP")
+names(Dec9_StopTimes2)<-c("StopTime","Observer", "Behavior","Stop","ID")
+```
+###lag
+
+```{r}
+Dec9_WaddleTimes2<-cbind(Dec9_StartTimes2,Dec9_StopTimes2)
+names(Dec9_WaddleTimes2)<-c("StartTime","Observer", "Behavior","Start","ID","StopTime","Obs.2", "Beh.2","Stop","ID.2")
+drops_doubles<-c("Start","Obs.2", "Beh.2","Stop","ID.2")
+Dec9_WaddleTimes2<-Dec9_WaddleTimes2[ , !(names(Dec9_WaddleTimes2) %in% drops_doubles)]
+Dec9_WaddleTimes2<-mutate(Dec9_WaddleTimes2,TimeEl=StopTime-StartTime)
+Dec9_WaddleTimes2<-mutate(Dec9_WaddleTimes2,Minutes=StartTime/60)
+Dec9_WaddleTimes2<-mutate(Dec9_WaddleTimes2,Date=rep("Dec9"))
+```
+
+
+##Subset Data by ID to set acclimation and test periods
+
+```{r}
+library(dplyr)
+L153Dec9_W2<-filter(Dec9_WaddleTimes2,ID=="L153")
+L153Dec9_W2$Observer<-rep(NA)
+L153Dec9_W2$Observer<-L153Dec9_W2$Observer[is.na(L153Dec9_W2$Observer)]<- "AnJ"
+
+L154Dec9_W2<-filter(Dec9_WaddleTimes2,ID=="L154")
+L154Dec9_W2$Observer<-rep(NA)
+L154Dec9_W2$Observer<-L154Dec9_W2$Observer[is.na(L154Dec9_W2$Observer)]<- "AnJ"
+
+L156Dec9_W2<-filter(Dec9_WaddleTimes2,ID=="L156")
+L156Dec9_W2$Observer<-rep(NA)
+L156Dec9_W2$Observer<-L156Dec9_W2$Observer[is.na(L156Dec9_W2$Observer)]<- "KaG"
+
+#L159Dec9_W3<-filter(Dec9_WaddleTimes3,ID=="L159")
+
+L161Dec9_W2<-filter(Dec9_WaddleTimes2,ID=="L161")
+L161Dec9_W2$Observer<-rep(NA)
+L161Dec9_W2$Observer<-L161Dec9_W2$Observer[is.na(L161Dec9_W2$Observer)]<- "KaG" 
+
+#L162Dec9_W3<-filter(Dec9_WaddleTimes,ID=="L162")
+
+
+
+L165Dec9_W2<-filter(Dec9_WaddleTimes2,ID=="L165")
+L165Dec9_W2$Observer<-rep(NA)
+L165Dec9_W2$Observer<-L165Dec9_W2$Observer[is.na(L165Dec9_W2$Observer)]<- "MjH"
+
+
+L167Dec9_W2<-filter(Dec9_WaddleTimes2,ID=="L167")
+L167Dec9_W2$Observer<-rep(NA)
+L167Dec9_W2$Observer<-L167Dec9_W2$Observer[is.na(L167Dec9_W2$Observer)]<- "EmT"
+
+```
+
+```{r}
+library(dplyr)
+L153Dec9_W2_accl<-filter(L153Dec9_W2,Minutes<=21)
+L153Dec9_W2_test<-filter(L153Dec9_W2,Minutes>21 & Minutes<=41)
+L154Dec9_W2_accl<-filter(L154Dec9_W2,Minutes<=22)
+L154Dec9_W2_test<-filter(L154Dec9_W2,Minutes>22 & Minutes<=42)
+L156Dec9_W2_accl<-filter(L156Dec9_W2,Minutes<=21)
+L156Dec9_W2_test<-filter(L156Dec9_W2,Minutes>21 & Minutes<=41)
+#L159Dec9_W3_accl<-filter(L159Dec9_W3,Minutes<=21)
+#L159Dec9_W3_test<-filter(L159Dec9_W3,Minutes>21 & Minutes<=41)
+L161Dec9_W2_accl<-filter(L161Dec9_W2,Minutes<=21)
+L161Dec9_W2_test<-filter(L161Dec9_W2,Minutes>21 & Minutes<=41)
+#L162Dec9_W3_accl<-filter(L162Dec9_W3,Minutes<=21)
+#L162Dec9_W3_test<-filter(L162Dec9_W3,Minutes>21)
+L165Dec9_W2_accl<-filter(L165Dec9_W2,Minutes<=22 & Minutes<=42)
+L165Dec9_W2_test<-filter(L165Dec9_W2,Minutes>22 & Minutes<=41)
+L167Dec9_W2_accl<-filter(L167Dec9_W2,Minutes<=21)
+L167Dec9_W2_test<-filter(L167Dec9_W2,Minutes>21 & Minutes<=41)
+```
+
+```{r}
+Dec9_W2_accl_BH<-rbind(L153Dec9_W2_accl,L156Dec9_W2_accl,L165Dec9_W2_accl,L161Dec9_W2_accl)
+Dec9_W2_test_BH<-rbind(L153Dec9_W2_test,L156Dec9_W2_test,L165Dec9_W2_test,L161Dec9_W2_test)
+library(dplyr)
+Dec9_W2_accl_BH<-mutate(Dec9_W2_accl_BH,Field=rep("BH"))
+Dec9_W2_accl_BH<-mutate(Dec9_W2_accl_BH,TimePer=rep("accl"))
+Dec9_W2_accl_BH<-mutate(Dec9_W2_accl_BH,FieldType=rep("conditioned"))
+Dec9_W2_test_BH<-mutate(Dec9_W2_test_BH,Field=rep("BH"))
+Dec9_W2_test_BH<-mutate(Dec9_W2_test_BH,TimePer=rep("test"))
+Dec9_W2_test_BH<-mutate(Dec9_W2_test_BH,FieldType=rep("conditioned"))
+```
+
+```{r}
+Dec9_W2_accl_NB<-rbind(L154Dec9_W2_accl,L167Dec9_W2_accl)
+Dec9_W2_test_NB<-rbind(L154Dec9_W2_test,L167Dec9_W2_test)
+library(dplyr)
+Dec9_W2_accl_NB<-mutate(Dec9_W2_accl_NB,Field=rep("NB"))
+Dec9_W2_accl_NB<-mutate(Dec9_W2_accl_NB,TimePer=rep("accl"))
+Dec9_W2_accl_NB<-mutate(Dec9_W2_accl_NB,FieldType=rep("control"))
+Dec9_W2_test_NB<-mutate(Dec9_W2_test_NB,Field=rep("NB"))
+Dec9_W2_test_NB<-mutate(Dec9_W2_test_NB,TimePer=rep("test"))
+Dec9_W2_test_NB<-mutate(Dec9_W2_test_NB,FieldType=rep("control"))
+```
+
+
+##Master Data Sets - Dec9 Analysis 2
+```{r}
+Dec9_W2<-rbind(Dec9_W2_accl_BH,Dec9_W2_accl_NB,Dec9_W2_test_BH,Dec9_W2_test_NB)
+Dec9_W2<-mutate(Dec9_W2,Date=rep("Dec9"))
+Dec9_W2_BH<-rbind(Dec9_W2_accl_BH,Dec9_W2_test_BH)
+Dec9_W2_NB<-rbind(Dec9_W2_accl_NB,Dec9_W2_test_NB)
+```
+
+```{r}
+library(dplyr)
+Dec9_W2<-Dec9_W2 %>% group_by(ID,TimePer,Observer,Field,FieldType,Date) %>% summarise(TotalTimeEl=sum(TimeEl))
+Dec9_W2_test<-filter(Dec9_W2,TimePer=="test")
+```
+
+#Dec9 Third Analysis
+```{r}
+L153Dec9W3<-read.csv("L153_Dec9_Waddle3.csv")
+L154Dec9W3<-read.csv("L154_Dec9_Waddle3.csv")
+L156Dec9W3<-read.csv("L156_Dec9_Waddle5.csv",skip=15,header=T)
+#L159Dec9W3<-read.csv("L159_Dec9_Waddle3.csv")
+L161Dec9W3<-read.csv("L161_Dec9_Waddle5.csv",skip=15,header=T)
+L162Dec9W3<-read.csv("L162_Dec9_Waddle3.csv")
+L165Dec9W3<-read.csv("L165_Dec9_Waddle3.csv")
+L167Dec9W3<-read.csv("L167_Dec9_Waddle3.csv")
+```
+
+
+```{r}
+
+L153Dec9W3$ID<-rep(NA)
+L153Dec9W3$ID<-L153Dec9W3$ID[is.na(L153Dec9W3$ID)]<- "L153"
+L154Dec9W3$ID<-rep(NA)
+L154Dec9W3$ID<-L154Dec9W3$ID[is.na(L154Dec9W3$ID)]<- "L154"
+L156Dec9W3$ID<-rep(NA)
+L156Dec9W3$ID<-L156Dec9W3$ID[is.na(L156Dec9W3$ID)]<- "L156"
+#L159Dec9W3$ID<-rep(NA)
+#L159Dec9W3$ID<-L159Dec9W3$ID[is.na(L159Dec9W3$ID)]<- "L159"
+L161Dec9W3$ID<-rep(NA)
+L161Dec9W3$ID<-L161Dec9W3$ID[is.na(L161Dec9W3$ID)]<- "L161"
+L162Dec9W3$ID<-rep(NA)
+L162Dec9W3$ID<-L162Dec9W3$ID[is.na(L162Dec9W3$ID)]<- "L162"
+L165Dec9W3$ID<-rep(NA)
+L165Dec9W3$ID<-L165Dec9W3$ID[is.na(L165Dec9W3$ID)]<- "L165"
+L167Dec9W3$ID<-rep(NA)
+L167Dec9W3$ID<-L167Dec9W3$ID[is.na(L167Dec9W3$ID)]<- "L167"
+```
+
+
+##Change Names in Files
+```{r}
+library(plyr)
+dfs_Dec9_3<-list(L153Dec9W3,L154Dec9W3,L156Dec9W3,L161Dec9W3,L162Dec9W3,L165Dec9W3,L167Dec9W3)
+
+drops<-c("Total.length","FPS","Subject","Comment","Status")
+
+DropFunction<- function(x) {
+  x<-x[ , !(names(x) %in% drops)]
+  return(x)
+}
+
+Dec9_Waddle3 = ldply(dfs_Dec9_3,DropFunction)
+
+names(Dec9_Waddle3)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
+
+```
+
+##Combine Data to get TimeEl
+```{r}
+Dec9_StartTimes3<-subset(Dec9_Waddle3,Start_Stop== "START")
+names(Dec9_StartTimes3)<- c("StartTime","Observer", "Behavior","Start","ID")
+Dec9_StopTimes3<-subset(Dec9_Waddle3,Start_Stop=="STOP")
+names(Dec9_StopTimes3)<-c("StopTime","Observer", "Behavior","Stop","ID")
+```
+
+
+```{r}
+Dec9_WaddleTimes3<-cbind(Dec9_StartTimes3,Dec9_StopTimes3)
+names(Dec9_WaddleTimes3)<-c("StartTime","Observer", "Behavior","Start","ID","StopTime","Obs.2", "Beh.2","Stop","ID.2")
+drops_doubles<-c("Start","Obs.2", "Beh.2","Stop","ID.2")
+Dec9_WaddleTimes3<-Dec9_WaddleTimes3[ , !(names(Dec9_WaddleTimes3) %in% drops_doubles)]
+Dec9_WaddleTimes3<-mutate(Dec9_WaddleTimes3,TimeEl=StopTime-StartTime)
+Dec9_WaddleTimes3<-mutate(Dec9_WaddleTimes3,Minutes=StartTime/60)
+Dec9_WaddleTimes3<-mutate(Dec9_WaddleTimes3,Date=rep("Dec9"))
+```
+
+##Subset Data by ID to set acclimation and test periods
+
+```{r}
+library(dplyr)
+L153Dec9_W3<-filter(Dec9_WaddleTimes3,ID=="L153")
+L153Dec9_W3$Observer<-rep(NA)
+L153Dec9_W3$Observer<-L153Dec9_W3$Observer[is.na(L153Dec9_W3$Observer)]<- "MjH"
+
+L154Dec9_W3<-filter(Dec9_WaddleTimes3,ID=="L154")
+L154Dec9_W3$Observer<-rep(NA)
+L154Dec9_W3$Observer<-L154Dec9_W3$Observer[is.na(L154Dec9_W3$Observer)]<- "MjH"
+
+L156Dec9_W3<-filter(Dec9_WaddleTimes3,ID=="L156")
+L156Dec9_W3$Observer<-rep(NA)
+L156Dec9_W3$Observer<-L156Dec9_W3$Observer[is.na(L156Dec9_W3$Observer)]<- "NiI"
+
+#L159Dec9_W3<-filter(Dec9_WaddleTimes3,ID=="L159")
+L161Dec9_W3<-filter(Dec9_WaddleTimes3,ID=="L161")
+L161Dec9_W3$Observer<-rep(NA)
+L161Dec9_W3$Observer<-L161Dec9_W3$Observer[is.na(L161Dec9_W3$Observer)]<- "NaB"
+
+L162Dec9_W3<-filter(Dec9_WaddleTimes,ID=="L162")
+L162Dec9_W3$Observer<-rep(NA)
+L162Dec9_W3$Observer<-L162Dec9_W3$Observer[is.na(L162Dec9_W3$Observer)]<- "NaB"
+
+
+L165Dec9_W3<-filter(Dec9_WaddleTimes3,ID=="L165")
+L165Dec9_W3$Observer<-rep(NA)
+L165Dec9_W3$Observer<-L165Dec9_W3$Observer[is.na(L165Dec9_W3$Observer)]<- "KaG"
+
+
+L167Dec9_W3<-filter(Dec9_WaddleTimes3,ID=="L167")
+L167Dec9_W3$Observer<-rep(NA)
+L167Dec9_W3$Observer<-L167Dec9_W3$Observer[is.na(L167Dec9_W3$Observer)]<- "MjH"
+
+```
+
+```{r}
+library(dplyr)
+L153Dec9_W3_accl<-filter(L153Dec9_W3,Minutes<=21)
+L153Dec9_W3_test<-filter(L153Dec9_W3,Minutes>21 & Minutes<=41)
+L154Dec9_W3_accl<-filter(L154Dec9_W3,Minutes<=22)
+L154Dec9_W3_test<-filter(L154Dec9_W3,Minutes>22 & Minutes<=42)
+L156Dec9_W3_accl<-filter(L156Dec9_W3,Minutes<=21)
+L156Dec9_W3_test<-filter(L156Dec9_W3,Minutes>21 & Minutes<=41)
+#L159Dec9_W3_accl<-filter(L159Dec9_W3,Minutes<=21)
+#L159Dec9_W3_test<-filter(L159Dec9_W3,Minutes>21 & Minutes<=41)
+L161Dec9_W3_accl<-filter(L161Dec9_W3,Minutes<=21)
+L161Dec9_W3_test<-filter(L161Dec9_W3,Minutes>21 & Minutes<=41)
+L162Dec9_W3_accl<-filter(L162Dec9_W3,Minutes<=21)
+L162Dec9_W3_test<-filter(L162Dec9_W3,Minutes>21)
+L165Dec9_W3_accl<-filter(L165Dec9_W3,Minutes<=22 & Minutes<=42)
+L165Dec9_W3_test<-filter(L165Dec9_W3,Minutes>22 & Minutes<=41)
+L167Dec9_W3_accl<-filter(L167Dec9_W3,Minutes<=21)
+L167Dec9_W3_test<-filter(L167Dec9_W3,Minutes>21 & Minutes<=41)
+```
+
+```{r}
+Dec9_W3_accl_BH<-rbind(L153Dec9_W3_accl,L156Dec9_W3_accl,L161Dec9_W3_accl,L165Dec9_W3_accl)
+Dec9_W3_test_BH<-rbind(L153Dec9_W3_test,L156Dec9_W3_test,L161Dec9_W3_test,L165Dec9_W3_test)
+library(dplyr)
+Dec9_W3_accl_BH<-mutate(Dec9_W3_accl_BH,Field=rep("BH"))
+Dec9_W3_accl_BH<-mutate(Dec9_W3_accl_BH,TimePer=rep("accl"))
+Dec9_W3_accl_BH<-mutate(Dec9_W3_accl_BH,FieldType=rep("conditioned"))
+Dec9_W3_test_BH<-mutate(Dec9_W3_test_BH,Field=rep("BH"))
+Dec9_W3_test_BH<-mutate(Dec9_W3_test_BH,TimePer=rep("test"))
+Dec9_W3_test_BH<-mutate(Dec9_W3_test_BH,FieldType=rep("conditioned"))
+```
+
+```{r}
+Dec9_W3_accl_NB<-rbind(L154Dec9_W3_accl,L162Dec9_W3_accl,L167Dec9_W3_accl)
+Dec9_W3_test_NB<-rbind(L154Dec9_W3_test,L162Dec9_W3_accl,L167Dec9_W3_test)
+library(dplyr)
+Dec9_W3_accl_NB<-mutate(Dec9_W3_accl_NB,Field=rep("NB"))
+Dec9_W3_accl_NB<-mutate(Dec9_W3_accl_NB,TimePer=rep("accl"))
+Dec9_W3_accl_NB<-mutate(Dec9_W3_accl_NB,FieldType=rep("control"))
+Dec9_W3_test_NB<-mutate(Dec9_W3_test_NB,Field=rep("NB"))
+Dec9_W3_test_NB<-mutate(Dec9_W3_test_NB,TimePer=rep("test"))
+Dec9_W3_test_NB<-mutate(Dec9_W3_test_NB,FieldType=rep("control"))
+```
+
+##Master Data Sets 
+```{r}
+Dec9_W3<-rbind(Dec9_W3_accl_BH,Dec9_W3_accl_NB,Dec9_W3_test_BH,Dec9_W3_test_NB)
+Dec9_W3<-mutate(Dec9_W3,Date=rep("Dec9"))
+Dec9_W3_BH<-rbind(Dec9_W3_accl_BH,Dec9_W3_test_BH)
+Dec9_W3_NB<-rbind(Dec9_W3_accl_NB,Dec9_W3_test_NB)
+```
+
+```{r}
+library(dplyr)
+Dec9_W3<-Dec9_W3 %>% group_by(ID,TimePer,Observer,Field,FieldType,Date) %>% summarise(TotalTimeEl=sum(TimeEl))
+Dec9_W3_test<-filter(Dec9_W3,TimePer=="test")
+```
+
+
+##########################################################################
+
+#December 10
+```{r}
+L155Dec10W<-read.csv("L155_Dec10_Waddle.csv")
+L157Dec10W<-read.csv("L157_Dec10_Waddle.csv")
+L158Dec10W<-read.csv("L158_Dec10_Waddle.csv")
+L160Dec10W<-read.csv("L160_Dec10_Waddle5.csv",skip=15,header=T)
+L163Dec10W<-read.csv("L163_Dec10_Waddle.csv")
+L164Dec10W<-read.csv("L164_Dec10_Waddle.csv")
+L166Dec10W<-read.csv("L166_Dec10_Waddle.csv")
+L168Dec10W<-read.csv("L168_Dec10_Waddle.csv")
+```
+
+```{r}
+L155Dec10W$ID<-rep(NA)
+L155Dec10W$ID<-L155Dec10W$ID[is.na(L155Dec10W$ID)]<- "L155"
+L157Dec10W$ID<-rep(NA)
+L157Dec10W$ID<-L157Dec10W$ID[is.na(L157Dec10W$ID)]<- "L157"
+L158Dec10W$ID<-rep(NA)
+L158Dec10W$ID<-L158Dec10W$ID[is.na(L158Dec10W$ID)]<- "L158"
+L160Dec10W$ID<-rep(NA)
+L160Dec10W$ID<-L160Dec10W$ID[is.na(L160Dec10W$ID)]<- "L160"
+L163Dec10W$ID<-rep(NA)
+L163Dec10W$ID<-L163Dec10W$ID[is.na(L163Dec10W$ID)]<- "L163"
+L164Dec10W$ID<-rep(NA)
+L164Dec10W$ID<-L164Dec10W$ID[is.na(L164Dec10W$ID)]<- "L164"
+L166Dec10W$ID<-rep(NA)
+L166Dec10W$ID<-L166Dec10W$ID[is.na(L166Dec10W$ID)]<- "L166"
+L168Dec10W$ID<-rep(NA)
+L168Dec10W$ID<-L168Dec10W$ID[is.na(L168Dec10W$ID)]<- "L168"
+```
+
+```{r}
+library(plyr)
+dfs_Dec10<-list(L155Dec10W,L157Dec10W,L158Dec10W,L160Dec10W,L163Dec10W,L164Dec10W,L166Dec10W,L168Dec10W)
+
+drops<-c("Total.length","FPS","Subject","Comment","Status")
+
+DropFunction<- function(x) {
+  x<-x[ , !(names(x) %in% drops)]
+  return(x)
+}
+
+Dec10_Waddle = ldply(dfs_Dec10,DropFunction)
+
+names(Dec10_Waddle)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
+```
+
+```{r}
+Dec10_StartTimes<-subset(Dec10_Waddle,Start_Stop== "START")
+names(Dec10_StartTimes)<- c("StartTime","Observer", "Behavior","Start","ID")
+Dec10_StopTimes<-subset(Dec10_Waddle,Start_Stop=="STOP")
+names(Dec10_StopTimes)<-c("StopTime","Observer", "Behavior","Stop","ID")
+Dec10_WaddleTimes<-cbind(Dec10_StartTimes,Dec10_StopTimes)
+```
+
+```{r}
+names(Dec10_WaddleTimes)<-c("StartTime","Observer", "Behavior","Start","ID","StopTime","Obs.2", "Beh.2","Stop","ID.2")
+drops_doubles<-c("Start","Obs.2", "Beh.2","Stop","ID.2")
+Dec10_WaddleTimes<-Dec10_WaddleTimes[ , !(names(Dec10_WaddleTimes) %in% drops_doubles)]
+Dec10_WaddleTimes<-mutate(Dec10_WaddleTimes,TimeEl=StopTime-StartTime)
+Dec10_WaddleTimes<-mutate(Dec10_WaddleTimes,Minutes=StartTime/60)
+```
+
+##Subset Data by ID to set acclimation and test periods
+
+```{r}
+library(dplyr)
+L155Dec10_W1<-filter(Dec10_WaddleTimes,ID=="L155")
+L155Dec10_W1$Observer<-rep(NA)
+L155Dec10_W1$Observer<-L155Dec10_W1$Observer[is.na(L155Dec10_W1$Observer)]<- "KaG"
+
+L157Dec10_W1<-filter(Dec10_WaddleTimes,ID=="L157")
+L157Dec10_W1$Observer<-rep(NA)
+L157Dec10_W1$Observer<-L157Dec10_W1$Observer[is.na(L157Dec10_W1$Observer)]<- "KaG"
+
+L158Dec10_W1<-filter(Dec10_WaddleTimes,ID=="L158")
+L158Dec10_W1$Observer<-rep(NA)
+L158Dec10_W1$Observer<-L158Dec10_W1$Observer[is.na(L158Dec10_W1$Observer)]<- "NaB"
+
+L160Dec10_W1<-filter(Dec10_WaddleTimes,ID=="L160")
+L160Dec10_W1$Observer<-rep(NA)
+L160Dec10_W1$Observer<-L160Dec10_W1$Observer[is.na(L160Dec10_W1$Observer)]<- "AnJ"
+
+L163Dec10_W1<-filter(Dec10_WaddleTimes,ID=="L163")
+L163Dec10_W1$Observer<-rep(NA)
+L163Dec10_W1$Observer<-L163Dec10_W1$Observer[is.na(L163Dec10_W1$Observer)]<- "MjH"
+
+L164Dec10_W1<-filter(Dec10_WaddleTimes,ID=="L164")
+L164Dec10_W1$Observer<-rep(NA)
+L164Dec10_W1$Observer<-L164Dec10_W1$Observer[is.na(L164Dec10_W1$Observer)]<- "KaG"
+
+L166Dec10_W1<-filter(Dec10_WaddleTimes,ID=="L166")
+L166Dec10_W1$Observer<-rep(NA)
+L166Dec10_W1$Observer<-L166Dec10_W1$Observer[is.na(L166Dec10_W1$Observer)]<- "NaB"
+
+L168Dec10_W1<-filter(Dec10_WaddleTimes,ID=="L168")
+L168Dec10_W1$Observer<-rep(NA)
+L168Dec10_W1$Observer<-L168Dec10_W1$Observer[is.na(L168Dec10_W1$Observer)]<- "AnJ"
+
+```
+
+```{r}
+library(dplyr)
+L155Dec10_W1_accl<-filter(L155Dec10_W1,Minutes<=21)
+L155Dec10_W1_test<-filter(L155Dec10_W1,Minutes>21 & Minutes<=41)
+L157Dec10_W1_accl<-filter(L157Dec10_W1,Minutes<=21)
+L157Dec10_W1_test<-filter(L157Dec10_W1,Minutes>21 & Minutes<=41)
+L158Dec10_W1_accl<-filter(L158Dec10_W1,Minutes<=22)
+L158Dec10_W1_test<-filter(L158Dec10_W1,Minutes>22 & Minutes<=42)
+L160Dec10_W1_accl<-filter(L160Dec10_W1,Minutes<=20)
+L160Dec10_W1_test<-filter(L160Dec10_W1,Minutes>20 & Minutes<=40)
+L163Dec10_W1_accl<-filter(L163Dec10_W1,Minutes<=21)
+L163Dec10_W1_test<-filter(L163Dec10_W1,Minutes>21 & Minutes<=41)
+L164Dec10_W1_accl<-filter(L164Dec10_W1,Minutes<=22)
+L164Dec10_W1_test<-filter(L164Dec10_W1,Minutes>22 & Minutes<=42)
+L166Dec10_W1_accl<-filter(L166Dec10_W1,Minutes<=23)
+L166Dec10_W1_test<-filter(L166Dec10_W1,Minutes>23 & Minutes<=43)
+L168Dec10_W1_accl<-filter(L168Dec10_W1,Minutes<=24)
+L168Dec10_W1_test<-filter(L168Dec10_W1,Minutes>24 & Minutes<=44)
+```
+
+```{r}
+Dec10_W1_accl_BH<-rbind(L157Dec10_W1_accl,L160Dec10_W1_accl,L164Dec10_W1_accl,L168Dec10_W1_accl)
+Dec10_W1_test_BH<-rbind(L157Dec10_W1_test,L160Dec10_W1_test,L164Dec10_W1_test,L168Dec10_W1_test)
+library(dplyr)
+Dec10_W1_accl_BH<-mutate(Dec10_W1_accl_BH,Field=rep("BH"))
+Dec10_W1_accl_BH<-mutate(Dec10_W1_accl_BH,TimePer=rep("accl"))
+Dec10_W1_accl_BH<-mutate(Dec10_W1_accl_BH,FieldType=rep("control"))
+Dec10_W1_test_BH<-mutate(Dec10_W1_test_BH,Field=rep("BH"))
+Dec10_W1_test_BH<-mutate(Dec10_W1_test_BH,TimePer=rep("test"))
+Dec10_W1_test_BH<-mutate(Dec10_W1_test_BH,FieldType=rep("control"))
+```
+
+```{r}
+Dec10_W1_accl_NB<-rbind(L155Dec10_W1_accl,L158Dec10_W1_accl,L163Dec10_W1_accl,L166Dec10_W1_accl)
+Dec10_W1_test_NB<-rbind(L155Dec10_W1_test,L158Dec10_W1_test,L163Dec10_W1_test,L166Dec10_W1_test)
+library(dplyr)
+Dec10_W1_accl_NB<-mutate(Dec10_W1_accl_NB,Field=rep("NB"))
+Dec10_W1_accl_NB<-mutate(Dec10_W1_accl_NB,TimePer=rep("accl"))
+Dec10_W1_accl_NB<-mutate(Dec10_W1_accl_NB,FieldType=rep("conditioned"))
+Dec10_W1_test_NB<-mutate(Dec10_W1_test_NB,Field=rep("NB"))
+Dec10_W1_test_NB<-mutate(Dec10_W1_test_NB,TimePer=rep("test"))
+Dec10_W1_test_NB<-mutate(Dec10_W1_test_NB,FieldType=rep("conditioned"))
+```
+
+##Master Data Sets 
+```{r}
+Dec10_W1<-rbind(Dec10_W1_accl_BH,Dec10_W1_accl_NB,Dec10_W1_test_BH,Dec10_W1_test_NB)
+Dec10_W1<-mutate(Dec10_W1,Date=rep("Dec10"))
+Dec10_W1_BH<-rbind(Dec10_W1_accl_BH,Dec10_W1_test_BH)
+Dec10_W1_NB<-rbind(Dec10_W1_accl_NB,Dec10_W1_test_NB)
+```
+
+```{r}
+library(dplyr)
+Dec10_W1<-Dec10_W1 %>% group_by(ID,TimePer,Observer,Field,FieldType,Date) %>% summarise(TotalTimeEl=sum(TimeEl))
+Dec10_W1_test<-filter(Dec10_W1,TimePer=="test")
+```
+
+##T-tests ---- Significant
+```{r}
+t.test(TimeEl~TimePer,data=Dec10_W1_BH)
+t.test(TimeEl~TimePer,data=Dec10_W1_NB)
+t.test(TotalTimeEl~Field,data=Dec10_W1_test)
+wilcox.test(TotalTimeEl~Field,data=Dec10_W1_test)
+```
+
+
+#Dec10 Second Analysis
+
+```{r}
+L155Dec10W2<-read.csv("L155_Dec10_Waddle2.csv")
+L157Dec10W2<-read.csv("L157_Dec10_Waddle2.csv")
+L158Dec10W2<-read.csv("L158_Dec10_Waddle2.csv")
+L160Dec10W2<-read.csv("L160_Dec10_Waddle2.csv")
+L163Dec10W2<-read.csv("L163_Dec10_Waddle2.csv")
+L164Dec10W2<-read.csv("L164_Dec10_Waddle4.csv",skip=15,header=T)
+L166Dec10W2<-read.csv("L166_Dec10_Waddle2.csv")
+L168Dec10W2<-read.csv("L168_Dec10_Waddle2.csv")
+```
+
+```{r}
+L155Dec10W2$ID<-rep(NA)
+L155Dec10W2$ID<-L155Dec10W2$ID[is.na(L155Dec10W2$ID)]<- "L155"
+L157Dec10W2$ID<-rep(NA)
+L157Dec10W2$ID<-L157Dec10W2$ID[is.na(L157Dec10W2$ID)]<- "L157"
+L158Dec10W2$ID<-rep(NA)
+L158Dec10W2$ID<-L158Dec10W2$ID[is.na(L158Dec10W2$ID)]<- "L158"
+L160Dec10W2$ID<-rep(NA)
+L160Dec10W2$ID<-L160Dec10W2$ID[is.na(L160Dec10W2$ID)]<- "L160"
+L163Dec10W2$ID<-rep(NA)
+L163Dec10W2$ID<-L163Dec10W2$ID[is.na(L163Dec10W2$ID)]<- "L163"
+L164Dec10W2$ID<-rep(NA)
+L164Dec10W2$ID<-L164Dec10W2$ID[is.na(L164Dec10W2$ID)]<- "L164"
+L166Dec10W2$ID<-rep(NA)
+L166Dec10W2$ID<-L166Dec10W2$ID[is.na(L166Dec10W2$ID)]<- "L166"
+L168Dec10W2$ID<-rep(NA)
+L168Dec10W2$ID<-L168Dec10W2$ID[is.na(L168Dec10W2$ID)]<- "L168"
+```
+
+```{r}
+library(plyr)
+dfs_Dec10_2<-list(L155Dec10W2,L157Dec10W2,L158Dec10W2,L160Dec10W2,L163Dec10W2,L164Dec10W2,L166Dec10W2,L168Dec10W2)
+
+drops<-c("Total.length","FPS","Subject","Comment","Status")
+
+DropFunction<- function(x) {
+  x<-x[ , !(names(x) %in% drops)]
+  return(x)
+}
+
+Dec10_Waddle2 = ldply(dfs_Dec10_2,DropFunction)
+
+names(Dec10_Waddle2)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
+```
+
+```{r}
+Dec10_StartTimes2<-subset(Dec10_Waddle2,Start_Stop== "START")
+names(Dec10_StartTimes2)<- c("StartTime","Observer", "Behavior","Start","ID")
+Dec10_StopTimes2<-subset(Dec10_Waddle2,Start_Stop=="STOP")
+names(Dec10_StopTimes2)<-c("StopTime","Observer", "Behavior","Stop","ID")
+Dec10_WaddleTimes2<-cbind(Dec10_StartTimes2,Dec10_StopTimes2)
+```
+
+```{r}
+names(Dec10_WaddleTimes2)<-c("StartTime","Observer", "Behavior","Start","ID","StopTime","Obs.2", "Beh.2","Stop","ID.2")
+drops_doubles<-c("Start","Obs.2", "Beh.2","Stop","ID.2")
+Dec10_WaddleTimes2<-Dec10_WaddleTimes2[ , !(names(Dec10_WaddleTimes2) %in% drops_doubles)]
+Dec10_WaddleTimes2<-mutate(Dec10_WaddleTimes2,TimeEl=StopTime-StartTime)
+Dec10_WaddleTimes2<-mutate(Dec10_WaddleTimes2,Minutes=StartTime/60)
+```
+
+##Subset Data by ID to set acclimation and test periods
+
+```{r}
+library(dplyr)
+L155Dec10_W2<-filter(Dec10_WaddleTimes2,ID=="L155")
+L155Dec10_W2$Observer<-rep(NA)
+L155Dec10_W2$Observer<-L155Dec10_W2$Observer[is.na(L155Dec10_W2$Observer)]<- "MjH"
+
+L157Dec10_W2<-filter(Dec10_WaddleTimes2,ID=="L157")
+L157Dec10_W2$Observer<-rep(NA)
+L157Dec10_W2$Observer<-L157Dec10_W2$Observer[is.na(L157Dec10_W2$Observer)]<- "NaB"
+
+L158Dec10_W2<-filter(Dec10_WaddleTimes2,ID=="L158")
+L158Dec10_W2$Observer<-rep(NA)
+L158Dec10_W2$Observer<-L158Dec10_W2$Observer[is.na(L158Dec10_W2$Observer)]<- "MjH"
+
+L160Dec10_W2<-filter(Dec10_WaddleTimes2,ID=="L160")
+L160Dec10_W2$Observer<-rep(NA)
+L160Dec10_W2$Observer<-L160Dec10_W2$Observer[is.na(L160Dec10_W2$Observer)]<- "NaB"
+
+L163Dec10_W2<-filter(Dec10_WaddleTimes2,ID=="L163")
+L163Dec10_W2$Observer<-rep(NA)
+L163Dec10_W2$Observer<-L163Dec10_W2$Observer[is.na(L163Dec10_W2$Observer)]<- "KaG"
+
+L164Dec10_W2<-filter(Dec10_WaddleTimes2,ID=="L164")
+L164Dec10_W2$Observer<-rep(NA)
+L164Dec10_W2$Observer<-L164Dec10_W2$Observer[is.na(L164Dec10_W2$Observer)]<- "MjH"
+
+L166Dec10_W2<-filter(Dec10_WaddleTimes2,ID=="L166")
+L166Dec10_W2$Observer<-rep(NA)
+L166Dec10_W2$Observer<-L166Dec10_W2$Observer[is.na(L166Dec10_W2$Observer)]<- "KaG"
+
+L168Dec10_W2<-filter(Dec10_WaddleTimes2,ID=="L168")
+L168Dec10_W2$Observer<-rep(NA)
+L168Dec10_W2$Observer<-L168Dec10_W2$Observer[is.na(L168Dec10_W2$Observer)]<- "KaG"
+
+```
+
+```{r}
+library(dplyr)
+L155Dec10_W2_accl<-filter(L155Dec10_W2,Minutes<=21)
+L155Dec10_W2_test<-filter(L155Dec10_W2,Minutes>21 & Minutes<=41)
+L157Dec10_W2_accl<-filter(L157Dec10_W2,Minutes<=21)
+L157Dec10_W2_test<-filter(L157Dec10_W2,Minutes>21 & Minutes<=41)
+L158Dec10_W2_accl<-filter(L158Dec10_W2,Minutes<=22)
+L158Dec10_W2_test<-filter(L158Dec10_W2,Minutes>22 & Minutes <=42)
+L160Dec10_W2_accl<-filter(L160Dec10_W2,Minutes<=20)
+L160Dec10_W2_test<-filter(L160Dec10_W2,Minutes>20 & Minutes <=40)
+L163Dec10_W2_accl<-filter(L163Dec10_W2,Minutes<=21)
+L163Dec10_W2_test<-filter(L163Dec10_W2,Minutes>21 & Minutes<=41)
+L164Dec10_W2_accl<-filter(L164Dec10_W2,Minutes<=22)
+L164Dec10_W2_test<-filter(L164Dec10_W2,Minutes>22 & Minutes<=42)
+L166Dec10_W2_accl<-filter(L166Dec10_W2,Minutes<=23)
+L166Dec10_W2_test<-filter(L166Dec10_W2,Minutes>23 & Minutes<=43)
+L168Dec10_W2_accl<-filter(L168Dec10_W2,Minutes<=24)
+L168Dec10_W2_test<-filter(L168Dec10_W2,Minutes>24 & Minutes<=44)
+```
+
+```{r}
+Dec10_W2_accl_BH<-rbind(L157Dec10_W2_accl,L160Dec10_W2_accl,L164Dec10_W2_accl,L168Dec10_W2_accl)
+Dec10_W2_test_BH<-rbind(L157Dec10_W2_test,L160Dec10_W2_test,L164Dec10_W2_test,L168Dec10_W2_test)
+library(dplyr)
+Dec10_W2_accl_BH<-mutate(Dec10_W2_accl_BH,Field=rep("BH"))
+Dec10_W2_accl_BH<-mutate(Dec10_W2_accl_BH,TimePer=rep("accl"))
+Dec10_W2_accl_BH<-mutate(Dec10_W2_accl_BH,FieldType=rep("control"))
+Dec10_W2_test_BH<-mutate(Dec10_W2_test_BH,Field=rep("BH"))
+Dec10_W2_test_BH<-mutate(Dec10_W2_test_BH,TimePer=rep("test"))
+Dec10_W2_test_BH<-mutate(Dec10_W2_test_BH,FieldType=rep("control"))
+```
+
+```{r}
+Dec10_W2_accl_NB<-rbind(L155Dec10_W2_accl,L158Dec10_W2_accl,L163Dec10_W2_accl,L166Dec10_W2_accl)
+Dec10_W2_test_NB<-rbind(L155Dec10_W2_test,L158Dec10_W2_test,L163Dec10_W2_test,L166Dec10_W2_test)
+library(dplyr)
+Dec10_W2_accl_NB<-mutate(Dec10_W2_accl_NB,Field=rep("NB"))
+Dec10_W2_accl_NB<-mutate(Dec10_W2_accl_NB,TimePer=rep("accl"))
+Dec10_W2_accl_NB<-mutate(Dec10_W2_accl_NB,FieldType=rep("conditioned"))
+Dec10_W2_test_NB<-mutate(Dec10_W2_test_NB,Field=rep("NB"))
+Dec10_W2_test_NB<-mutate(Dec10_W2_test_NB,TimePer=rep("test"))
+Dec10_W2_test_NB<-mutate(Dec10_W2_test_NB,FieldType=rep("conditioned"))
+```
+
+##Master Data Sets 
+```{r}
+Dec10_W2<-rbind(Dec10_W2_accl_BH,Dec10_W2_accl_NB,Dec10_W2_test_BH,Dec10_W2_test_NB)
+Dec10_W2<-mutate(Dec10_W2,Date=rep("Dec10"))
+Dec10_W2_BH<-rbind(Dec10_W2_accl_BH,Dec10_W2_test_BH)
+Dec10_W2_NB<-rbind(Dec10_W2_accl_NB,Dec10_W2_test_NB)
+```
+
+```{r}
+library(dplyr)
+Dec10_W2<-Dec10_W2 %>% group_by(ID,TimePer,Observer,Field,FieldType,Date) %>% summarise(TotalTimeEl=sum(TimeEl))
+Dec10_W2_test<-filter(Dec10_W2,TimePer=="test")
+```
+
+
+#December10 Third Analysis
+
+```{r}
+L155Dec10_W3<-read.csv("L155_Dec10_Waddle3.csv",skip=15,header=T)
+L157Dec10_W3<-read.csv("L157_Dec10_Waddle3.csv",skip=15,header=T)
+L158Dec10_W3<-read.csv("L158_Dec10_Waddle3.csv",skip=15,header=T)
+L160Dec10_W3<-read.csv("L160_Dec10_Waddle4.csv",skip=15,header=T)
+L163Dec10_W3<-read.csv("L163_Dec10_Waddle3.csv",skip=15,header=T)
+L164Dec10_W3<-read.csv("L164_Dec10_Waddle3.csv",skip=15,header=T)
+L166Dec10_W3<-read.csv("L166_Dec10_Waddle3.csv",skip=15,header=T)
+L168Dec10_W3<-read.csv("L168_Dec10_Waddle3.csv",skip=15,header=T)
+```
+
+```{r}
+L155Dec10_W3$ID<-rep(NA)
+L155Dec10_W3$ID<-L155Dec10_W3$ID[is.na(L155Dec10_W3$ID)]<- "L155"
+L157Dec10_W3$ID<-rep(NA)
+L157Dec10_W3$ID<-L157Dec10_W3$ID[is.na(L157Dec10_W3$ID)]<- "L157"
+L158Dec10_W3$ID<-rep(NA)
+L158Dec10_W3$ID<-L158Dec10_W3$ID[is.na(L158Dec10_W3$ID)]<- "L158"
+L160Dec10_W3$ID<-rep(NA)
+L160Dec10_W3$ID<-L160Dec10_W3$ID[is.na(L160Dec10_W3$ID)]<- "L160"
+L163Dec10_W3$ID<-rep(NA)
+L163Dec10_W3$ID<-L163Dec10_W3$ID[is.na(L163Dec10_W3$ID)]<- "L163"
+L164Dec10_W3$ID<-rep(NA)
+L164Dec10_W3$ID<-L164Dec10_W3$ID[is.na(L164Dec10_W3$ID)]<- "L164"
+L166Dec10_W3$ID<-rep(NA)
+L166Dec10_W3$ID<-L166Dec10_W3$ID[is.na(L166Dec10_W3$ID)]<- "L166"
+L168Dec10_W3$ID<-rep(NA)
+L168Dec10_W3$ID<-L168Dec10_W3$ID[is.na(L168Dec10_W3$ID)]<- "L168"
+```
+
+```{r}
+library(plyr)
+dfs_Dec10_3<-list(L155Dec10_W3,L157Dec10_W3,L158Dec10_W3,L160Dec10_W3,L164Dec10_W3,L168Dec10_W3,L163Dec10_W3,L166Dec10_W3)#L163,L166
+
+drops<-c("Total.length","FPS","Subject","Comment","Status")
+
+DropFunction<- function(x) {
+  x<-x[ , !(names(x) %in% drops)]
+  return(x)
+}
+
+Dec10_Waddle3 = ldply(dfs_Dec10_3,DropFunction)
+
+names(Dec10_Waddle3)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
+```
+
+```{r}
+Dec10_StartTimes3<-subset(Dec10_Waddle3,Start_Stop== "START")
+names(Dec10_StartTimes3)<- c("StartTime","Observer", "Behavior","Start","ID")
+Dec10_StopTimes3<-subset(Dec10_Waddle3,Start_Stop=="STOP")
+names(Dec10_StopTimes3)<-c("StopTime","Observer", "Behavior","Stop","ID")
+Dec10_WaddleTimes3<-cbind(Dec10_StartTimes3,Dec10_StopTimes3)
+```
+
+```{r}
+names(Dec10_WaddleTimes3)<-c("StartTime","Observer", "Behavior","Start","ID","StopTime","Obs.2", "Beh.2","Stop","ID.2")
+drops_doubles<-c("Start","Obs.2", "Beh.2","Stop","ID.2")
+Dec10_WaddleTimes3<-Dec10_WaddleTimes3[ , !(names(Dec10_WaddleTimes3) %in% drops_doubles)]
+Dec10_WaddleTimes3<-mutate(Dec10_WaddleTimes3,TimeEl=StopTime-StartTime)
+Dec10_WaddleTimes3<-mutate(Dec10_WaddleTimes3,Minutes=StartTime/60)
+```
+
+##Subset Data by ID to set acclimation and test periods
+
+```{r}
+library(dplyr)
+L155Dec10_W3<-filter(Dec10_WaddleTimes3,ID=="L155")
+L155Dec10_W3$Observer<-rep(NA)
+L155Dec10_W3$Observer<-L155Dec10_W3$Observer[is.na(L155Dec10_W3$Observer)]<- "AnJ"
+
+L157Dec10_W3<-filter(Dec10_WaddleTimes3,ID=="L157")
+L157Dec10_W3$Observer<-rep(NA)
+L157Dec10_W3$Observer<-L157Dec10_W3$Observer[is.na(L157Dec10_W3$Observer)]<- "EmT"
+
+L158Dec10_W3<-filter(Dec10_WaddleTimes3,ID=="L158")
+L158Dec10_W3$Observer<-rep(NA)
+L158Dec10_W3$Observer<-L158Dec10_W3$Observer[is.na(L158Dec10_W3$Observer)]<- "KaG"
+
+L160Dec10_W3<-filter(Dec10_WaddleTimes3,ID=="L160")
+L160Dec10_W3$Observer<-rep(NA)
+L160Dec10_W3$Observer<-L160Dec10_W3$Observer[is.na(L160Dec10_W3$Observer)]<- "KaG"
+
+L163Dec10_W3<-filter(Dec10_WaddleTimes3,ID=="L163")
+L163Dec10_W3$Observer<-rep(NA)
+L163Dec10_W3$Observer<-L163Dec10_W3$Observer[is.na(L163Dec10_W3$Observer)]<- "AnJ"
+
+L164Dec10_W3<-filter(Dec10_WaddleTimes3,ID=="L164")
+L164Dec10_W3$Observer<-rep(NA)
+L164Dec10_W3$Observer<-L164Dec10_W3$Observer[is.na(L164Dec10_W3$Observer)]<- "EmT"
+
+L166Dec10_W3<-filter(Dec10_WaddleTimes3,ID=="L166")
+L166Dec10_W3$Observer<-rep(NA)
+L166Dec10_W3$Observer<-L166Dec10_W3$Observer[is.na(L166Dec10_W3$Observer)]<- "NiI"
+
+L168Dec10_W3<-filter(Dec10_WaddleTimes3,ID=="L168")
+L168Dec10_W3$Observer<-rep(NA)
+L168Dec10_W3$Observer<-L168Dec10_W3$Observer[is.na(L168Dec10_W3$Observer)]<- "NaB"
+
+```
+
+```{r}
+library(dplyr)
+L155Dec10_W3_accl<-filter(L155Dec10_W3,Minutes<=21)
+L155Dec10_W3_test<-filter(L155Dec10_W3,Minutes>21 & Minutes<=41)
+L157Dec10_W3_accl<-filter(L157Dec10_W3,Minutes<=21)
+L157Dec10_W3_test<-filter(L157Dec10_W3,Minutes>21 & Minutes<=41)
+L158Dec10_W3_accl<-filter(L158Dec10_W3,Minutes<=22)
+L158Dec10_W3_test<-filter(L158Dec10_W3,Minutes>22 & Minutes <=42)
+L160Dec10_W3_accl<-filter(L160Dec10_W3,Minutes<=20)
+L160Dec10_W3_test<-filter(L160Dec10_W3,Minutes>20 & Minutes <=40)
+L163Dec10_W3_accl<-filter(L163Dec10_W3,Minutes<=21)
+L163Dec10_W3_test<-filter(L163Dec10_W3,Minutes>21 & Minutes<=41)
+L164Dec10_W3_accl<-filter(L164Dec10_W3,Minutes<=22)
+L164Dec10_W3_test<-filter(L164Dec10_W3,Minutes>22 & Minutes<=42)
+L166Dec10_W3_accl<-filter(L166Dec10_W3,Minutes<=23)
+L166Dec10_W3_test<-filter(L166Dec10_W3,Minutes>23 & Minutes<=43)
+L168Dec10_W3_accl<-filter(L168Dec10_W3,Minutes<=24)
+L168Dec10_W3_test<-filter(L168Dec10_W3,Minutes>24 & Minutes<=44)
+```
+
+```{r}
+Dec10_W3_accl_BH<-rbind(L157Dec10_W3_accl,L160Dec10_W3_accl,L164Dec10_W3_accl,L168Dec10_W3_accl)
+Dec10_W3_test_BH<-rbind(L157Dec10_W3_test,L160Dec10_W3_test,L164Dec10_W3_test,L168Dec10_W3_test)
+library(dplyr)
+Dec10_W3_accl_BH<-mutate(Dec10_W3_accl_BH,Field=rep("BH"))
+Dec10_W3_accl_BH<-mutate(Dec10_W3_accl_BH,TimePer=rep("accl"))
+Dec10_W3_accl_BH<-mutate(Dec10_W3_accl_BH,FieldType=rep("control"))
+Dec10_W3_test_BH<-mutate(Dec10_W3_test_BH,Field=rep("BH"))
+Dec10_W3_test_BH<-mutate(Dec10_W3_test_BH,TimePer=rep("test"))
+Dec10_W3_test_BH<-mutate(Dec10_W3_test_BH,FieldType=rep("control"))
+```
+
+```{r}
+Dec10_W3_accl_NB<-rbind(L155Dec10_W3_accl,L158Dec10_W3_accl,L163Dec10_W3_accl,L166Dec10_W3_accl)
+Dec10_W3_test_NB<-rbind(L155Dec10_W3_test,L158Dec10_W3_test,L163Dec10_W3_test,L166Dec10_W3_test)
+library(dplyr)
+Dec10_W3_accl_NB<-mutate(Dec10_W3_accl_NB,Field=rep("NB"))
+Dec10_W3_accl_NB<-mutate(Dec10_W3_accl_NB,TimePer=rep("accl"))
+Dec10_W3_accl_NB<-mutate(Dec10_W3_accl_NB,FieldType=rep("conditioned"))
+Dec10_W3_test_NB<-mutate(Dec10_W3_test_NB,Field=rep("NB"))
+Dec10_W3_test_NB<-mutate(Dec10_W3_test_NB,TimePer=rep("test"))
+Dec10_W3_test_NB<-mutate(Dec10_W3_test_NB,FieldType=rep("conditioned"))
+```
+
+##Master Data Sets 
+```{r}
+Dec10_W3<-rbind(Dec10_W3_accl_BH,Dec10_W3_accl_NB,Dec10_W3_test_BH,Dec10_W3_test_NB)
+Dec10_W3<-mutate(Dec10_W3,Date=rep("Dec10"))
+Dec10_W3_BH<-rbind(Dec10_W3_accl_BH,Dec10_W3_test_BH)
+Dec10_W3_NB<-rbind(Dec10_W3_accl_NB,Dec10_W3_test_NB)
+```
+
+```{r}
+library(dplyr)
+Dec10_W3<-Dec10_W3 %>% group_by(ID,TimePer,Observer,Field,FieldType,Date) %>% summarise(TotalTimeEl=sum(TimeEl))
+Dec10_W3_test<-filter(Dec10_W3,TimePer=="test")
+```
+
+
+################################################################
+
+#December 11
+```{r}
+L153Dec11W<-read.csv("L153_Dec11_Waddle.csv")
+L154Dec11W<-read.csv("L154_Dec11_Waddle.csv")
+L156Dec11W<-read.csv("L156_Dec11_Waddle.csv")
+L159Dec11W<-read.csv("L159_Dec11_Waddle.csv")
+L161Dec11W<-read.csv("L161_Dec11_Waddle.csv")
+L162Dec11W<-read.csv("L162_Dec11_Waddle.csv")
+L165Dec11W<-read.csv("L165_Dec11_Waddle.csv")
+L167Dec11W<-read.csv("L167_Dec11_Waddle.csv")
+```
+
+
+```{r}
+L153Dec11W$ID<-rep(NA)
+L153Dec11W$ID<-L153Dec11W$ID[is.na(L153Dec11W$ID)]<- "L153"
+L154Dec11W$ID<-rep(NA)
+L154Dec11W$ID<-L154Dec11W$ID[is.na(L154Dec11W$ID)]<- "L154"
+L156Dec11W$ID<-rep(NA)
+L156Dec11W$ID<-L156Dec11W$ID[is.na(L156Dec11W$ID)]<- "L156"
+L159Dec11W$ID<-rep(NA)
+L159Dec11W$ID<-L159Dec11W$ID[is.na(L159Dec11W$ID)]<- "L159"
+L161Dec11W$ID<-rep(NA)
+L161Dec11W$ID<-L161Dec11W$ID[is.na(L161Dec11W$ID)]<- "L161"
+L162Dec11W$ID<-rep(NA)
+L162Dec11W$ID<-L162Dec11W$ID[is.na(L162Dec11W$ID)]<- "L162"
+L165Dec11W$ID<-rep(NA)
+L165Dec11W$ID<-L165Dec11W$ID[is.na(L165Dec11W$ID)]<- "L165"
+L167Dec11W$ID<-rep(NA)
+L167Dec11W$ID<-L167Dec11W$ID[is.na(L167Dec11W$ID)]<- "L167"
+```
+
+```{r}
+library(plyr)
+dfs_Dec11<-list(L153Dec11W,L154Dec11W,L156Dec11W,L159Dec11W,L161Dec11W,L162Dec11W,L165Dec11W,L167Dec11W)
+
+drops<-c("Total.length","FPS","Subject","Comment","Status")
+
+DropFunction<- function(x) {
+  x<-x[ , !(names(x) %in% drops)]
+  return(x)
+}
+
+Dec11_Waddle = ldply(dfs_Dec11,DropFunction)
+
+names(Dec11_Waddle)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
+```
+
+
+
+```{r}
+Dec11_StartTimes<-subset(Dec11_Waddle,Start_Stop== "START")
+names(Dec11_StartTimes)<- c("StartTime","Observer", "Behavior","Start","ID")
+Dec11_StopTimes<-subset(Dec11_Waddle,Start_Stop=="STOP")
+names(Dec11_StopTimes)<-c("StopTime","Observer", "Behavior","Stop","ID")
+Dec11_WaddleTimes<-cbind(Dec11_StartTimes,Dec11_StopTimes)
+```
+
+```{r}
+names(Dec11_WaddleTimes)<-c("StartTime","Observer", "Behavior","Start","ID","StopTime","Obs.2", "Beh.2","Stop","ID.2")
+drops_doubles<-c("Start","Obs.2", "Beh.2","Stop","ID.2")
+Dec11_WaddleTimes<-Dec11_WaddleTimes[ , !(names(Dec11_WaddleTimes) %in% drops_doubles)]
+Dec11_WaddleTimes<-mutate(Dec11_WaddleTimes,TimeEl=StopTime-StartTime)
+Dec11_WaddleTimes<-mutate(Dec11_WaddleTimes,Minutes=StartTime/60)
+```
+
+##Subset Data by ID to set acclimation and test periods 
+
+```{r}
+library(dplyr)
+L153Dec11_W1<-filter(Dec11_WaddleTimes,ID=="L153")
+L153Dec11_W1$Observer<-rep(NA)
+L153Dec11_W1$Observer<-L153Dec11_W1$Observer[is.na(L153Dec11_W1$Observer)]<- "KaG"
+
+L154Dec11_W1<-filter(Dec11_WaddleTimes,ID=="L154")
+L154Dec11_W1$Observer<-rep(NA)
+L154Dec11_W1$Observer<-L154Dec11_W1$Observer[is.na(L154Dec11_W1$Observer)]<- "KaG"
+
+L156Dec11_W1<-filter(Dec11_WaddleTimes,ID=="L156")
+L156Dec11_W1$Observer<-rep(NA)
+L156Dec11_W1$Observer<-L156Dec11_W1$Observer[is.na(L156Dec11_W1$Observer)]<- "AnJ"
+
+L159Dec11_W1<-filter(Dec11_WaddleTimes,ID=="L159")
+L159Dec11_W1$Observer<-rep(NA)
+L159Dec11_W1$Observer<-L159Dec11_W1$Observer[is.na(L159Dec11_W1$Observer)]<- "AnJ"
+
+
+L161Dec11_W1<-filter(Dec11_WaddleTimes,ID=="L161")
+L161Dec11_W1$Observer<-rep(NA)
+L161Dec11_W1$Observer<-L161Dec11_W1$Observer[is.na(L161Dec11_W1$Observer)]<- "NaB"
+
+L162Dec11_W1<-filter(Dec11_WaddleTimes,ID=="L162")
+L162Dec11_W1$Observer<-rep(NA)
+L162Dec11_W1$Observer<-L162Dec11_W1$Observer[is.na(L162Dec11_W1$Observer)]<- "NaB"
+
+L165Dec11_W1<-filter(Dec11_WaddleTimes,ID=="L165")
+L165Dec11_W1$Observer<-rep(NA)
+L165Dec11_W1$Observer<-L165Dec11_W1$Observer[is.na(L165Dec11_W1$Observer)]<- "NiI"
+
+L167Dec11_W1<-filter(Dec11_WaddleTimes,ID=="L167")
+L167Dec11_W1$Observer<-rep(NA)
+L167Dec11_W1$Observer<-L167Dec11_W1$Observer[is.na(L167Dec11_W1$Observer)]<- "NiI"
+```
+
+```{r}
+library(dplyr)
+L153Dec11_W1_accl<-filter(L153Dec11_W1,Minutes<=22)
+L153Dec11_W1_test<-filter(L153Dec11_W1,Minutes>22 & Minutes<=42)
+L154Dec11_W1_accl<-filter(L154Dec11_W1,Minutes<=22)
+L154Dec11_W1_test<-filter(L154Dec11_W1,Minutes>22 & Minutes<=42)
+L156Dec11_W1_accl<-filter(L156Dec11_W1,Minutes<=21)
+L156Dec11_W1_test<-filter(L156Dec11_W1,Minutes>21 & Minutes<=41)
+L159Dec11_W1_accl<-filter(L159Dec11_W1,Minutes<=23)
+L159Dec11_W1_test<-filter(L159Dec11_W1,Minutes>23 & Minutes<=43)
+L161Dec11_W1_accl<-filter(L161Dec11_W1,Minutes<=23)
+L161Dec11_W1_test<-filter(L161Dec11_W1,Minutes>23 & Minutes<=43)
+L162Dec11_W1_accl<-filter(L162Dec11_W1,Minutes<=24)
+L162Dec11_W1_test<-filter(L162Dec11_W1,Minutes>24 & Minutes<=44)
+L165Dec11_W1_accl<-filter(L165Dec11_W1,Minutes<=21)
+L165Dec11_W1_test<-filter(L165Dec11_W1,Minutes>21 & Minutes<=41)
+L167Dec11_W1_accl<-filter(L167Dec11_W1,Minutes<=21)
+L167Dec11_W1_test<-filter(L167Dec11_W1,Minutes>21 & Minutes<=41)
+```
+
+
+```{r}
+Dec11_W1_accl_BH<-rbind(L154Dec11_W1_accl,L159Dec11_W1_accl,L162Dec11_W1_accl,L167Dec11_W1_accl)
+Dec11_W1_test_BH<-rbind(L154Dec11_W1_test,L159Dec11_W1_test,L162Dec11_W1_test,L167Dec11_W1_test)
+library(dplyr)
+Dec11_W1_accl_BH<-mutate(Dec11_W1_accl_BH,Field=rep("BH"))
+Dec11_W1_accl_BH<-mutate(Dec11_W1_accl_BH,TimePer=rep("accl"))
+Dec11_W1_accl_BH<-mutate(Dec11_W1_accl_BH,FieldType=rep("conditioned"))
+Dec11_W1_test_BH<-mutate(Dec11_W1_test_BH,Field=rep("BH"))
+Dec11_W1_test_BH<-mutate(Dec11_W1_test_BH,TimePer=rep("test"))
+Dec11_W1_test_BH<-mutate(Dec11_W1_test_BH,FieldType=rep("conditioned"))
+```
+
+```{r}
+Dec11_W1_accl_NB<-rbind(L153Dec11_W1_accl,L156Dec11_W1_accl,L161Dec11_W1_accl,L165Dec11_W1_accl)
+Dec11_W1_test_NB<-rbind(L153Dec11_W1_test,L156Dec11_W1_test,L161Dec11_W1_test,L165Dec11_W1_test)
+library(dplyr)
+Dec11_W1_accl_NB<-mutate(Dec11_W1_accl_NB,Field=rep("NB"))
+Dec11_W1_accl_NB<-mutate(Dec11_W1_accl_NB,TimePer=rep("accl"))
+Dec11_W1_accl_NB<-mutate(Dec11_W1_accl_NB,FieldType=rep("control"))
+Dec11_W1_test_NB<-mutate(Dec11_W1_test_NB,Field=rep("NB"))
+Dec11_W1_test_NB<-mutate(Dec11_W1_test_NB,TimePer=rep("test"))
+Dec11_W1_test_NB<-mutate(Dec11_W1_test_NB,FieldType=rep("control"))
+```
+
+##Master Data Sets
+```{r}
+Dec11_W1<-rbind(Dec11_W1_accl_BH,Dec11_W1_accl_NB,Dec11_W1_test_BH,Dec11_W1_test_NB)
+Dec11_W1<-mutate(Dec11_W1,Date=rep("Dec11"))
+Dec11_W1_BH<-rbind(Dec11_W1_accl_BH,Dec11_W1_test_BH)
+Dec11_W1_NB<-rbind(Dec11_W1_accl_NB,Dec11_W1_test_NB)
+```
+
+```{r}
+library(dplyr)
+Dec11_W1<-Dec11_W1 %>% group_by(ID,TimePer,Observer,Field,FieldType,Date) %>% summarise(TotalTimeEl=sum(TimeEl))
+Dec11_W1_test<-filter(Dec11_W1,TimePer=="test")
+```
+
+
+
+#December 11 Analysis 2###############################
+
+```{r}
+L153Dec11W2<-read.csv("L153_Dec11_Waddle2.csv")
+L154Dec11W2<-read.csv("L154_Dec11_Waddle2.csv")
+L156Dec11W2<-read.csv("L156_Dec11_Waddle2.csv")
+L159Dec11W2<-read.csv("L159_Dec11_Waddle2.csv")
+L161Dec11W2<-read.csv("L161_Dec11_Waddle2.csv")
+L162Dec11W2<-read.csv("L162_Dec11_Waddle2.csv")
+L165Dec11W2<-read.csv("L165_Dec11_Waddle2.csv")
+L167Dec11W2<-read.csv("L167_Dec11_Waddle2.csv")
+```
+
+```{r}
+L153Dec11W2$ID<-rep(NA)
+L153Dec11W2$ID<-L153Dec11W2$ID[is.na(L153Dec11W2$ID)]<- "L153"
+L154Dec11W2$ID<-rep(NA)
+L154Dec11W2$ID<-L154Dec11W2$ID[is.na(L154Dec11W2$ID)]<- "L154"
+L156Dec11W2$ID<-rep(NA)
+L156Dec11W2$ID<-L156Dec11W2$ID[is.na(L156Dec11W2$ID)]<- "L156"
+L159Dec11W2$ID<-rep(NA)
+L159Dec11W2$ID<-L159Dec11W2$ID[is.na(L159Dec11W2$ID)]<- "L159"
+L161Dec11W2$ID<-rep(NA)
+L161Dec11W2$ID<-L161Dec11W2$ID[is.na(L161Dec11W2$ID)]<- "L161"
+L162Dec11W2$ID<-rep(NA)
+L162Dec11W2$ID<-L162Dec11W2$ID[is.na(L162Dec11W2$ID)]<- "L162"
+L165Dec11W2$ID<-rep(NA)
+L165Dec11W2$ID<-L165Dec11W2$ID[is.na(L165Dec11W2$ID)]<- "L165"
+L167Dec11W2$ID<-rep(NA)
+L167Dec11W2$ID<-L167Dec11W2$ID[is.na(L167Dec11W2$ID)]<- "L167"
+```
+
+```{r}
+library(plyr)
+dfs_Dec11_2<-list(L153Dec11W2,L154Dec11W2,L156Dec11W2,L159Dec11W2,L161Dec11W2,L162Dec11W2,L165Dec11W2,L167Dec11W2)
+
+drops<-c("Total.length","FPS","Subject","Comment","Status")
+
+DropFunction<- function(x) {
+  x<-x[ , !(names(x) %in% drops)]
+  return(x)
+}
+
+Dec11_Waddle2 = ldply(dfs_Dec11_2,DropFunction)
+
+names(Dec11_Waddle2)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
+```
+
+```{r}
+Dec11_StartTimes2<-subset(Dec11_Waddle2,Start_Stop== "START")
+names(Dec11_StartTimes2)<- c("StartTime","Observer", "Behavior","Start","ID")
+Dec11_StopTimes2<-subset(Dec11_Waddle2,Start_Stop=="STOP")
+names(Dec11_StopTimes2)<-c("StopTime","Observer", "Behavior","Stop","ID")
+Dec11_WaddleTimes2<-cbind(Dec11_StartTimes2,Dec11_StopTimes2)
+```
+
+```{r}
+names(Dec11_WaddleTimes2)<-c("StartTime","Observer", "Behavior","Start","ID","StopTime","Obs.2", "Beh.2","Stop","ID.2")
+drops_doubles<-c("Start","Obs.2", "Beh.2","Stop","ID.2")
+Dec11_WaddleTimes2<-Dec11_WaddleTimes2[ , !(names(Dec11_WaddleTimes2) %in% drops_doubles)]
+Dec11_WaddleTimes2<-mutate(Dec11_WaddleTimes2,TimeEl=StopTime-StartTime)
+Dec11_WaddleTimes2<-mutate(Dec11_WaddleTimes2,Minutes=StartTime/60)
+```
+
+##Subset Data by ID to set acclimation and test periods 
+
+```{r}
+library(dplyr)
+L153Dec11_W2<-filter(Dec11_WaddleTimes2,ID=="L153")
+L153Dec11_W2$Observer<-rep(NA)
+L153Dec11_W2$Observer<-L153Dec11_W2$Observer[is.na(L153Dec11_W2$Observer)]<- "AnJ"
+
+L154Dec11_W2<-filter(Dec11_WaddleTimes2,ID=="L154")
+L154Dec11_W2$Observer<-rep(NA)
+L154Dec11_W2$Observer<-L154Dec11_W2$Observer[is.na(L154Dec11_W2$Observer)]<- "AnJ"
+
+L156Dec11_W2<-filter(Dec11_WaddleTimes2,ID=="L156")
+L156Dec11_W2$Observer<-rep(NA)
+L156Dec11_W2$Observer<-L156Dec11_W2$Observer[is.na(L156Dec11_W2$Observer)]<- "NaB"
+
+L159Dec11_W2<-filter(Dec11_WaddleTimes2,ID=="L159")
+L159Dec11_W2$Observer<-rep(NA)
+L159Dec11_W2$Observer<-L159Dec11_W2$Observer[is.na(L159Dec11_W2$Observer)]<- "NaB"
+
+L161Dec11_W2<-filter(Dec11_WaddleTimes2,ID=="L161")
+L161Dec11_W2$Observer<-rep(NA)
+L161Dec11_W2$Observer<-L161Dec11_W2$Observer[is.na(L161Dec11_W2$Observer)]<- "AnJ"
+
+
+L162Dec11_W2<-filter(Dec11_WaddleTimes2,ID=="L162")
+L162Dec11_W2$Observer<-rep(NA)
+L162Dec11_W2$Observer<-L162Dec11_W2$Observer[is.na(L162Dec11_W2$Observer)]<- "AnJ"
+
+L165Dec11_W2<-filter(Dec11_WaddleTimes2,ID=="L165")
+L165Dec11_W2$Observer<-rep(NA)
+L165Dec11_W2$Observer<-L165Dec11_W2$Observer[is.na(L165Dec11_W2$Observer)]<- "NaB"
+
+L167Dec11_W2<-filter(Dec11_WaddleTimes2,ID=="L167")
+L167Dec11_W2$Observer<-rep(NA)
+L167Dec11_W2$Observer<-L167Dec11_W2$Observer[is.na(L167Dec11_W2$Observer)]<- "KaG"
+
+```
+
+```{r}
+library(dplyr)
+L153Dec11_W2_accl<-filter(L153Dec11_W2,Minutes<=22)
+L153Dec11_W2_test<-filter(L153Dec11_W2,Minutes>22 & Minutes<=42)
+L154Dec11_W2_accl<-filter(L154Dec11_W2,Minutes<=22)
+L154Dec11_W2_test<-filter(L154Dec11_W2,Minutes>22 & Minutes<=42)
+L156Dec11_W2_accl<-filter(L156Dec11_W2,Minutes<=21)
+L156Dec11_W2_test<-filter(L156Dec11_W2,Minutes>21 & Minutes<=41)
+L159Dec11_W2_accl<-filter(L159Dec11_W2,Minutes<=23)
+L159Dec11_W2_test<-filter(L159Dec11_W2,Minutes>23 & Minutes<=43)
+L161Dec11_W2_accl<-filter(L161Dec11_W2,Minutes<=23)
+L161Dec11_W2_test<-filter(L161Dec11_W2,Minutes>23 & Minutes<=43)
+L162Dec11_W2_accl<-filter(L162Dec11_W2,Minutes<=24)
+L162Dec11_W2_test<-filter(L162Dec11_W2,Minutes>24 & Minutes<=44)
+L165Dec11_W2_accl<-filter(L165Dec11_W2,Minutes<=21)
+L165Dec11_W2_test<-filter(L165Dec11_W2,Minutes>21 & Minutes<=41)
+L167Dec11_W2_accl<-filter(L167Dec11_W2,Minutes<=21)
+L167Dec11_W2_test<-filter(L167Dec11_W2,Minutes>21 & Minutes<=41)
+```
+
+```{r}
+Dec11_W2_accl_BH<-rbind(L154Dec11_W2_accl,L159Dec11_W2_accl,L162Dec11_W2_accl,L167Dec11_W2_accl)
+Dec11_W2_test_BH<-rbind(L154Dec11_W2_test,L159Dec11_W2_test,L162Dec11_W2_test,L167Dec11_W2_test)
+library(dplyr)
+Dec11_W2_accl_BH<-mutate(Dec11_W2_accl_BH,Field=rep("BH"))
+Dec11_W2_accl_BH<-mutate(Dec11_W2_accl_BH,TimePer=rep("accl"))
+Dec11_W2_accl_BH<-mutate(Dec11_W2_accl_BH,FieldType=rep("conditioned"))
+Dec11_W2_test_BH<-mutate(Dec11_W2_test_BH,Field=rep("BH"))
+Dec11_W2_test_BH<-mutate(Dec11_W2_test_BH,TimePer=rep("test"))
+Dec11_W2_test_BH<-mutate(Dec11_W2_test_BH,FieldType=rep("conditioned"))
+```
+
+```{r}
+Dec11_W2_accl_NB<-rbind(L153Dec11_W2_accl,L156Dec11_W2_accl,L161Dec11_W2_accl,L165Dec11_W2_accl)
+Dec11_W2_test_NB<-rbind(L153Dec11_W2_test,L156Dec11_W2_test,L161Dec11_W2_test,L165Dec11_W2_test)
+library(dplyr)
+Dec11_W2_accl_NB<-mutate(Dec11_W2_accl_NB,Field=rep("NB"))
+Dec11_W2_accl_NB<-mutate(Dec11_W2_accl_NB,TimePer=rep("accl"))
+Dec11_W2_accl_NB<-mutate(Dec11_W2_accl_NB,FieldType=rep("control"))
+Dec11_W2_test_NB<-mutate(Dec11_W2_test_NB,Field=rep("NB"))
+Dec11_W2_test_NB<-mutate(Dec11_W2_test_NB,TimePer=rep("test"))
+Dec11_W2_test_NB<-mutate(Dec11_W2_test_NB,FieldType=rep("control"))
+```
+
+##Master Data Sets  
+```{r}
+Dec11_W2<-rbind(Dec11_W2_accl_BH,Dec11_W2_accl_NB,Dec11_W2_test_BH,Dec11_W2_test_NB)
+Dec11_W2<-mutate(Dec11_W2,Date=rep("Dec11"))
+Dec11_W2_BH<-rbind(Dec11_W2_accl_BH,Dec11_W2_test_BH)
+Dec11_W2_NB<-rbind(Dec11_W2_accl_NB,Dec11_W2_test_NB)
+```
+
+```{r}
+library(dplyr)
+Dec11_W2<-Dec11_W2 %>% group_by(ID,TimePer,Observer,Field,FieldType,Date) %>% summarise(TotalTimeEl=sum(TimeEl))
+Dec11_W2_test<-filter(Dec11_W2,TimePer=="test")
+```
+
+
+#December 11 Third Analysis##############################
+
+
+```{r}
+L153Dec11W3<-read.csv("L153_Dec11_Waddle3.csv",skip=15,header=T)
+L154Dec11W3<-read.csv("L154_Dec11_Waddle3.csv",skip=15,header=T)
+#L156Dec11W3<-read.csv("L156_Dec11_Waddle3.csv",skip=15,header=T)
+L159Dec11W3<-read.csv("L159_Dec11_Waddle3.csv",skip=15,header=T)
+L161Dec11W3<-read.csv("L161_Dec11_Waddle3.csv",skip=15,header=T)
+L162Dec11W3<-read.csv("L162_Dec11_Waddle3.csv",skip=15,header=T)
+L165Dec11W3<-read.csv("L165_Dec11_Waddle3.csv",skip=15,header=T)
+L167Dec11W3<-read.csv("L167_Dec11_Waddle3.csv",skip=15,header=T)
+```
+
+```{r}
+L153Dec11W3$ID<-rep(NA)
+L153Dec11W3$ID<-L153Dec11W3$ID[is.na(L153Dec11W3$ID)]<- "L153"
+L154Dec11W3$ID<-rep(NA)
+L154Dec11W3$ID<-L154Dec11W3$ID[is.na(L154Dec11W3$ID)]<- "L154"
+#L156Dec11W3$ID<-rep(NA)
+#L156Dec11W3$ID<-L156Dec11W3$ID[is.na(L156Dec11W3$ID)]<- "L156"
+L159Dec11W3$ID<-rep(NA)
+L159Dec11W3$ID<-L159Dec11W3$ID[is.na(L159Dec11W3$ID)]<- "L159"
+L161Dec11W3$ID<-rep(NA)
+L161Dec11W3$ID<-L161Dec11W3$ID[is.na(L161Dec11W3$ID)]<- "L161"
+L162Dec11W3$ID<-rep(NA)
+L162Dec11W3$ID<-L162Dec11W3$ID[is.na(L162Dec11W3$ID)]<- "L162"
+L165Dec11W3$ID<-rep(NA)
+L165Dec11W3$ID<-L165Dec11W3$ID[is.na(L165Dec11W3$ID)]<- "L165"
+L167Dec11W3$ID<-rep(NA)
+L167Dec11W3$ID<-L167Dec11W3$ID[is.na(L167Dec11W3$ID)]<- "L167"
+```
+
+```{r}
+library(plyr)
+dfs_Dec11_3<-list(L153Dec11W3,L154Dec11W3,L159Dec11W3,L161Dec11W3,L162Dec11W3,L167Dec11W3,L165Dec11W3) #L165
+
+drops<-c("Total.length","FPS","Subject","Comment","Status")
+
+DropFunction<- function(x) {
+  x<-x[ , !(names(x) %in% drops)]
+  return(x)
+}
+
+Dec11_Waddle3 = ldply(dfs_Dec11_3,DropFunction)
+
+names(Dec11_Waddle3)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
+```
+
+```{r}
+Dec11_StartTimes3<-subset(Dec11_Waddle3,Start_Stop== "START")
+names(Dec11_StartTimes3)<- c("StartTime","Observer", "Behavior","Start","ID")
+Dec11_StopTimes3<-subset(Dec11_Waddle3,Start_Stop=="STOP")
+names(Dec11_StopTimes3)<-c("StopTime","Observer", "Behavior","Stop","ID")
+Dec11_WaddleTimes3<-cbind(Dec11_StartTimes3,Dec11_StopTimes3)
+```
+
+```{r}
+names(Dec11_WaddleTimes3)<-c("StartTime","Observer", "Behavior","Start","ID","StopTime","Obs.2", "Beh.2","Stop","ID.2")
+drops_doubles<-c("Start","Obs.2", "Beh.2","Stop","ID.2")
+Dec11_WaddleTimes3<-Dec11_WaddleTimes3[ , !(names(Dec11_WaddleTimes3) %in% drops_doubles)]
+Dec11_WaddleTimes3<-mutate(Dec11_WaddleTimes3,TimeEl=StopTime-StartTime)
+Dec11_WaddleTimes3<-mutate(Dec11_WaddleTimes3,Minutes=StartTime/60)
+```
+
+##Subset Data by ID to set acclimation and test periods 
+
+```{r}
+library(dplyr)
+L153Dec11_W3<-filter(Dec11_WaddleTimes3,ID=="L153")
+L153Dec11_W3$Observer<-rep(NA)
+L153Dec11_W3$Observer<-L153Dec11_W3$Observer[is.na(L153Dec11_W3$Observer)]<- "NaB"
+
+L154Dec11_W3<-filter(Dec11_WaddleTimes3,ID=="L154")
+L154Dec11_W3$Observer<-rep(NA)
+L154Dec11_W3$Observer<-L154Dec11_W3$Observer[is.na(L154Dec11_W3$Observer)]<- "NaB"
+
+#L156Dec11_W3<-filter(Dec11_WaddleTimes3,ID=="L156")
+#L156Dec11_W3$Observer<-rep(NA)
+#L156Dec11_W3$Observer<-L156Dec11_W3$Observer[is.na(L156Dec11_W3$Observer)]<- "NaB"
+
+L159Dec11_W3<-filter(Dec11_WaddleTimes3,ID=="L159")
+L159Dec11_W3$Observer<-rep(NA)
+L159Dec11_W3$Observer<-L159Dec11_W3$Observer[is.na(L159Dec11_W3$Observer)]<- "EmT"
+
+L161Dec11_W3<-filter(Dec11_WaddleTimes3,ID=="L161")
+L161Dec11_W3$Observer<-rep(NA)
+L161Dec11_W3$Observer<-L161Dec11_W3$Observer[is.na(L161Dec11_W3$Observer)]<- "NiI"
+
+
+L162Dec11_W3<-filter(Dec11_WaddleTimes3,ID=="L162")
+L162Dec11_W3$Observer<-rep(NA)
+L162Dec11_W3$Observer<-L162Dec11_W3$Observer[is.na(L162Dec11_W3$Observer)]<- "NiI"
+
+L165Dec11_W3<-filter(Dec11_WaddleTimes3,ID=="L165")
+L165Dec11_W3$Observer<-rep(NA)
+L165Dec11_W3$Observer<-L165Dec11_W3$Observer[is.na(L165Dec11_W3$Observer)]<- "KaG"
+
+L167Dec11_W3<-filter(Dec11_WaddleTimes3,ID=="L167")
+L167Dec11_W3$Observer<-rep(NA)
+L167Dec11_W3$Observer<-L167Dec11_W3$Observer[is.na(L167Dec11_W3$Observer)]<- "MjH"
+
+```
+
+```{r}
+library(dplyr)
+L153Dec11_W3_accl<-filter(L153Dec11_W3,Minutes<=22)
+L153Dec11_W3_test<-filter(L153Dec11_W3,Minutes>22 & Minutes<=42)
+L154Dec11_W3_accl<-filter(L154Dec11_W3,Minutes<=22)
+L154Dec11_W3_test<-filter(L154Dec11_W3,Minutes>22 & Minutes<=42)
+#L156Dec11_W3_accl<-filter(L156Dec11_W3,Minutes<=21)
+#L156Dec11_W3_test<-filter(L156Dec11_W3,Minutes>21 & Minutes<=41)
+L159Dec11_W3_accl<-filter(L159Dec11_W3,Minutes<=23)
+L159Dec11_W3_test<-filter(L159Dec11_W3,Minutes>23 & Minutes<=43)
+L161Dec11_W3_accl<-filter(L161Dec11_W3,Minutes<=23)
+L161Dec11_W3_test<-filter(L161Dec11_W3,Minutes>23 & Minutes<=43)
+L162Dec11_W3_accl<-filter(L162Dec11_W3,Minutes<=24)
+L162Dec11_W3_test<-filter(L162Dec11_W3,Minutes>24 & Minutes<=44)
+L165Dec11_W3_accl<-filter(L165Dec11_W3,Minutes<=21)
+L165Dec11_W3_test<-filter(L165Dec11_W3,Minutes>21 & Minutes<=41)
+L167Dec11_W3_accl<-filter(L167Dec11_W3,Minutes<=21)
+L167Dec11_W3_test<-filter(L167Dec11_W3,Minutes>21 & Minutes<=41)
+```
+
+```{r}
+Dec11_W3_accl_BH<-rbind(L154Dec11_W3_accl,L159Dec11_W3_accl,L162Dec11_W3_accl,L167Dec11_W3_accl)
+Dec11_W3_test_BH<-rbind(L154Dec11_W3_test,L159Dec11_W3_test,L162Dec11_W3_test,L167Dec11_W3_test)
+library(dplyr)
+Dec11_W3_accl_BH<-mutate(Dec11_W3_accl_BH,Field=rep("BH"))
+Dec11_W3_accl_BH<-mutate(Dec11_W3_accl_BH,TimePer=rep("accl"))
+Dec11_W3_accl_BH<-mutate(Dec11_W3_accl_BH,FieldType=rep("conditioned"))
+Dec11_W3_test_BH<-mutate(Dec11_W3_test_BH,Field=rep("BH"))
+Dec11_W3_test_BH<-mutate(Dec11_W3_test_BH,TimePer=rep("test"))
+Dec11_W3_test_BH<-mutate(Dec11_W3_test_BH,FieldType=rep("conditioned"))
+```
+
+```{r}
+Dec11_W3_accl_NB<-rbind(L153Dec11_W3_accl,L161Dec11_W3_accl,L165Dec11_W3_accl)
+Dec11_W3_test_NB<-rbind(L153Dec11_W3_test,L161Dec11_W3_test,L165Dec11_W3_test)
+library(dplyr)
+Dec11_W3_accl_NB<-mutate(Dec11_W3_accl_NB,Field=rep("NB"))
+Dec11_W3_accl_NB<-mutate(Dec11_W3_accl_NB,TimePer=rep("accl"))
+Dec11_W3_accl_NB<-mutate(Dec11_W3_accl_NB,FieldType=rep("control"))
+Dec11_W3_test_NB<-mutate(Dec11_W3_test_NB,Field=rep("NB"))
+Dec11_W3_test_NB<-mutate(Dec11_W3_test_NB,TimePer=rep("test"))
+Dec11_W3_test_NB<-mutate(Dec11_W3_test_NB,FieldType=rep("control"))
+```
+
+##Master Data Sets  
+```{r}
+Dec11_W3<-rbind(Dec11_W3_accl_BH,Dec11_W3_accl_NB,Dec11_W3_test_BH,Dec11_W3_test_NB)
+Dec11_W3<-mutate(Dec11_W3,Date=rep("Dec11"))
+Dec11_W3_BH<-rbind(Dec11_W3_accl_BH,Dec11_W3_test_BH)
+Dec11_W3_NB<-rbind(Dec11_W3_accl_NB,Dec11_W3_test_NB)
+```
+
+```{r}
+library(dplyr)
+Dec11_W3<-Dec11_W3 %>% group_by(ID,TimePer,Observer,Field,FieldType,Date) %>% summarise(TotalTimeEl=sum(TimeEl))
+Dec11_W3_test<-filter(Dec11_W3,TimePer=="test")
+```
+
+
+######################################################################################
+
+
+
+#December 12
+
+```{r}
+L155Dec12W<-read.csv("L155_Dec12_Waddle.csv")
+L157Dec12W<-read.csv("L157_Dec12_Waddle.csv")
+#L158Dec12W<-read.csv("L158_Dec12_Waddle.csv")
+L160Dec12W<-read.csv("L160_Dec12_Waddle.csv")
+L163Dec12W<-read.csv("L163_Dec12_Waddle.csv")
+L164Dec12W<-read.csv("L164_Dec12_Waddle.csv")
+L166Dec12W<-read.csv("L166_Dec12_Waddle.csv")
+L168Dec12W<-read.csv("L168_Dec12_Waddle.csv")
+```
+
+```{r}
+#L158Dec12W$Time<-L158Dec12W$Time[is.na(L158Dec12W$Time)]<-0
+```
+
+```{r}
+L155Dec12W$ID<-rep(NA)
+L155Dec12W$ID<-L155Dec12W$ID[is.na(L155Dec12W$ID)]<- "L155"
+L157Dec12W$ID<-rep(NA)
+L157Dec12W$ID<-L157Dec12W$ID[is.na(L157Dec12W$ID)]<- "L157"
+#L158Dec12W$ID<-rep(NA)
+#L158Dec12W$ID<-L158Dec12W$ID[is.na(L158Dec12W$ID)]<- "L158"
+L160Dec12W$ID<-rep(NA)
+L160Dec12W$ID<-L160Dec12W$ID[is.na(L160Dec12W$ID)]<- "L160"
+L163Dec12W$ID<-rep(NA)
+L163Dec12W$ID<-L163Dec12W$ID[is.na(L163Dec12W$ID)]<- "L163"
+L164Dec12W$ID<-rep(NA)
+L164Dec12W$ID<-L164Dec12W$ID[is.na(L164Dec12W$ID)]<- "L164"
+L166Dec12W$ID<-rep(NA)
+L166Dec12W$ID<-L166Dec12W$ID[is.na(L166Dec12W$ID)]<- "L166"
+L168Dec12W$ID<-rep(NA)
+L168Dec12W$ID<-L168Dec12W$ID[is.na(L168Dec12W$ID)]<- "L168"
+```
+
+```{r}
+library(plyr)
+dfs_Dec12<-list(L155Dec12W,L157Dec12W,L160Dec12W,L163Dec12W,L164Dec12W,L166Dec12W,L168Dec12W)
+
+drops<-c("Total.length","FPS","Subject","Comment","Status")
+
+DropFunction<- function(x) {
+  x<-x[ , !(names(x) %in% drops)]
+  return(x)
+}
+
+Dec12_Waddle = ldply(dfs_Dec12,DropFunction)
+
+names(Dec12_Waddle)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
+```
+
+
+```{r}
+Dec12_StartTimes<-subset(Dec12_Waddle,Start_Stop== "START")
+names(Dec12_StartTimes)<- c("StartTime","Observer", "Behavior","Start","ID")
+Dec12_StopTimes<-subset(Dec12_Waddle,Start_Stop=="STOP")
+names(Dec12_StopTimes)<-c("StopTime","Observer", "Behavior","Stop","ID")
+Dec12_WaddleTimes<-cbind(Dec12_StartTimes,Dec12_StopTimes)
+```
+
+```{r}
+names(Dec12_WaddleTimes)<-c("StartTime","Observer", "Behavior","Start","ID","StopTime","Obs.2", "Beh.2","Stop","ID.2")
+drops_doubles<-c("Start", "Obs.2"," Beh.2","Stop","ID.2")
+Dec12_WaddleTimes<-Dec12_WaddleTimes[ , !(names(Dec12_WaddleTimes) %in% drops_doubles)]
+Dec12_WaddleTimes<-mutate(Dec12_WaddleTimes,TimeEl=StopTime-StartTime)
+Dec12_WaddleTimes<-mutate(Dec12_WaddleTimes,Minutes=StartTime/60)
+```
+
+
+##Subset Data by ID to set acclimation and test periods
+
+```{r}
+library(dplyr)
+L155Dec12_W1<-filter(Dec12_WaddleTimes,ID=="L155")
+L155Dec12_W1$Observer<-rep(NA)
+L155Dec12_W1$Observer<-L155Dec12_W1$Observer[is.na(L155Dec12_W1$Observer)]<- "KaG"
+
+L157Dec12_W1<-filter(Dec12_WaddleTimes,ID=="L157")
+L157Dec12_W1$Observer<-rep(NA)
+L157Dec12_W1$Observer<-L157Dec12_W1$Observer[is.na(L157Dec12_W1$Observer)]<- "KaG"
+
+#L158Dec12_W1<-filter(Dec12_WaddleTimes,ID=="L158")
+L160Dec12_W1<-filter(Dec12_WaddleTimes,ID=="L160")
+L160Dec12_W1$Observer<-rep(NA)
+L160Dec12_W1$Observer<-L160Dec12_W1$Observer[is.na(L160Dec12_W1$Observer)]<- "KaG"
+
+L163Dec12_W1<-filter(Dec12_WaddleTimes,ID=="L163")
+L163Dec12_W1$Observer<-rep(NA)
+L163Dec12_W1$Observer<-L163Dec12_W1$Observer[is.na(L163Dec12_W1$Observer)]<- "NiI"
+
+L164Dec12_W1<-filter(Dec12_WaddleTimes,ID=="L164")
+L164Dec12_W1$Observer<-rep(NA)
+L164Dec12_W1$Observer<-L164Dec12_W1$Observer[is.na(L164Dec12_W1$Observer)]<- "AnJ"
+
+L166Dec12_W1<-filter(Dec12_WaddleTimes,ID=="L166")
+L166Dec12_W1$Observer<-rep(NA)
+L166Dec12_W1$Observer<-L166Dec12_W1$Observer[is.na(L166Dec12_W1$Observer)]<- "AnJ"
+
+L168Dec12_W1<-filter(Dec12_WaddleTimes,ID=="L168")
+L168Dec12_W1$Observer<-rep(NA)
+L168Dec12_W1$Observer<-L168Dec12_W1$Observer[is.na(L168Dec12_W1$Observer)]<- "KaG"
+
+```
+
+```{r}
+library(dplyr)
+L155Dec12_W1_accl<-filter(L155Dec12_W1,Minutes<=22)
+L155Dec12_W1_test<-filter(L155Dec12_W1,Minutes>22 & Minutes<=42)
+L157Dec12_W1_accl<-filter(L157Dec12_W1,Minutes<=22)
+L157Dec12_W1_test<-filter(L157Dec12_W1,Minutes>22 & Minutes<=42)
+#L158Dec12_W1_accl<-filter(L158Dec12_W1,Minutes<=21)
+#L158Dec12_W1_test<-filter(L158Dec12_W1,Minutes>21 & Minutes <=41)
+L160Dec12_W1_accl<-filter(L160Dec12_W1,Minutes<=21)
+L160Dec12_W1_test<-filter(L160Dec12_W1,Minutes>21 & Minutes <=41)
+L163Dec12_W1_accl<-filter(L163Dec12_W1,Minutes<=20)
+L163Dec12_W1_test<-filter(L163Dec12_W1,Minutes>20 & Minutes<=40)
+L164Dec12_W1_accl<-filter(L164Dec12_W1,Minutes<=21)
+L164Dec12_W1_test<-filter(L164Dec12_W1,Minutes>21 & Minutes<=41)
+L166Dec12_W1_accl<-filter(L166Dec12_W1,Minutes<=25)
+L166Dec12_W1_test<-filter(L166Dec12_W1,Minutes>25 & Minutes<=45)
+L168Dec12_W1_accl<-filter(L168Dec12_W1,Minutes<=22)
+L168Dec12_W1_test<-filter(L168Dec12_W1,Minutes>22 & Minutes<=42)
+```
+
+```{r}
+Dec12_W1_accl_BH<-rbind(L155Dec12_W1_accl,L163Dec12_W1_accl,L166Dec12_W1_accl)
+Dec12_W1_test_BH<-rbind(L155Dec12_W1_test,L163Dec12_W1_test,L166Dec12_W1_test)
+library(dplyr)
+Dec12_W1_accl_BH<-mutate(Dec12_W1_accl_BH,Field=rep("BH"))
+Dec12_W1_accl_BH<-mutate(Dec12_W1_accl_BH,TimePer=rep("accl"))
+Dec12_W1_accl_BH<-mutate(Dec12_W1_accl_BH,FieldType=rep("control"))
+Dec12_W1_test_BH<-mutate(Dec12_W1_test_BH,Field=rep("BH"))
+Dec12_W1_test_BH<-mutate(Dec12_W1_test_BH,TimePer=rep("test"))
+Dec12_W1_test_BH<-mutate(Dec12_W1_test_BH,FieldType=rep("control"))
+```
+
+```{r}
+Dec12_W1_accl_NB<-rbind(L157Dec12_W1_accl,L160Dec12_W1_accl,L164Dec12_W1_accl,L168Dec12_W1_accl)
+Dec12_W1_test_NB<-rbind(L157Dec12_W1_test,L160Dec12_W1_test,L164Dec12_W1_test,L168Dec12_W1_test)
+library(dplyr)
+Dec12_W1_accl_NB<-mutate(Dec12_W1_accl_NB,Field=rep("NB"))
+Dec12_W1_accl_NB<-mutate(Dec12_W1_accl_NB,TimePer=rep("accl"))
+Dec12_W1_accl_NB<-mutate(Dec12_W1_accl_NB,FieldType=rep("conditioned"))
+Dec12_W1_test_NB<-mutate(Dec12_W1_test_NB,Field=rep("NB"))
+Dec12_W1_test_NB<-mutate(Dec12_W1_test_NB,TimePer=rep("test"))
+Dec12_W1_test_NB<-mutate(Dec12_W1_test_NB,FieldType=rep("conditioned"))
+```
+
+##Master Data Sets 
+```{r}
+Dec12_W1<-rbind(Dec12_W1_accl_BH,Dec12_W1_accl_NB,Dec12_W1_test_BH,Dec12_W1_test_NB)
+Dec12_W1<-mutate(Dec12_W1,Date=rep("Dec12"))
+Dec12_W1_BH<-rbind(Dec12_W1_accl_BH,Dec12_W1_test_BH)
+Dec12_W1_NB<-rbind(Dec12_W1_accl_NB,Dec12_W1_test_NB)
+```
+
+```{r}
+library(dplyr)
+Dec12_W1<-Dec12_W1 %>% group_by(ID,TimePer,Observer,Field,FieldType,Date) %>% summarise(TotalTimeEl=sum(TimeEl))
+Dec12_W1_test<-filter(Dec12_W1,TimePer=="test")
+```
+
+
+
+
+#December 12 Analysis 2 
+
+```{r}
+L155Dec12W2<-read.csv("L155_Dec12_Waddle2.csv")
+L157Dec12W2<-read.csv("L157_Dec12_Waddle2.csv")
+L158Dec12W2<-read.csv("L158_Dec12_Waddle2.csv")
+L160Dec12W2<-read.csv("L160_Dec12_Waddle2.csv",skip=15,header=T)
+L163Dec12W2<-read.csv("L163_Dec12_Waddle2.csv")
+L164Dec12W2<-read.csv("L164_Dec12_Waddle2.csv")
+L166Dec12W2<-read.csv("L166_Dec12_Waddle2.csv")
+L168Dec12W2<-read.csv("L168_Dec12_Waddle2.csv")
+```
+
+
+```{r}
+L155Dec12W2$ID<-rep(NA)
+L155Dec12W2$ID<-L155Dec12W2$ID[is.na(L155Dec12W2$ID)]<- "L155"
+L157Dec12W2$ID<-rep(NA)
+L157Dec12W2$ID<-L157Dec12W2$ID[is.na(L157Dec12W2$ID)]<- "L157"
+L158Dec12W2$ID<-rep(NA)
+L158Dec12W2$ID<-L158Dec12W2$ID[is.na(L158Dec12W2$ID)]<- "L158"
+L160Dec12W2$ID<-rep(NA)
+L160Dec12W2$ID<-L160Dec12W2$ID[is.na(L160Dec12W2$ID)]<- "L160"
+L163Dec12W2$ID<-rep(NA)
+L163Dec12W2$ID<-L163Dec12W2$ID[is.na(L163Dec12W2$ID)]<- "L163"
+L164Dec12W2$ID<-rep(NA)
+L164Dec12W2$ID<-L164Dec12W2$ID[is.na(L164Dec12W2$ID)]<- "L164"
+L166Dec12W2$ID<-rep(NA)
+L166Dec12W2$ID<-L166Dec12W2$ID[is.na(L166Dec12W2$ID)]<- "L166"
+L168Dec12W2$ID<-rep(NA)
+L168Dec12W2$ID<-L168Dec12W2$ID[is.na(L168Dec12W2$ID)]<- "L168"
+```
+
+```{r}
+library(plyr)
+dfs_Dec12_2<-list(L155Dec12W2,L157Dec12W2,L158Dec12W2,L160Dec12W2,L163Dec12W2,L164Dec12W2,L166Dec12W2,L168Dec12W2)
+
+drops<-c("Total.length","FPS","Subject","Comment","Status")
+
+DropFunction<- function(x) {
+  x<-x[ , !(names(x) %in% drops)]
+  return(x)
+}
+
+Dec12_Waddle2 = ldply(dfs_Dec12_2,DropFunction)
+
+names(Dec12_Waddle2)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
+```
+
+
+```{r}
+Dec12_StartTimes2<-subset(Dec12_Waddle2,Start_Stop== "START")
+names(Dec12_StartTimes2)<- c("StartTime","Observer","Behavior","Start","ID")
+Dec12_StopTimes2<-subset(Dec12_Waddle2,Start_Stop=="STOP")
+names(Dec12_StopTimes2)<-c("StopTime","Observer","Behavior","Stop","ID")
+Dec12_WaddleTimes2<-cbind(Dec12_StartTimes2,Dec12_StopTimes2)
+```
+
+```{r}
+names(Dec12_WaddleTimes2)<-c("StartTime","Observer","Behavior","Start","ID","StopTime","Obs.2","Beh.2","Stop","ID.2")
+drops_doubles<-c("Start","Obs.2","Beh.2","Stop","ID.2")
+Dec12_WaddleTimes2<-Dec12_WaddleTimes2[ , !(names(Dec12_WaddleTimes2) %in% drops_doubles)]
+Dec12_WaddleTimes2<-mutate(Dec12_WaddleTimes2,TimeEl=StopTime-StartTime)
+Dec12_WaddleTimes2<-mutate(Dec12_WaddleTimes2,Minutes=StartTime/60)
+```
+
+
+##Subset Data by ID to set acclimation and test periods
+
+```{r}
+library(dplyr)
+L155Dec12_W2<-filter(Dec12_WaddleTimes2,ID=="L155")
+L155Dec12_W2$Observer<-rep(NA)
+L155Dec12_W2$Observer<-L155Dec12_W2$Observer[is.na(L155Dec12_W2$Observer)]<- "EmT"
+
+L157Dec12_W2<-filter(Dec12_WaddleTimes2,ID=="L157")
+L157Dec12_W2$Observer<-rep(NA)
+L157Dec12_W2$Observer<-L157Dec12_W2$Observer[is.na(L157Dec12_W2$Observer)]<- "EmT"
+
+L158Dec12_W2<-filter(Dec12_WaddleTimes2,ID=="L158")
+L158Dec12_W2$Observer<-rep(NA)
+L158Dec12_W2$Observer<-L158Dec12_W2$Observer[is.na(L158Dec12_W2$Observer)]<- "MjH"
+
+L160Dec12_W2<-filter(Dec12_WaddleTimes2,ID=="L160")
+L160Dec12_W2$Observer<-rep(NA)
+L160Dec12_W2$Observer<-L160Dec12_W2$Observer[is.na(L160Dec12_W2$Observer)]<- "AnJ"
+
+L163Dec12_W2<-filter(Dec12_WaddleTimes2,ID=="L163")
+L163Dec12_W2$Observer<-rep(NA)
+L163Dec12_W2$Observer<-L163Dec12_W2$Observer[is.na(L163Dec12_W2$Observer)]<- "EmT"
+
+L164Dec12_W2<-filter(Dec12_WaddleTimes2,ID=="L164")
+L164Dec12_W2$Observer<-rep(NA)
+L164Dec12_W2$Observer<-L164Dec12_W2$Observer[is.na(L164Dec12_W2$Observer)]<- "EmT"
+
+L166Dec12_W2<-filter(Dec12_WaddleTimes2,ID=="L166")
+L166Dec12_W2$Observer<-rep(NA)
+L166Dec12_W2$Observer<-L166Dec12_W2$Observer[is.na(L166Dec12_W2$Observer)]<- "NaB"
+
+L168Dec12_W2<-filter(Dec12_WaddleTimes2,ID=="L168")
+L168Dec12_W2$Observer<-rep(NA)
+L168Dec12_W2$Observer<-L168Dec12_W2$Observer[is.na(L168Dec12_W2$Observer)]<- "NaB"
+```
+
+```{r}
+library(dplyr)
+L155Dec12_W2_accl<-filter(L155Dec12_W2,Minutes<=22)
+L155Dec12_W2_test<-filter(L155Dec12_W2,Minutes>22 & Minutes<=42)
+L157Dec12_W2_accl<-filter(L157Dec12_W2,Minutes<=22)
+L157Dec12_W2_test<-filter(L157Dec12_W2,Minutes>22 & Minutes<=42)
+L158Dec12_W2_accl<-filter(L158Dec12_W2,Minutes<=21)
+L158Dec12_W2_test<-filter(L158Dec12_W2,Minutes>21 & Minutes <=41)
+L160Dec12_W2_accl<-filter(L160Dec12_W2,Minutes<=21)
+L160Dec12_W2_test<-filter(L160Dec12_W2,Minutes>21 & Minutes <=41)
+L163Dec12_W2_accl<-filter(L163Dec12_W2,Minutes<=20)
+L163Dec12_W2_test<-filter(L163Dec12_W2,Minutes>20 & Minutes<=40)
+L164Dec12_W2_accl<-filter(L164Dec12_W2,Minutes<=21)
+L164Dec12_W2_test<-filter(L164Dec12_W2,Minutes>21 & Minutes<=41)
+L166Dec12_W2_accl<-filter(L166Dec12_W2,Minutes<=25)
+L166Dec12_W2_test<-filter(L166Dec12_W2,Minutes>25 & Minutes<=45)
+L168Dec12_W2_accl<-filter(L168Dec12_W2,Minutes<=22)
+L168Dec12_W2_test<-filter(L168Dec12_W2,Minutes>22 & Minutes<=42)
+```
+
+```{r}
+Dec12_W2_accl_BH<-rbind(L155Dec12_W2_accl,L158Dec12_W2_accl,L163Dec12_W2_accl,L166Dec12_W2_accl)
+Dec12_W2_test_BH<-rbind(L155Dec12_W2_test,L158Dec12_W2_test,L163Dec12_W2_test,L166Dec12_W2_test)
+library(dplyr)
+Dec12_W2_accl_BH<-mutate(Dec12_W2_accl_BH,Field=rep("BH"))
+Dec12_W2_accl_BH<-mutate(Dec12_W2_accl_BH,TimePer=rep("accl"))
+Dec12_W2_accl_BH<-mutate(Dec12_W2_accl_BH,FieldType=rep("control"))
+Dec12_W2_test_BH<-mutate(Dec12_W2_test_BH,Field=rep("BH"))
+Dec12_W2_test_BH<-mutate(Dec12_W2_test_BH,TimePer=rep("test"))
+Dec12_W2_test_BH<-mutate(Dec12_W2_test_BH,FieldType=rep("control"))
+```
+
+```{r}
+Dec12_W2_accl_NB<-rbind(L157Dec12_W2_accl,L160Dec12_W2_accl,L164Dec12_W2_accl,L168Dec12_W2_accl)
+Dec12_W2_test_NB<-rbind(L157Dec12_W2_test,L160Dec12_W2_test,L164Dec12_W2_test,L168Dec12_W2_test)
+library(dplyr)
+Dec12_W2_accl_NB<-mutate(Dec12_W2_accl_NB,Field=rep("NB"))
+Dec12_W2_accl_NB<-mutate(Dec12_W2_accl_NB,TimePer=rep("accl"))
+Dec12_W2_accl_NB<-mutate(Dec12_W2_accl_NB,FieldType=rep("conditioned"))
+Dec12_W2_test_NB<-mutate(Dec12_W2_test_NB,Field=rep("NB"))
+Dec12_W2_test_NB<-mutate(Dec12_W2_test_NB,TimePer=rep("test"))
+Dec12_W2_test_NB<-mutate(Dec12_W2_test_NB,FieldType=rep("conditioned"))
+```
+
+##Master Data Sets 
+```{r}
+Dec12_W2<-rbind(Dec12_W2_accl_BH,Dec12_W2_accl_NB,Dec12_W2_test_BH,Dec12_W2_test_NB)
+Dec12_W2<-mutate(Dec12_W2,Date=rep("Dec12"))
+Dec12_W2_BH<-rbind(Dec12_W2_accl_BH,Dec12_W2_test_BH)
+Dec12_W2_NB<-rbind(Dec12_W2_accl_NB,Dec12_W2_test_NB)
+```
+
+```{r}
+library(dplyr)
+Dec12_W2<-Dec12_W2 %>% group_by(ID,TimePer,Observer,Field,FieldType,Date) %>% summarise(TotalTimeEl=sum(TimeEl))
+Dec12_W2_test<-filter(Dec12_W2,TimePer=="test")
+```
+
+#December 12 Analysis 3#############################
+
+```{r}
+L155Dec12W3<-read.csv("L155_Dec12_Waddle4.csv",skip=15,header=T)
+L157Dec12W3<-read.csv("L157_Dec12_Waddle3.csv",skip=15,header=T)
+L158Dec12W3<-read.csv("L158_Dec12_Waddle3.csv",skip=15,header=T)
+L160Dec12W3<-read.csv("L160_Dec12_Waddle3.csv",skip=15,header=T)
+L163Dec12W3<-read.csv("L163_Dec12_Waddle4.csv",skip=15,header=T)
+L164Dec12W3<-read.csv("L164_Dec12_Waddle3.csv",skip=15,header=T)
+L166Dec12W3<-read.csv("L166_Dec12_Waddle3.csv",skip=15,header=T)
+L168Dec12W3<-read.csv("L168_Dec12_Waddle3.csv",skip=15,header=T)
+```
+
+
+```{r}
+L155Dec12W3$ID<-rep(NA)
+L155Dec12W3$ID<-L155Dec12W3$ID[is.na(L155Dec12W3$ID)]<- "L155"
+L157Dec12W3$ID<-rep(NA)
+L157Dec12W3$ID<-L157Dec12W3$ID[is.na(L157Dec12W3$ID)]<- "L157"
+L158Dec12W3$ID<-rep(NA)
+L158Dec12W3$ID<-L158Dec12W3$ID[is.na(L158Dec12W3$ID)]<- "L158"
+L160Dec12W3$ID<-rep(NA)
+L160Dec12W3$ID<-L160Dec12W3$ID[is.na(L160Dec12W3$ID)]<- "L160"
+L163Dec12W3$ID<-rep(NA)
+L163Dec12W3$ID<-L163Dec12W3$ID[is.na(L163Dec12W3$ID)]<- "L163"
+L164Dec12W3$ID<-rep(NA)
+L164Dec12W3$ID<-L164Dec12W3$ID[is.na(L164Dec12W3$ID)]<- "L164"
+L166Dec12W3$ID<-rep(NA)
+L166Dec12W3$ID<-L166Dec12W3$ID[is.na(L166Dec12W3$ID)]<- "L166"
+L168Dec12W3$ID<-rep(NA)
+L168Dec12W3$ID<-L168Dec12W3$ID[is.na(L168Dec12W3$ID)]<- "L168"
+```
+
+```{r}
+library(plyr)
+dfs_Dec12_3<-list(L155Dec12W3,L157Dec12W3,L158Dec12W3,L160Dec12W3,L163Dec12W3,L164Dec12W3,L166Dec12W3,L168Dec12W3)
+
+drops<-c("Total.length","FPS","Subject","Comment","Status")
+
+DropFunction<- function(x) {
+  x<-x[ , !(names(x) %in% drops)]
+  return(x)
+}
+
+Dec12_Waddle3 = ldply(dfs_Dec12_3,DropFunction)
+
+names(Dec12_Waddle3)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
+```
+
+
+```{r}
+Dec12_StartTimes3<-subset(Dec12_Waddle3,Start_Stop== "START")
+names(Dec12_StartTimes3)<- c("StartTime","Observer","Behavior","Start","ID")
+Dec12_StopTimes3<-subset(Dec12_Waddle3,Start_Stop=="STOP")
+names(Dec12_StopTimes3)<-c("StopTime","Observer","Behavior","Stop","ID")
+Dec12_WaddleTimes3<-cbind(Dec12_StartTimes3,Dec12_StopTimes3)
+```
+
+```{r}
+names(Dec12_WaddleTimes3)<-c("StartTime","Observer","Behavior","Start","ID","StopTime","Obs.2","Beh.2","Stop","ID.2")
+drops_doubles<-c("Start","Obs.2","Beh.2","Stop","ID.2")
+Dec12_WaddleTimes3<-Dec12_WaddleTimes3[ , !(names(Dec12_WaddleTimes3) %in% drops_doubles)]
+Dec12_WaddleTimes3<-mutate(Dec12_WaddleTimes3,TimeEl=StopTime-StartTime)
+Dec12_WaddleTimes3<-mutate(Dec12_WaddleTimes3,Minutes=StartTime/60)
+```
+
+
+##Subset Data by ID to set acclimation and test periods
+
+```{r}
+library(dplyr)
+L155Dec12_W3<-filter(Dec12_WaddleTimes3,ID=="L155")
+L155Dec12_W3$Observer<-rep(NA)
+L155Dec12_W3$Observer<-L155Dec12_W3$Observer[is.na(L155Dec12_W3$Observer)]<- "MjH"
+
+L157Dec12_W3<-filter(Dec12_WaddleTimes3,ID=="L157")
+L157Dec12_W3$Observer<-rep(NA)
+L157Dec12_W3$Observer<-L157Dec12_W3$Observer[is.na(L157Dec12_W3$Observer)]<- "NiI"
+
+L158Dec12_W3<-filter(Dec12_WaddleTimes3,ID=="L158")
+L158Dec12_W3$Observer<-rep(NA)
+L158Dec12_W3$Observer<-L158Dec12_W3$Observer[is.na(L158Dec12_W3$Observer)]<- "AnJ"
+
+L160Dec12_W3<-filter(Dec12_WaddleTimes3,ID=="L160")
+L160Dec12_W3$Observer<-rep(NA)
+L160Dec12_W3$Observer<-L160Dec12_W3$Observer[is.na(L160Dec12_W3$Observer)]<- "EmT"
+
+L163Dec12_W3<-filter(Dec12_WaddleTimes3,ID=="L163")
+L163Dec12_W3$Observer<-rep(NA)
+L163Dec12_W3$Observer<-L163Dec12_W3$Observer[is.na(L163Dec12_W3$Observer)]<- "MjH"
+
+L164Dec12_W3<-filter(Dec12_WaddleTimes3,ID=="L164")
+L164Dec12_W3$Observer<-rep(NA)
+L164Dec12_W3$Observer<-L164Dec12_W3$Observer[is.na(L164Dec12_W3$Observer)]<- "MjH"
+
+L166Dec12_W3<-filter(Dec12_WaddleTimes3,ID=="L166")
+L166Dec12_W3$Observer<-rep(NA)
+L166Dec12_W3$Observer<-L166Dec12_W3$Observer[is.na(L166Dec12_W3$Observer)]<- "EmT"
+
+L168Dec12_W3<-filter(Dec12_WaddleTimes3,ID=="L168")
+L168Dec12_W3$Observer<-rep(NA)
+L168Dec12_W3$Observer<-L168Dec12_W3$Observer[is.na(L168Dec12_W3$Observer)]<- "MjH"
+```
+
+```{r}
+library(dplyr)
+L155Dec12_W3_accl<-filter(L155Dec12_W3,Minutes<=22)
+L155Dec12_W3_test<-filter(L155Dec12_W3,Minutes>22 & Minutes<=42)
+L157Dec12_W3_accl<-filter(L157Dec12_W3,Minutes<=22)
+L157Dec12_W3_test<-filter(L157Dec12_W3,Minutes>22 & Minutes<=42)
+L158Dec12_W3_accl<-filter(L158Dec12_W3,Minutes<=21)
+L158Dec12_W3_test<-filter(L158Dec12_W3,Minutes>21 & Minutes <=41)
+L160Dec12_W3_accl<-filter(L160Dec12_W3,Minutes<=21)
+L160Dec12_W3_test<-filter(L160Dec12_W3,Minutes>21 & Minutes <=41)
+L163Dec12_W3_accl<-filter(L163Dec12_W3,Minutes<=20)
+L163Dec12_W3_test<-filter(L163Dec12_W3,Minutes>20 & Minutes<=40)
+L164Dec12_W3_accl<-filter(L164Dec12_W3,Minutes<=21)
+L164Dec12_W3_test<-filter(L164Dec12_W3,Minutes>21 & Minutes<=41)
+L166Dec12_W3_accl<-filter(L166Dec12_W3,Minutes<=25)
+L166Dec12_W3_test<-filter(L166Dec12_W3,Minutes>25 & Minutes<=45)
+L168Dec12_W3_accl<-filter(L168Dec12_W3,Minutes<=22)
+L168Dec12_W3_test<-filter(L168Dec12_W3,Minutes>22 & Minutes<=42)
+```
+
+```{r}
+Dec12_W3_accl_BH<-rbind(L155Dec12_W3_accl,L158Dec12_W3_accl,L163Dec12_W3_accl,L166Dec12_W3_accl)
+Dec12_W3_test_BH<-rbind(L155Dec12_W3_test,L158Dec12_W3_test,L163Dec12_W3_test,L166Dec12_W3_test)
+library(dplyr)
+Dec12_W3_accl_BH<-mutate(Dec12_W3_accl_BH,Field=rep("BH"))
+Dec12_W3_accl_BH<-mutate(Dec12_W3_accl_BH,TimePer=rep("accl"))
+Dec12_W3_accl_BH<-mutate(Dec12_W3_accl_BH,FieldType=rep("control"))
+Dec12_W3_test_BH<-mutate(Dec12_W3_test_BH,Field=rep("BH"))
+Dec12_W3_test_BH<-mutate(Dec12_W3_test_BH,TimePer=rep("test"))
+Dec12_W3_test_BH<-mutate(Dec12_W3_test_BH,FieldType=rep("control"))
+```
+
+```{r}
+Dec12_W3_accl_NB<-rbind(L157Dec12_W3_accl,L160Dec12_W3_accl,L164Dec12_W3_accl,L168Dec12_W3_accl)
+Dec12_W3_test_NB<-rbind(L157Dec12_W3_test,L160Dec12_W3_test,L164Dec12_W3_test,L168Dec12_W3_test)
+library(dplyr)
+Dec12_W3_accl_NB<-mutate(Dec12_W3_accl_NB,Field=rep("NB"))
+Dec12_W3_accl_NB<-mutate(Dec12_W3_accl_NB,TimePer=rep("accl"))
+Dec12_W3_accl_NB<-mutate(Dec12_W3_accl_NB,FieldType=rep("conditioned"))
+Dec12_W3_test_NB<-mutate(Dec12_W3_test_NB,Field=rep("NB"))
+Dec12_W3_test_NB<-mutate(Dec12_W3_test_NB,TimePer=rep("test"))
+Dec12_W3_test_NB<-mutate(Dec12_W3_test_NB,FieldType=rep("conditioned"))
+```
+
+##Master Data Sets 
+```{r}
+Dec12_W3<-rbind(Dec12_W3_accl_BH,Dec12_W3_accl_NB,Dec12_W3_test_BH,Dec12_W3_test_NB)
+Dec12_W3<-mutate(Dec12_W3,Date=rep("Dec12"))
+Dec12_W3_BH<-rbind(Dec12_W3_accl_BH,Dec12_W3_test_BH)
+Dec12_W3_NB<-rbind(Dec12_W3_accl_NB,Dec12_W3_test_NB)
+```
+
+```{r}
+library(dplyr)
+Dec12_W3<-Dec12_W3 %>% group_by(ID,TimePer,Observer,Field,FieldType,Date) %>% summarise(TotalTimeEl=sum(TimeEl))
+Dec12_W3_test<-filter(Dec12_W3,TimePer=="test")
+```
+
+
+#######################################################################
+
+##Dec 13 Analysis
+
+```{r}
+L153Dec13W1<-read.csv("L153_Dec13_Waddle.csv")
+#L153Dec13W2<-read.csv("L153_Dec13_Waddle2.csv")
+L154Dec13W1<-read.csv("L154_Dec13_Waddle.csv")
+L154Dec13W2<-read.csv("L154_Dec13_Waddle2.csv")
+L156Dec13W1<-read.csv("L156_Dec13_Waddle.csv")
+L156Dec13W2<-read.csv("L156_Dec13_Waddle2.csv")
+L159Dec13W1<-read.csv("L159_Dec13_Waddle.csv")
+L159Dec13W2<-read.csv("L159_Dec13_Waddle2.csv")
+```
+
+
+```{r}
+L153Dec13W1$ID<-rep(NA)
+L153Dec13W1$ID<-L153Dec13W1$ID[is.na(L153Dec13W1$ID)]<- "L153"
+#L153Dec13W2$ID<-rep(NA)
+#L153Dec13W2$ID<-L153Dec13W2$ID[is.na(L153Dec13W2$ID)]<- "L153"
+L154Dec13W1$ID<-rep(NA)
+L154Dec13W1$ID<-L154Dec13W1$ID[is.na(L154Dec13W1$ID)]<- "L154"
+L154Dec13W2$ID<-rep(NA)
+L154Dec13W2$ID<-L154Dec13W2$ID[is.na(L154Dec13W2$ID)]<- "L154"
+L156Dec13W1$ID<-rep(NA)
+L156Dec13W1$ID<-L156Dec13W1$ID[is.na(L156Dec13W1$ID)]<- "L156"
+L156Dec13W2$ID<-rep(NA)
+L156Dec13W2$ID<-L156Dec13W2$ID[is.na(L156Dec13W2$ID)]<- "L156"
+L159Dec13W1$ID<-rep(NA)
+L159Dec13W1$ID<-L159Dec13W1$ID[is.na(L159Dec13W1$ID)]<- "L159"
+L159Dec13W2$ID<-rep(NA)
+L159Dec13W2$ID<-L159Dec13W2$ID[is.na(L159Dec13W2$ID)]<- "L159"
+```
+
+```{r}
+library(plyr)
+dfs_Dec13<-list(L153Dec13W1,L154Dec13W1, L156Dec13W1,L159Dec13W1)
+dfs_Dec13_2<-list(L154Dec13W2,L156Dec13W2,L159Dec13W2)
+
+drops<-c("Total.length","FPS","Subject","Comment","Status")
+
+DropFunction<- function(x) {
+  x<-x[ , !(names(x) %in% drops)]
+  return(x)
+}
+
+Dec13_Waddle1 = ldply(dfs_Dec13,DropFunction)
+
+names(Dec13_Waddle1)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
+
+Dec13_Waddle2 = ldply(dfs_Dec13_2,DropFunction)
+
+names(Dec13_Waddle2)<-c("Time", "Observer", "Behavior", "Start_Stop","ID")
+```
+
+
+```{r}
+Dec13_StartTimes1<-subset(Dec13_Waddle1,Start_Stop== "START")
+names(Dec13_StartTimes1)<- c("StartTime","Observer","Behavior","Start","ID")
+Dec13_StopTimes1<-subset(Dec13_Waddle1,Start_Stop=="STOP")
+names(Dec13_StopTimes1)<-c("StopTime","Observer", "Behavior","Stop","ID")
+Dec13_WaddleTimes1<-cbind(Dec13_StartTimes1,Dec13_StopTimes1)
+
+Dec13_StartTimes2<-subset(Dec13_Waddle2,Start_Stop== "START")
+names(Dec13_StartTimes2)<- c("StartTime","Observer","Behavior","Start","ID")
+Dec13_StopTimes2<-subset(Dec13_Waddle2,Start_Stop=="STOP")
+names(Dec13_StopTimes2)<-c("StopTime","Observer", "Behavior","Stop","ID")
+Dec13_WaddleTimes2<-cbind(Dec13_StartTimes2,Dec13_StopTimes2)
+```
+
+```{r}
+names(Dec13_WaddleTimes1)<-c("StartTime","Observer", "Behavior","Start","ID","StopTime","Obs.2","Beh.2","Stop","ID.2")
+drops_doubles<-c("Start","Obs.2","Beh.2","Stop","ID.2")
+Dec13_WaddleTimes1<-Dec13_WaddleTimes1[ , !(names(Dec13_WaddleTimes1) %in% drops_doubles)]
+Dec13_WaddleTimes1<-mutate(Dec13_WaddleTimes1,TimeEl=StopTime-StartTime)
+Dec13_WaddleTimes1<-mutate(Dec13_WaddleTimes1,Minutes=StartTime/60)
+
+names(Dec13_WaddleTimes2)<-c("StartTime","Observer", "Behavior","Start","ID","StopTime","Obs.2","Beh.2","Stop","ID.2")
+drops_doubles<-c("Start","Obs.2","Beh.2","Stop","ID.2")
+Dec13_WaddleTimes2<-Dec13_WaddleTimes2[ , !(names(Dec13_WaddleTimes2) %in% drops_doubles)]
+Dec13_WaddleTimes2<-mutate(Dec13_WaddleTimes2,TimeEl=StopTime-StartTime)
+Dec13_WaddleTimes2<-mutate(Dec13_WaddleTimes2,Minutes=StartTime/60)
+```
+
+
+##Subset Data by ID to set acclimation and test periods
+
+```{r}
+library(dplyr)
+L153Dec13_W1<-filter(Dec13_WaddleTimes1,ID=="L153")
+#L153Dec13_W2<-filter(Dec13_WaddleTimes2,ID=="L153")
+L153Dec13_W1$Observer<-rep(NA)
+L153Dec13_W1$Observer<-L153Dec13_W1$Observer[is.na(L153Dec13_W1$Observer)]<- "NaB"
+
+L154Dec13_W1<-filter(Dec13_WaddleTimes1,ID=="L154")
+L154Dec13_W2<-filter(Dec13_WaddleTimes2,ID=="L154")
+L154Dec13_W1$Observer<-rep(NA)
+L154Dec13_W1$Observer<-L154Dec13_W1$Observer[is.na(L154Dec13_W1$Observer)]<- "NaB"
+L154Dec13_W2$Observer<-rep(NA)
+L154Dec13_W2$Observer<-L154Dec13_W2$Observer[is.na(L154Dec13_W2$Observer)]<- "NiI"
+
+L156Dec13_W1<-filter(Dec13_WaddleTimes1,ID=="L156")
+L156Dec13_W2<-filter(Dec13_WaddleTimes2,ID=="L156")
+L156Dec13_W1$Observer<-rep(NA)
+L156Dec13_W1$Observer<-L156Dec13_W1$Observer[is.na(L156Dec13_W1$Observer)]<- "AnJ"
+L156Dec13_W2$Observer<-rep(NA)
+L156Dec13_W2$Observer<-L156Dec13_W2$Observer[is.na(L156Dec13_W2$Observer)]<- "NiI"
+
+
+L159Dec13_W1<-filter(Dec13_WaddleTimes1,ID=="L159")
+L159Dec13_W2<-filter(Dec13_WaddleTimes2,ID=="L159")
+L159Dec13_W1$Observer<-rep(NA)
+L159Dec13_W1$Observer<-L159Dec13_W1$Observer[is.na(L159Dec13_W1$Observer)]<- "AnJ"
+L159Dec13_W2$Observer<-rep(NA)
+L159Dec13_W2$Observer<-L159Dec13_W2$Observer[is.na(L159Dec13_W2$Observer)]<- "NiI"
+
+```
+
+```{r}
+library(dplyr)
+L153Dec13_W1_accl<-filter(L153Dec13_W1,Minutes<=21)
+L153Dec13_W1_test<-filter(L153Dec13_W1,Minutes>21 & Minutes<=41)
+#L153Dec13_W2_accl<-filter(L153Dec13_W2,Minutes<=21)
+#L153Dec13_W2_test<-filter(L153Dec13_W2,Minutes>21 & Minutes<=41)
+L154Dec13_W1_accl<-filter(L154Dec13_W1,Minutes<=21)
+L154Dec13_W1_test<-filter(L154Dec13_W1,Minutes>21 & Minutes <=41)
+L154Dec13_W2_accl<-filter(L154Dec13_W2,Minutes<=21)
+L154Dec13_W2_test<-filter(L154Dec13_W2,Minutes>21 & Minutes <=41)
+L156Dec13_W1_accl<-filter(L156Dec13_W1,Minutes<=21)
+L156Dec13_W1_test<-filter(L156Dec13_W1,Minutes>21 & Minutes<=41)
+L156Dec13_W2_accl<-filter(L156Dec13_W2,Minutes<=21)
+L156Dec13_W2_test<-filter(L156Dec13_W2,Minutes>21 & Minutes<=41)
+L159Dec13_W1_accl<-filter(L159Dec13_W1,Minutes<=21)
+L159Dec13_W1_test<-filter(L159Dec13_W1,Minutes>21 & Minutes<=41)
+L159Dec13_W2_accl<-filter(L159Dec13_W2,Minutes<=21)
+L159Dec13_W2_test<-filter(L159Dec13_W2,Minutes>21 & Minutes<=41)
+```
+
+```{r}
+Dec13_W1_accl_BH<-rbind(L154Dec13_W1_accl,L159Dec13_W1_accl)
+Dec13_W1_test_BH<-rbind(L154Dec13_W1_test,L159Dec13_W1_test)
+library(dplyr)
+Dec13_W1_accl_BH<-mutate(Dec13_W1_accl_BH,Field=rep("BH"))
+Dec13_W1_accl_BH<-mutate(Dec13_W1_accl_BH,TimePer=rep("accl"))
+Dec13_W1_accl_BH<-mutate(Dec13_W1_accl_BH,FieldType=rep("conditioned"))
+Dec13_W1_test_BH<-mutate(Dec13_W1_test_BH,Field=rep("BH"))
+Dec13_W1_test_BH<-mutate(Dec13_W1_test_BH,TimePer=rep("test"))
+Dec13_W1_test_BH<-mutate(Dec13_W1_test_BH,FieldType=rep("conditioned"))
+```
+
+```{r}
+Dec13_W2_accl_BH<-rbind(L154Dec13_W2_accl,L159Dec13_W2_accl)
+Dec13_W2_test_BH<-rbind(L154Dec13_W2_test,L159Dec13_W2_test)
+library(dplyr)
+Dec13_W2_accl_BH<-mutate(Dec13_W2_accl_BH,Field=rep("BH"))
+Dec13_W2_accl_BH<-mutate(Dec13_W2_accl_BH,TimePer=rep("accl"))
+Dec13_W2_accl_BH<-mutate(Dec13_W2_accl_BH,FieldType=rep("conditioned"))
+Dec13_W2_test_BH<-mutate(Dec13_W2_test_BH,Field=rep("BH"))
+Dec13_W2_test_BH<-mutate(Dec13_W2_test_BH,TimePer=rep("test"))
+Dec13_W2_test_BH<-mutate(Dec13_W2_test_BH,FieldType=rep("conditioned"))
+```
+
+```{r}
+Dec13_W1_accl_NB<-rbind(L153Dec13_W1_accl,L156Dec13_W1_accl)
+Dec13_W1_test_NB<-rbind(L153Dec13_W1_test,L156Dec13_W1_test)
+library(dplyr)
+Dec13_W1_accl_NB<-mutate(Dec13_W1_accl_NB,Field=rep("NB"))
+Dec13_W1_accl_NB<-mutate(Dec13_W1_accl_NB,TimePer=rep("accl"))
+Dec13_W1_accl_NB<-mutate(Dec13_W1_accl_NB,FieldType=rep("control"))
+Dec13_W1_test_NB<-mutate(Dec13_W1_test_NB,Field=rep("NB"))
+Dec13_W1_test_NB<-mutate(Dec13_W1_test_NB,TimePer=rep("test"))
+Dec13_W1_test_NB<-mutate(Dec13_W1_test_NB,FieldType=rep("control"))
+```
+
+```{r}
+Dec13_W2_accl_NB<-rbind(L156Dec13_W2_accl)
+Dec13_W2_test_NB<-rbind(L156Dec13_W2_test)
+```
+
+```{r}
+library(dplyr)
+Dec13_W2_accl_NB<-mutate(Dec13_W2_accl_NB,Field=rep("NB"))
+Dec13_W2_accl_NB<-mutate(Dec13_W2_accl_NB,TimePer=rep("accl"))
+Dec13_W2_accl_NB<-mutate(Dec13_W2_accl_NB,FieldType=rep("control"))
+Dec13_W2_test_NB<-mutate(Dec13_W2_test_NB,Field=rep("NB"))
+Dec13_W2_test_NB<-mutate(Dec13_W2_test_NB,TimePer=rep("test"))
+Dec13_W2_test_NB<-mutate(Dec13_W2_test_NB,FieldType=rep("control"))
+```
+
+##Master Data Sets 
+```{r}
+Dec13_W1<-rbind(Dec13_W1_accl_BH,Dec13_W1_accl_NB,Dec13_W1_test_BH,Dec13_W1_test_NB)
+Dec13_W1<-mutate(Dec13_W1,Date=rep("Dec13"))
+Dec13_W1_BH<-rbind(Dec13_W1_accl_BH,Dec13_W1_test_BH)
+Dec13_W1_NB<-rbind(Dec13_W1_accl_NB,Dec13_W1_test_NB)
+```
+
+```{r}
+Dec13_W2<-rbind(Dec13_W2_accl_BH,Dec13_W2_accl_NB,Dec13_W2_test_BH,Dec13_W2_test_NB)
+Dec13_W2<-mutate(Dec13_W2,Date=rep("Dec13"))
+Dec13_W2_BH<-rbind(Dec13_W2_accl_BH,Dec13_W2_test_BH)
+Dec13_W2_NB<-rbind(Dec13_W2_accl_NB,Dec13_W2_test_NB)
+```
+
+```{r}
+library(dplyr)
+Dec13_W1<-Dec13_W1 %>% group_by(ID,TimePer,Observer,Field,FieldType,Date) %>% summarise(TotalTimeEl=sum(TimeEl))
+Dec13_W1_test<-filter(Dec13_W1,TimePer=="test")
+```
+
+```{r}
+library(dplyr)
+Dec13_W2<-Dec13_W2 %>% group_by(ID,TimePer,Observer,Field,FieldType,Date) %>% summarise(TotalTimeEl=sum(TimeEl))
+Dec13_W2_test<-filter(Dec13_W2,TimePer=="test")
+```
+
+###############################################
+
+#Combined & Averaged Master Data Sets
+
+###Dec9
+```{r Dec9}
+library(dplyr)
+Dec9_W_Avg<-full_join(Dec9_W1,Dec9_W3,by=c("ID","Date","TimePer","Field","FieldType"),na.rm=T)
+Dec9_W_Avg<-full_join(Dec9_W_Avg,Dec9_W2,by=c("ID","Date","TimePer","Field","FieldType"),na.rm=T)
+Dec9_W_Avg[is.na(Dec9_W_Avg)]<- 0
+Dec9_W_Avg$TotalTimeEl<-as.numeric(Dec9_W_Avg$TotalTimeEl)
+Dec9_W_Avg$TotalTimeEl.x<-as.numeric(Dec9_W_Avg$TotalTimeEl.x)
+Dec9_W_Avg$TotalTimeEl.y<-as.numeric(Dec9_W_Avg$TotalTimeEl.y)
+dropnotneeded<-c("Observer.x","Observer.y","Observer")
+Dec9_W_Avg<-Dec9_W_Avg[ , !(names(Dec9_W_Avg) %in% dropnotneeded)]
+Dec9_W_Avg$Freq <- rowMeans(Dec9_W_Avg[,6:8])
+dropnotneeded<-c("TotalTimeEl.x","TotalTimeEl.y","TotalTimeEl")
+Dec9_W<-Dec9_W_Avg[ , !(names(Dec9_W_Avg) %in% dropnotneeded)] 
+#Dec9_W$Freq<-rowMeans(select(Dec9_W_Avg,starts_with("TotalTimeEl")))
+
+```
+
+```{r}
+L162<-data.frame("L162","Dec9","NB","test","control",0)
+names(L162)<-c("ID","Date","Field","TimePer","FieldType","Freq")
+Dec9_W<-rbind.data.frame(Dec9_W,L162)
+Dec9_W_Test<-filter(Dec9_W,TimePer=="test")
+```
+
+
+
+###Dec10
+```{r}
+library(dplyr)
+Dec10_W_Avg<-full_join(Dec10_W1,Dec10_W2,by=c("ID","Date","TimePer","Field","FieldType"),na.rm=T)
+Dec10_W_Avg<-full_join(Dec10_W_Avg,Dec10_W3,by=c("ID","Date","TimePer","Field","FieldType"),na.rm=T)
+Dec10_W_Avg[is.na(Dec10_W_Avg)]<- 0
+Dec10_W_Avg$TotalTimeEl<-as.numeric(Dec10_W_Avg$TotalTimeEl)
+Dec10_W_Avg$TotalTimeEl.x<-as.numeric(Dec10_W_Avg$TotalTimeEl.x)
+Dec10_W_Avg$TotalTimeEl.y<-as.numeric(Dec10_W_Avg$TotalTimeEl.y)
+dropnotneeded<-c("Observer.x","Observer.y", "Observer") #Observer
+Dec10_W_Avg<-Dec10_W_Avg[ , !(names(Dec10_W_Avg) %in% dropnotneeded)]
+Dec10_W_Avg$Freq <- rowMeans(Dec10_W_Avg[,6:8])
+dropnotneeded<-c("TotalTimeEl.x","TotalTimeEl.y","TotalTimeEl") #TotalTimeEL
+Dec10_W<-Dec10_W_Avg[ , !(names(Dec10_W_Avg) %in% dropnotneeded)] 
+
+#Dec10_W<-Dec10_W_Avg %>% group_by(ID,Date,Field,TimePer,FieldType) %>% summarize(Freq=mean(TotalTimeEl.x:TotalTimeEl.y))
+Dec10_W_Test<-filter(Dec10_W,TimePer=="test")
+```
+
+
+
+###Dec11 
+
+```{r}
+library(dplyr)
+Dec11_W_Avg<-full_join(Dec11_W1,Dec11_W2,by=c("ID","Date","TimePer","Field","FieldType"),na.rm=T)
+Dec11_W_Avg<-full_join(Dec11_W_Avg,Dec11_W3,by=c("ID","Date","TimePer","Field","FieldType"),na.rm=T)
+Dec11_W_Avg[is.na(Dec11_W_Avg)]<- 0
+Dec11_W_Avg$TotalTimeEl<-as.numeric(Dec11_W_Avg$TotalTimeEl)
+Dec11_W_Avg$TotalTimeEl.x<-as.numeric(Dec11_W_Avg$TotalTimeEl.x)
+Dec11_W_Avg$TotalTimeEl.y<-as.numeric(Dec11_W_Avg$TotalTimeEl.y)
+dropnotneeded<-c("Observer.x","Observer.y","Observer")
+Dec11_W_Avg<-Dec11_W_Avg[ , !(names(Dec11_W_Avg) %in% dropnotneeded)]
+Dec11_W_Avg$Freq <- rowMeans(Dec11_W_Avg[,6:7])
+dropnotneeded<-c("TotalTimeEl.x","TotalTimeEl.y","TotalTimeEl")
+Dec11_W<-Dec11_W_Avg[ , !(names(Dec11_W_Avg) %in% dropnotneeded)] 
+
+
+#Dec11_W <- Dec11_W_Avg %>% group_by(ID,Date,Field,TimePer,FieldType) %>% summarize(Freq=mean(TotalTimeEl.x:TotalTimeEl.y))
+
+```
+
+```{r}
+#L165<-data.frame("L165","Dec11","NB","test","control",0)
+#names(L165)<-c("ID","Date","Field","TimePer","FieldType","Freq")
+#Dec11_W<-rbind.data.frame(Dec11_W,L165)
+Dec11_W_Test<-filter(Dec11_W,TimePer=="test")
+```
+
+
+
+###Dec12
+
+
+```{r}
+library(dplyr)
+Dec12_W_Avg<-full_join(Dec12_W1,Dec12_W2,by=c("ID","Date","TimePer","Field","FieldType"),na.rm=T)
+Dec12_W_Avg<-full_join(Dec12_W_Avg,Dec12_W3,by=c("ID","Date","TimePer","Field","FieldType"),na.rm=T)
+Dec12_W_Avg[is.na(Dec12_W_Avg)]<- 0
+Dec12_W_Avg$TotalTimeEl<-as.numeric(Dec12_W_Avg$TotalTimeEl)
+Dec12_W_Avg$TotalTimeEl.x<-as.numeric(Dec12_W_Avg$TotalTimeEl.x)
+Dec12_W_Avg$TotalTimeEl.y<-as.numeric(Dec12_W_Avg$TotalTimeEl.y)
+dropnotneeded<-c("Observer.x","Observer.y","Observer")
+Dec12_W_Avg<-Dec12_W_Avg[ , !(names(Dec12_W_Avg) %in% dropnotneeded)]
+Dec12_W_Avg$Freq <- rowMeans(Dec12_W_Avg[,6:8])
+dropnotneeded<-c("TotalTimeEl.x","TotalTimeEl.y","TotalTimeEl")
+Dec12_W<-Dec12_W_Avg[ , !(names(Dec12_W_Avg) %in% dropnotneeded)] 
+
+#Dec12_W <- Dec12_W_Avg %>% group_by(ID,Date,Field,TimePer,FieldType) %>% summarize(Freq=mean(TotalTimeEl.x:TotalTimeEl.y))
+Dec12_W_Test<-filter(Dec12_W,TimePer=="test")
+```
+
+
+
+###Dec13
+
+
+```{r}
+library(dplyr)
+Dec13_W_Avg<-full_join(Dec13_W1,Dec13_W2,by=c("ID","Date","TimePer","Field","FieldType"),na.rm=T)
+Dec13_W_Avg[is.na(Dec13_W_Avg)]<- 0
+#Dec13_W_Avg$TotalTimeEl<-as.numeric(Dec13_W_Avg$TotalTimeEl)
+Dec13_W_Avg$TotalTimeEl.x<-as.numeric(Dec13_W_Avg$TotalTimeEl.x)
+Dec13_W_Avg$TotalTimeEl.y<-as.numeric(Dec13_W_Avg$TotalTimeEl.y)
+dropnotneeded<-c("Observer.x","Observer.y") #,"Observer")
+Dec13_W_Avg<-Dec13_W_Avg[ , !(names(Dec13_W_Avg) %in% dropnotneeded)]
+Dec13_W_Avg$Freq <- rowMeans(Dec13_W_Avg[,6:7])
+dropnotneeded<-c("TotalTimeEl.x","TotalTimeEl.y") #,"TotalTimeEl")
+Dec13_W<-Dec13_W_Avg[ , !(names(Dec13_W_Avg) %in% dropnotneeded)] 
+
+#Dec13_W <- Dec13_W_Avg %>% group_by(ID,Date,Field,TimePer,FieldType) %>% summarize(Freq=mean(TotalTimeEl.x:TotalTimeEl.y))
+#Dec13_W_Test<-filter(Dec13_W,TimePer=="test")
+```
+#use mutate to get average
+
+```{r}
+L153<-data.frame("L153","Dec13","NB","test","control",0)
+names(L153)<-c("ID","Date","Field","TimePer","FieldType","Freq")
+Dec13_W<-rbind.data.frame(Dec13_W,L153)
+Dec13_W_Test<-filter(Dec13_W,TimePer=="test")
+```
+
+
+###Red Group 
+```{r}
+Red_W<-rbind(Dec10_W,Dec12_W)
+Red_W_Test<-rbind(Dec10_W_Test,Dec12_W_Test)
+```
+
+
+```{r}
+t.test(Freq~FieldType,Red_W_Test)
+wilcox.test(Freq~FieldType,Red_W_Test)
+```
+
+paired t-test- variation per individual
+
+pair=
+
+difference between Conditioned & control per ID - mann-whitney
+
+##Fixes to Dec11 & Dec13
+
+```{r}
+Dec11_W_Test<-Dec11_W_Test[!(Dec11_W_Test$ID=="L153"),]
+Dec11_W_Test<-Dec11_W_Test[!(Dec11_W_Test$ID=="L154"),]
+Dec11_W_Test<-Dec11_W_Test[!(Dec11_W_Test$ID=="L156"),]
+Dec11_W_Test<-Dec11_W_Test[!(Dec11_W_Test$ID=="L159"),]
+Dec11_W_Test<-rbind(Dec11_W_Test,Dec13_W_Test)
+```
+
+###Purple Group 
+```{r}
+Purple_W<-rbind(Dec9_W,Dec11_W)
+Purple_W_Test<-rbind(Dec9_W_Test,Dec11_W_Test)
+#Purple_updated<-subset(Purple_W_Test,ID!="L167")
+```
+
+```{r}
+t.test(Freq~FieldType,Purple_W_Test)
+wilcox.test(Freq~FieldType,Purple_W_Test)
+```
+
+###Combined Purple & Red Test Periods
+```{r}
+WaddleAll<-rbind(Red_W_Test,Purple_W_Test)
+```
+
+###Comparison Tests -- SIGNIFICANT!!!!!!! 
+```{r}
+t.test(Freq~FieldType,WaddleAll)
+wilcox.test(Freq~FieldType,WaddleAll)
+```
+
+```{r}
+Dec9_W_Accl<-filter(Dec9_W,TimePer=="accl")
+Dec10_W_Accl<-filter(Dec10_W,TimePer=="accl")
+Dec11_W_Accl<-filter(Dec11_W,TimePer=="accl")
+Dec12_W_Accl<-filter(Dec12_W,TimePer=="accl")
+```
+
+```{r}
+Purple_W_Cond<-filter(Purple_W,FieldType=="conditioned")
+Purple_W_Control<-filter(Purple_W,FieldType=="control")
+Purple_W_Diff<-left_join(Purple_W_Cond,Purple_W_Control,by=c("ID","TimePer"))
+Purple_W_Diff<-mutate(Purple_W_Diff,TimeDiff=Freq.x-Freq.y)
+Purple_W_Diff<-filter(Purple_W_Diff,TimePer=="test")
+dropcols<-c("Field.x","FieldType.x","Date.x","Field.y","FieldType.y","Date.y")
+Purple_W_Diff<-Purple_W_Diff[ , !(names(Purple_W_Diff) %in% dropcols)]
+names(Purple_W_Diff)<-c("ID","TimePer","Cond","Control","TimeDiff")
+```
+
+```{r}
+Red_W_Cond<-filter(Red_W,FieldType=="conditioned")
+Red_W_Control<-filter(Red_W,FieldType=="control")
+Red_W_Diff<-left_join(Red_W_Cond,Red_W_Control,by=c("ID","TimePer"))
+Red_W_Diff<-mutate(Red_W_Diff,TimeDiff=Freq.x-Freq.y)
+Red_W_Diff<-filter(Red_W_Diff,TimePer=="test")
+dropcols<-c("Field.x","FieldType.x","Date.x","Field.y","FieldType.y","Date.y")
+Red_W_Diff<-Red_W_Diff[ , !(names(Red_W_Diff) %in% dropcols)]
+names(Red_W_Diff)<-c("ID","TimePer","Cond","Control","TimeDiff")
+```
+
+```{r}
+Total_Diff<-full_join(Purple_W_Diff,Red_W_Diff,by=c("ID","TimePer","Cond","Control","TimeDiff"))
+```
+
+```{r}
+cond<-as.vector(Total_Diff$Cond)
+control<-as.vector(Total_Diff$Control)
+wilcox.test(cond,control)
+```
+
+##bootstrap anova 
+residulas
+
+em means
+
+Kruskal wallis
+
+##unequal variances -
+```{r}
+aov<-aov(Freq~FieldType,data=WaddleAll)
+summary(aov)
+res<-bartlett.test(Freq~FieldType,data=WaddleAll)
+res
+```
+
+```{r}
+WaddleAll %>% group_by(FieldType) %>% summarise(mean=mean(Freq),sd=sd(Freq),sum=sum(Freq))
+```
+
+```{r}
+RedStats<-Red_W_Test %>% group_by(FieldType) %>% summarise(mean=mean(Freq),sd=sd(Freq),sum=sum(Freq))
+RedStats<-mutate(RedStats,Group=rep("Red"))
+PurpleStats<-Purple_W_Test %>% group_by(FieldType) %>% summarise(mean=mean(Freq),sd=sd(Freq),sum=sum(Freq))
+PurpleStats<-mutate(PurpleStats,Group=rep("Purple"))
+WaddleStats<-rbind(RedStats,PurpleStats)
+```
+
+```{r}
+library(ggplot2)
+RedPlot<-ggplot(RedStats,aes(x=FieldType,y=mean))+geom_point()
+RedPlot
+```
+
+```{r}
+WaddlebyID<-ggplot (WaddleAll,aes(x=ID,y=Freq))+geom_point(aes(color=FieldType))
+WaddlebyID
+```
+
+
+```{r}
+PurplePlot<-ggplot(PurpleStats,aes(x=FieldType,y=mean))+geom_point()
+PurplePlot
+```
+
+
+```{r}
+WaddlePlot<-ggplot(WaddleStats,aes(x=FieldType,y=mean))+geom_point()+facet_grid(~Group)
+WaddlePlot + theme_minimal()
+```
+
+boxplot with all the points inside
+
+violin plots
+
+stat_summary(fxn=mean)
+
+
