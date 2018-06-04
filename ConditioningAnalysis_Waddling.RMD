@@ -1707,7 +1707,7 @@ L157Dec12W2<-read.csv("L157_Dec12_Waddle2.csv")
 L158Dec12W2<-read.csv("L158_Dec12_Waddle2.csv")
 L160Dec12W2<-read.csv("L160_Dec12_Waddle2.csv",skip=15,header=T)
 L163Dec12W2<-read.csv("L163_Dec12_Waddle2.csv")
-L164Dec12W2<-read.csv("L164_Dec12_Waddle2.csv")
+L164Dec12W2<-read.csv("C:/Users/kkmgo/Documents/L164_Dec12_Waddle4.csv",skip=15,header=T)
 L166Dec12W2<-read.csv("L166_Dec12_Waddle2.csv")
 L168Dec12W2<-read.csv("L168_Dec12_Waddle2.csv")
 ```
@@ -2517,8 +2517,24 @@ WaddlePlot + theme_minimal()
 
 boxplot with all the points inside
 
+```{r}
+boxplot(Freq~FieldType,data=WaddleAll,main="Mean Waddling Time Per Field Type",xlab="Field Type",ylab="Mean Waddling Time (seconds)")
+stripchart(Freq~FieldType,vertical=T,data=WaddleAll,method="jitter",add=T,pch=20,col='blue')
+```
+
 violin plots
 
+```{r}
+library(ggplot2)
+ggplot(WaddleAll,aes(x=FieldType,y=Freq))+geom_violin()+stat_summary(fun.y=mean,geom="point",size=2,color="red") + geom_jitter(shape=16,position=position_jitter(.03))
+
+```
+
+
+```{r}
+library(ggplot2)
+ggplot(WaddleAll,aes(x=FieldType,y=Freq))+geom_boxplot(fill="cadetblue2",color="cadetblue4")+scale_y_continuous(name="Mean Waddling Time (seconds)",breaks=seq(0,450,50))+scale_x_discrete((name="Field Type"))+ggtitle("Mean Waddling Time Per Field Type")+geom_jitter(color="darkblue",position=position_jitter(.05))+theme_bw()
+```
 stat_summary(fxn=mean)
 
 
