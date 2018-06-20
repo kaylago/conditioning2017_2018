@@ -2605,8 +2605,7 @@ WaddlePlot + theme_minimal()
 boxplot with all the points inside
 
 ```{r}
-boxplot(Freq~FieldType,data=WaddleAll,main="Mean Waddling Time Per Field Type",xlab="Field Type",ylab="Mean Waddling Time (seconds)")
-stripchart(Freq~FieldType,vertical=T,data=WaddleAll,method="jitter",add=T,pch=20,col='blue')
+boxplot(Freq~FieldType,data=WaddleAll,main="Mean Waddling Time Per Field Type",xlab="Field Type",ylab="Mean Waddling Time (seconds)",col="lightblue")
 ```
 
 violin plots
@@ -2623,5 +2622,10 @@ library(ggplot2)
 ggplot(WaddleAll,aes(x=FieldType,y=Freq))+geom_boxplot(fill="cadetblue2",color="cadetblue4")+scale_y_continuous(name="Mean Waddling Time (seconds)",breaks=seq(0,450,50))+scale_x_discrete((name="Field Type"))+ggtitle("Mean Waddling Time Per Field Type")+geom_jitter(color="darkblue",position=position_jitter(.05))+theme_bw()
 ```
 stat_summary(fxn=mean)
+
+```{r}
+library(ggplot2)
+ggplot(WaddleAll,aes(x=FieldType,y=Freq))+stat_boxplot(geom='errorbar')+geom_boxplot(fill="cadetblue2",color="cadetblue4")+scale_y_continuous(name="Mean Waddling Time (seconds)",breaks=seq(0,450,50))+scale_x_discrete((name="Field Type"))+ggtitle("Mean Waddling Time Per Field Type")+theme_bw()+stat_summary(fun.y=mean, geom="point", shape=23, size=3, color="darkblue", fill="darkblue")
+```
 
 
