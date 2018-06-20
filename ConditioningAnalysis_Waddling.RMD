@@ -2623,9 +2623,11 @@ ggplot(WaddleAll,aes(x=FieldType,y=Freq))+geom_boxplot(fill="cadetblue2",color="
 ```
 stat_summary(fxn=mean)
 
+####use this graph
 ```{r}
 library(ggplot2)
-ggplot(WaddleAll,aes(x=FieldType,y=Freq))+stat_boxplot(geom='errorbar')+geom_boxplot(fill="cadetblue2",color="cadetblue4")+scale_y_continuous(name="Mean Waddling Time (seconds)",breaks=seq(0,450,50))+scale_x_discrete((name="Field Type"))+ggtitle("Mean Waddling Time Per Field Type")+theme_bw()+stat_summary(fun.y=mean, geom="point", shape=23, size=3, color="darkblue", fill="darkblue")
+ggplot(WaddleAll,aes(x=FieldType,y=Freq))+stat_boxplot(geom='errorbar',color="cadetblue4")+geom_boxplot(fill="cadetblue2",color="cadetblue4")+scale_y_continuous(name="Mean Waddling Time (seconds)",breaks=seq(0,450,50))+scale_x_discrete((name="Field Type"))+ggtitle("Mean Waddling Time Per Field Type")+theme_bw()+theme(plot.title = element_text(hjust = 0.5))+stat_summary(fun.y=mean, geom="point", shape=22, size=3, color="darkblue", fill="darkblue")
 ```
+
 
 
