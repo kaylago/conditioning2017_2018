@@ -2521,8 +2521,8 @@ Dec12_W_Accl<-filter(Dec12_W,TimePer=="accl")
 ```
 
 ```{r}
-Purple_W_Cond<-filter(Purple_W,FieldType=="conditioned")
-Purple_W_Control<-filter(Purple_W,FieldType=="control")
+Purple_W_Cond<-filter(Purple_W_Test,FieldType=="conditioned")
+Purple_W_Control<-filter(Purple_W_Test,FieldType=="control")
 Purple_W_Diff<-left_join(Purple_W_Cond,Purple_W_Control,by=c("ID","TimePer"))
 Purple_W_Diff<-mutate(Purple_W_Diff,TimeDiff=Freq.x-Freq.y)
 Purple_W_Diff<-filter(Purple_W_Diff,TimePer=="test")
@@ -2532,8 +2532,8 @@ names(Purple_W_Diff)<-c("ID","TimePer","Cond","Control","TimeDiff")
 ```
 
 ```{r}
-Red_W_Cond<-filter(Red_W,FieldType=="conditioned")
-Red_W_Control<-filter(Red_W,FieldType=="control")
+Red_W_Cond<-filter(Red_W_Test,FieldType=="conditioned")
+Red_W_Control<-filter(Red_W_Test,FieldType=="control")
 Red_W_Diff<-left_join(Red_W_Cond,Red_W_Control,by=c("ID","TimePer"))
 Red_W_Diff<-mutate(Red_W_Diff,TimeDiff=Freq.x-Freq.y)
 Red_W_Diff<-filter(Red_W_Diff,TimePer=="test")
@@ -2550,6 +2550,7 @@ Total_Diff<-full_join(Purple_W_Diff,Red_W_Diff,by=c("ID","TimePer","Cond","Contr
 cond<-as.vector(Total_Diff$Cond)
 control<-as.vector(Total_Diff$Control)
 wilcox.test(cond,control)
+t.test(cond,control)
 ```
 
 ##bootstrap anova 
@@ -2623,11 +2624,32 @@ ggplot(WaddleAll,aes(x=FieldType,y=Freq))+geom_boxplot(fill="cadetblue2",color="
 ```
 stat_summary(fxn=mean)
 
-####use this graph
+####use this graph - Figure 1
 ```{r}
 library(ggplot2)
-ggplot(WaddleAll,aes(x=FieldType,y=Freq))+stat_boxplot(geom='errorbar',color="cadetblue4")+geom_boxplot(fill="cadetblue2",color="cadetblue4")+scale_y_continuous(name="Mean Waddling Time (seconds)",breaks=seq(0,450,50))+scale_x_discrete((name="Field Type"))+ggtitle("Mean Waddling Time Per Field Type")+theme_bw()+theme(plot.title = element_text(hjust = 0.5))+stat_summary(fun.y=mean, geom="point", shape=22, size=3, color="darkblue", fill="darkblue")
+ggplot(WaddleAll,aes(x=FieldType,y=Freq))+stat_boxplot(geom='errorbar',color="navyblue")+geom_boxplot(fill="cadetblue2",color="navyblue")+scale_y_continuous(name="Mean Waddling Time (seconds)",breaks=seq(0,450,50))+scale_x_discrete((name="Field Type"))+ggtitle("Mean Waddling Time Per Field Type")+theme_bw()+theme(plot.title = element_text(hjust = 0.5))+stat_summary(fun.y=mean, geom="point", shape=22, size=3, color="navyblue", fill="navyblue")
 ```
+
+###Figure 2
+```{r}
+library(ggplot2)
+ggplot(Red_W_Test,aes(x=FieldType,y=Freq))+stat_boxplot(geom='errorbar',color="gray1")+geom_boxplot(fill="red2",color="gray1")+scale_y_continuous(name="Mean Waddling Time (seconds)",breaks=seq(0,450,50))+scale_x_discrete((name="Field Type"))+ggtitle("Mean Waddling Time Per Field Type \nNew Brunswick Group")+theme_bw()+theme(plot.title = element_text(hjust = 0.5))+stat_summary(fun.y=mean, geom="point", shape=22, size=3, color="gray1", fill="gray1")
+```
+
+
+```{r}
+library(ggplot2)
+ggplot(Purple_W_Test,aes(x=FieldType,y=Freq))+stat_boxplot(geom='errorbar',color="gray1")+geom_boxplot(fill="darkorchid3",color="gray1")+scale_y_continuous(name="Mean Waddling Time (seconds)",breaks=seq(0,450,50))+scale_x_discrete((name="Field Type"))+ggtitle("Mean Waddling Time Per Field Type \nBahamas Group")+theme_bw()+theme(plot.title = element_text(hjust = 0.5))+stat_summary(fun.y=mean, geom="point", shape=22, size=3, color="gray1", fill="gray1")
+```
+
+
+
+
+
+
+
+
+
 
 
 
