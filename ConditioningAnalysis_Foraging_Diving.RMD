@@ -1,0 +1,1255 @@
+---
+title: "Conditioning_Foraging&DivingAnalysis"
+author: "KMG"
+date: "April 15, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+rm(list=ls())
+setwd("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles")
+getwd()
+```
+
+#December 9 Foraging 
+
+##Read in files
+```{r}
+L153Dec9_f1<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L153_Dec9_Foraging.csv",skip=15,header=T)
+#L154Dec9_f1<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L154_Dec9_Foraging.csv",skip=15,header=T)
+L156Dec9_f1<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L156_Dec9_Foraging.csv",skip=15,header=T)
+L159Dec9_f1<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L159_Dec9_Foraging.csv",skip=15,header=T)
+L161Dec9_f1<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L161_Dec9_Foraging.csv",skip=15,header=T)
+L162Dec9_f1<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L162_Dec9_Foraging.csv",skip=15,header=T)
+#L165Dec9_f1<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L165_Dec9_Foraging.csv",skip=15,header=T)
+L167Dec9_f1<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L167_Dec9_Foraging.csv",skip=15,header=T)
+```
+
+
+```{r}
+#library(dplyr)
+#L153Dec9W<-L153Dec9W %>% mutate(diff=Time-lag(Time,default=first(Time)))
+
+L153Dec9_f1$ID<-rep(NA)
+L153Dec9_f1$ID<-L153Dec9_f1$ID[is.na(L153Dec9_f1$ID)]<- "L153"
+#L154Dec9_f1$ID<-rep(NA)
+#L154Dec9_f1$ID<-L154Dec9_f1$ID[is.na(L154Dec9_f1$ID)]<- "L154"
+L156Dec9_f1$ID<-rep(NA)
+L156Dec9_f1$ID<-L156Dec9_f1$ID[is.na(L156Dec9_f1$ID)]<- "L156"
+L159Dec9_f1$ID<-rep(NA)
+L159Dec9_f1$ID<-L159Dec9_f1$ID[is.na(L159Dec9_f1$ID)]<- "L159"
+L161Dec9_f1$ID<-rep(NA)
+L161Dec9_f1$ID<-L161Dec9_f1$ID[is.na(L161Dec9_f1$ID)]<- "L161"
+L162Dec9_f1$ID<-rep(NA)
+L162Dec9_f1$ID<-L162Dec9_f1$ID[is.na(L162Dec9_f1$ID)]<- "L162"
+#L165Dec9_f1$ID<-rep(NA)
+#L165Dec9_f1$ID<-L165Dec9_f1$ID[is.na(L165Dec9_f1$ID)]<- "L165"
+L167Dec9_f1$ID<-rep(NA)
+L167Dec9_f1$ID<-L167Dec9_f1$ID[is.na(L167Dec9_f1$ID)]<- "L167"
+```
+
+##Change Names in Files
+```{r}
+library(plyr)
+dfs_Dec9_f1<-list(L153Dec9_f1,L156Dec9_f1,L159Dec9_f1,L161Dec9_f1,L162Dec9_f1,L167Dec9_f1)
+
+drops<-c("Total.length","FPS","Subject","Comment","Status")
+
+DropFunction<- function(x) {
+  x<-x[ , !(names(x) %in% drops)]
+  return(x)
+}
+
+
+Dec9_foraging = ldply(dfs_Dec9_f1,DropFunction)
+
+names(Dec9_foraging)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
+  
+```
+
+```{r}
+library(dplyr)
+Dec9_dives1<-subset(Dec9_foraging,Behavior=="dive")
+Dec9_dives1$Dives<-ifelse(Dec9_dives1$Start_Stop=="POINT",1,0)
+Dec9_foraging1<-subset(Dec9_foraging,Behavior!="dive")
+```
+
+```{r}
+Dec9_StartF1<-subset(Dec9_foraging1,Start_Stop== "START")
+names(Dec9_StartF1)<- c("StartTime","Observer", "Behavior","Start","ID")
+Dec9_StopF1<-subset(Dec9_foraging1,Start_Stop=="STOP")
+names(Dec9_StopF1)<-c("StopTime","Observer", "Behavior","Stop","ID")
+```
+
+
+```{r}
+Dec9_foraging1<-cbind(Dec9_StartF1,Dec9_StopF1)
+names(Dec9_foraging1)<-c("StartTime","Observer", "Behavior","Start","ID","StopTime","Obs.2", "Beh.2","Stop","ID.2")
+drops_doubles<-c("Start","Obs.2", "Beh.2","Stop","ID.2")
+Dec9_foraging1<-Dec9_foraging1[ , !(names(Dec9_foraging1) %in% drops_doubles)]
+Dec9_foraging1<-mutate(Dec9_foraging1,TimeEl=StopTime-StartTime)
+Dec9_foraging1<-mutate(Dec9_foraging1,Minutes=StartTime/60)
+Dec9_foraging1<-mutate(Dec9_foraging1,Date=rep("Dec9"))
+Dec9_dives1<-mutate(Dec9_dives1,Date=rep("Dec9"))
+Dec9_dives1<-mutate(Dec9_dives1,Minutes=Time/60)
+```
+
+
+```{r}
+library(dplyr)
+L153Dec9_f1 <-filter(Dec9_foraging1,ID=="L153")
+L153Dec9_d1 <-filter(Dec9_dives1,ID=="L153")
+#L153Dec9_f1$Observer<-rep(NA)
+#L153Dec9_f1$Observer<-L153Dec9_f1$Observer[is.na(L153Dec9_f1$Observer)]<- "KaG"
+
+L154Dec9_f1<-filter(Dec9_foraging1,ID=="L154")
+L154Dec9_d1 <-filter(Dec9_dives1,ID=="L154")
+#L154Dec9_W1$Observer<-rep(NA)
+#L154Dec9_W1$Observer<-L154Dec9_W1$Observer[is.na(L154Dec9_W1$Observer)]<- "KaG"
+
+L156Dec9_f1<-filter(Dec9_foraging1,ID=="L156")
+L156Dec9_d1 <-filter(Dec9_dives1,ID=="L156")
+#L156Dec9_W1$Observer<-rep(NA)
+#L156Dec9_W1$Observer<-L156Dec9_W1$Observer[is.na(L156Dec9_W1$Observer)]<- "AnJ"
+
+L159Dec9_f1<-filter(Dec9_foraging1,ID=="L159")
+L159Dec9_d1 <-filter(Dec9_dives1,ID=="L159")
+#L159Dec9_W1$Observer<-rep(NA)
+#L159Dec9_W1$Observer<-L159Dec9_W1$Observer[is.na(L159Dec9_W1$Observer)]<- "AnJ"
+
+L161Dec9_f1<-filter(Dec9_foraging1,ID=="L161")
+L161Dec9_d1 <-filter(Dec9_dives1,ID=="L161")
+#L161Dec9_W1$Observer<-rep(NA)
+#L161Dec9_W1$Observer<-L161Dec9_W1$Observer[is.na(L161Dec9_W1$Observer)]<- "NiI"
+
+L162Dec9_f1<-filter(Dec9_foraging1,ID=="L162")
+L162Dec9_d1 <-filter(Dec9_dives1,ID=="L162")
+
+L165Dec9_f1<-filter(Dec9_foraging1,ID=="L165")
+L165Dec9_d1 <-filter(Dec9_dives1,ID=="L165")
+#L165Dec9_W1$Observer<-rep(NA)
+#L165Dec9_W1$Observer<-L165Dec9_W1$Observer[is.na(L165Dec9_W1$Observer)]<- "NiI"
+
+L167Dec9_f1<-filter(Dec9_foraging1,ID=="L167")
+L167Dec9_d1 <-filter(Dec9_dives1,ID=="L167")
+#L167Dec9_W1$Observer<-rep(NA)
+#167Dec9_W1$Observer<-L167Dec9_W1$Observer[is.na(L167Dec9_W1$Observer)]<- "MjH"
+```
+
+```{r}
+library(dplyr)
+L153Dec9_f1_accl<-filter(L153Dec9_f1,Minutes<=21)
+L153Dec9_f1_test<-filter(L153Dec9_f1,Minutes>21 & Minutes<=41)
+#L154Dec9_f1_accl<-filter(L154Dec9_f1,Minutes<=22)
+#L154Dec9_f1_test<-filter(L154Dec9_f1,Minutes>22 & Minutes<=42)
+L156Dec9_f1_accl<-filter(L156Dec9_f1,Minutes<=21)
+L156Dec9_f1_test<-filter(L156Dec9_f1,Minutes>21 & Minutes<=41)
+L159Dec9_f1_accl<-filter(L159Dec9_f1,Minutes<=21)
+L159Dec9_f1_test<-filter(L159Dec9_f1,Minutes>21 & Minutes<=41)
+L161Dec9_f1_accl<-filter(L161Dec9_f1,Minutes<=21)
+L161Dec9_f1_test<-filter(L161Dec9_f1,Minutes>21 & Minutes<=41)
+L162Dec9_f1_accl<-filter(L162Dec9_f1,Minutes<=21)
+L162Dec9_f1_test<-filter(L162Dec9_f1,Minutes>21 & Minutes<=41)
+#L165Dec9_f1_accl<-filter(L165Dec9_f1,Minutes<=22)
+#L165Dec9_f1_test<-filter(L165Dec9_f1,Minutes>22 & Minutes<=41)
+L167Dec9_f1_accl<-filter(L167Dec9_f1,Minutes<=21)
+L167Dec9_f1_test<-filter(L167Dec9_f1,Minutes>21 & Minutes<=41)
+```
+
+
+```{r}
+library(dplyr)
+L153Dec9_d1_accl<-filter(L153Dec9_d1,Minutes<=21)
+L153Dec9_d1_test<-filter(L153Dec9_d1,Minutes>21 & Minutes<=41)
+#L154Dec9_d1_accl<-filter(L154Dec9_d1,Minutes<=22)
+#L154Dec9_d1_test<-filter(L154Dec9_d1,Minutes>22 & Minutes<=42)
+L156Dec9_d1_accl<-filter(L156Dec9_d1,Minutes<=21)
+L156Dec9_d1_test<-filter(L156Dec9_d1,Minutes>21 & Minutes<=41)
+L159Dec9_d1_accl<-filter(L159Dec9_d1,Minutes<=21)
+L159Dec9_d1_test<-filter(L159Dec9_d1,Minutes>21 & Minutes<=41)
+L161Dec9_d1_accl<-filter(L161Dec9_d1,Minutes<=21)
+L161Dec9_d1_test<-filter(L161Dec9_d1,Minutes>21 & Minutes<=41)
+L162Dec9_d1_accl<-filter(L162Dec9_d1,Minutes<=21)
+L162Dec9_d1_test<-filter(L162Dec9_d1,Minutes>21 & Minutes<=41)
+#L165Dec9_d1_accl<-filter(L165Dec9_d1,Minutes<=22)
+#L165Dec9_d1_test<-filter(L165Dec9_d1,Minutes>22 & Minutes<=41)
+L167Dec9_d1_accl<-filter(L167Dec9_d1,Minutes<=21)
+L167Dec9_d1_test<-filter(L167Dec9_d1,Minutes>21 & Minutes<=41)
+```
+
+```{r}
+library(dplyr)
+Dec9_f1_accl_BH<-rbind(L153Dec9_f1_accl,L156Dec9_f1_accl,L161Dec9_f1_accl)
+Dec9_f1_test_BH<-rbind(L153Dec9_f1_test,L156Dec9_f1_test,L161Dec9_f1_test)
+library(dplyr)
+Dec9_f1_accl_BH<-mutate(Dec9_f1_accl_BH,Field=rep("BH"))
+Dec9_f1_accl_BH<-mutate(Dec9_f1_accl_BH,TimePer=rep("accl"))
+Dec9_f1_accl_BH<-mutate(Dec9_f1_accl_BH,FieldType=rep("conditioned"))
+Dec9_f1_test_BH<-mutate(Dec9_f1_test_BH,Field=rep("BH"))
+Dec9_f1_test_BH<-mutate(Dec9_f1_test_BH,TimePer=rep("test"))
+Dec9_f1_test_BH<-mutate(Dec9_f1_test_BH,FieldType=rep("conditioned"))
+```
+
+```{r}
+library(dplyr)
+Dec9_d1_accl_BH<-rbind(L153Dec9_d1_accl,L156Dec9_d1_accl,L161Dec9_d1_accl)
+Dec9_d1_test_BH<-rbind(L153Dec9_d1_test,L156Dec9_d1_test,L161Dec9_d1_test)
+library(dplyr)
+Dec9_d1_accl_BH<-mutate(Dec9_d1_accl_BH,Field=rep("BH"))
+Dec9_d1_accl_BH<-mutate(Dec9_d1_accl_BH,TimePer=rep("accl"))
+Dec9_d1_accl_BH<-mutate(Dec9_d1_accl_BH,FieldType=rep("conditioned"))
+Dec9_d1_test_BH<-mutate(Dec9_d1_test_BH,Field=rep("BH"))
+Dec9_d1_test_BH<-mutate(Dec9_d1_test_BH,TimePer=rep("test"))
+Dec9_d1_test_BH<-mutate(Dec9_d1_test_BH,FieldType=rep("conditioned"))
+```
+
+```{r}
+library(dplyr)
+Dec9_f1_accl_NB<-rbind(L159Dec9_f1_accl, L162Dec9_f1_accl, L167Dec9_f1_accl)
+Dec9_f1_test_NB<-rbind(L159Dec9_f1_test, L162Dec9_f1_test, L167Dec9_f1_test)
+library(dplyr)
+Dec9_f1_accl_NB<-mutate(Dec9_f1_accl_NB,Field=rep("NB"))
+Dec9_f1_accl_NB<-mutate(Dec9_f1_accl_NB,TimePer=rep("accl"))
+Dec9_f1_accl_NB<-mutate(Dec9_f1_accl_NB,FieldType=rep("control"))
+Dec9_f1_test_NB<-mutate(Dec9_f1_test_NB,Field=rep("NB"))
+Dec9_f1_test_NB<-mutate(Dec9_f1_test_NB,TimePer=rep("test"))
+Dec9_f1_test_NB<-mutate(Dec9_f1_test_NB,FieldType=rep("control"))
+```
+
+
+```{r}
+library(dplyr)
+Dec9_d1_accl_NB<-rbind(L159Dec9_d1_accl,L162Dec9_d1_accl, L167Dec9_d1_accl)
+Dec9_d1_test_NB<-rbind(L159Dec9_d1_test,L162Dec9_d1_test, L167Dec9_d1_test)
+library(dplyr)
+Dec9_d1_accl_NB<-mutate(Dec9_d1_accl_NB,Field=rep("NB"))
+Dec9_d1_accl_NB<-mutate(Dec9_d1_accl_NB,TimePer=rep("accl"))
+Dec9_d1_accl_NB<-mutate(Dec9_d1_accl_NB,FieldType=rep("control"))
+Dec9_d1_test_NB<-mutate(Dec9_d1_test_NB,Field=rep("NB"))
+Dec9_d1_test_NB<-mutate(Dec9_d1_test_NB,TimePer=rep("test"))
+Dec9_d1_test_NB<-mutate(Dec9_d1_test_NB,FieldType=rep("control"))
+```
+
+##Master Data Sets
+```{r}
+library(dplyr)
+Dec9_f1<-rbind(Dec9_f1_accl_BH,Dec9_f1_accl_NB,Dec9_f1_test_BH,Dec9_f1_test_NB)
+Dec9_f1<-mutate(Dec9_f1,Date=rep("Dec9"))
+```
+
+```{r}
+library(dplyr)
+Dec9_d1<-rbind(Dec9_d1_accl_BH,Dec9_d1_accl_NB,Dec9_d1_test_BH,Dec9_d1_test_NB)
+Dec9_d1<-mutate(Dec9_d1,Date=rep("Dec9"))
+```
+
+```{r}
+library(dplyr)
+Dec9_f1<-Dec9_f1 %>% group_by(ID,TimePer,Observer,Field,FieldType,Date) %>% summarise(TotalTimeEl=sum(TimeEl)) 
+Dec9_f1_test<-filter(Dec9_f1,TimePer=="test")
+```
+
+```{r}
+library(dplyr)
+Dec9_d1<-Dec9_d1 %>% group_by(ID,TimePer,Observer,Field,FieldType,Date) %>% summarise(Dives=sum(Dives)) 
+Dec9_d1_test<-filter(Dec9_d1,TimePer=="test")
+```
+
+
+#December 9 Foraging Analysis 2
+
+
+##Read in files
+```{r}
+L153Dec9_f2<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L153_Dec9_Foraging2.csv",skip=15,header=T)
+#L154Dec9_f2<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L154_Dec9_Foraging2.csv",skip=15,header=T)
+L156Dec9_f2<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L156_Dec9_Foraging2.csv",skip=15,header=T)
+L159Dec9_f2<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L159_Dec9_Foraging2.csv",skip=15,header=T)
+L161Dec9_f2<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L161_Dec9_Foraging2.csv",skip=15,header=T)
+L162Dec9_f2<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L162_Dec9_Foraging2.csv",skip=15,header=T)
+#L165Dec9_f2<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L165_Dec9_Foraging2.csv",skip=15,header=T)
+L167Dec9_f2<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L167_Dec9_Foraging2.csv",skip=15,header=T)
+```
+
+
+```{r}
+#library(dplyr)
+#L153Dec9W<-L153Dec9W %>% mutate(diff=Time-lag(Time,default=first(Time)))
+
+L153Dec9_f2$ID<-rep(NA)
+L153Dec9_f2$ID<-L153Dec9_f2$ID[is.na(L153Dec9_f2$ID)]<- "L153"
+#L154Dec9_f1$ID<-rep(NA)
+#L154Dec9_f1$ID<-L154Dec9_f1$ID[is.na(L154Dec9_f1$ID)]<- "L154"
+L156Dec9_f2$ID<-rep(NA)
+L156Dec9_f2$ID<-L156Dec9_f2$ID[is.na(L156Dec9_f2$ID)]<- "L156"
+L159Dec9_f2$ID<-rep(NA)
+L159Dec9_f2$ID<-L159Dec9_f2$ID[is.na(L159Dec9_f2$ID)]<- "L159"
+L161Dec9_f2$ID<-rep(NA)
+L161Dec9_f2$ID<-L161Dec9_f2$ID[is.na(L161Dec9_f2$ID)]<- "L161"
+L162Dec9_f2$ID<-rep(NA)
+L162Dec9_f2$ID<-L162Dec9_f2$ID[is.na(L162Dec9_f2$ID)]<- "L162"
+#L165Dec9_f1$ID<-rep(NA)
+#L165Dec9_f1$ID<-L165Dec9_f1$ID[is.na(L165Dec9_f1$ID)]<- "L165"
+L167Dec9_f2$ID<-rep(NA)
+L167Dec9_f2$ID<-L167Dec9_f2$ID[is.na(L167Dec9_f2$ID)]<- "L167"
+```
+
+##Change Names in Files
+```{r}
+library(plyr)
+dfs_Dec9_f2<-list(L153Dec9_f2,L156Dec9_f2,L159Dec9_f2,L161Dec9_f2,L162Dec9_f2,L167Dec9_f2)
+
+drops<-c("Total.length","FPS","Subject","Comment","Status")
+
+DropFunction<- function(x) {
+  x<-x[ , !(names(x) %in% drops)]
+  return(x)
+}
+
+
+Dec9_foraging2 = ldply(dfs_Dec9_f2,DropFunction)
+
+names(Dec9_foraging2)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
+  
+```
+
+```{r}
+library(dplyr)
+Dec9_dives2<-subset(Dec9_foraging2,Behavior=="dive")
+Dec9_dives2$Dives<-ifelse(Dec9_dives2$Start_Stop=="POINT",1,0)
+Dec9_foraging2<-subset(Dec9_foraging2,Behavior!="dive")
+```
+
+```{r}
+Dec9_StartF2<-subset(Dec9_foraging2,Start_Stop== "START")
+names(Dec9_StartF2)<- c("StartTime","Observer", "Behavior","Start","ID")
+Dec9_StopF2<-subset(Dec9_foraging2,Start_Stop=="STOP")
+names(Dec9_StopF2)<-c("StopTime","Observer", "Behavior","Stop","ID")
+```
+
+
+```{r}
+Dec9_foraging2<-cbind(Dec9_StartF2,Dec9_StopF2)
+names(Dec9_foraging2)<-c("StartTime","Observer", "Behavior","Start","ID","StopTime","Obs.2", "Beh.2","Stop","ID.2")
+drops_doubles<-c("Start","Obs.2", "Beh.2","Stop","ID.2")
+Dec9_foraging2<-Dec9_foraging2[ , !(names(Dec9_foraging2) %in% drops_doubles)]
+Dec9_foraging2<-mutate(Dec9_foraging2,TimeEl=StopTime-StartTime)
+Dec9_foraging2<-mutate(Dec9_foraging2,Minutes=StartTime/60)
+Dec9_foraging2<-mutate(Dec9_foraging2,Date=rep("Dec9"))
+Dec9_dives2<-mutate(Dec9_dives2,Date=rep("Dec9"))
+Dec9_dives2<-mutate(Dec9_dives2,Minutes=Time/60)
+```
+
+
+```{r}
+library(dplyr)
+L153Dec9_f2 <-filter(Dec9_foraging2,ID=="L153")
+L153Dec9_d2 <-filter(Dec9_dives2,ID=="L153")
+#L153Dec9_f1$Observer<-rep(NA)
+#L153Dec9_f1$Observer<-L153Dec9_f1$Observer[is.na(L153Dec9_f1$Observer)]<- "KaG"
+
+L154Dec9_f2<-filter(Dec9_foraging2,ID=="L154")
+L154Dec9_d2 <-filter(Dec9_dives2,ID=="L154")
+#L154Dec9_W1$Observer<-rep(NA)
+#L154Dec9_W1$Observer<-L154Dec9_W1$Observer[is.na(L154Dec9_W1$Observer)]<- "KaG"
+
+L156Dec9_f2<-filter(Dec9_foraging2,ID=="L156")
+L156Dec9_d2 <-filter(Dec9_dives2,ID=="L156")
+#L156Dec9_W1$Observer<-rep(NA)
+#L156Dec9_W1$Observer<-L156Dec9_W1$Observer[is.na(L156Dec9_W1$Observer)]<- "AnJ"
+
+L159Dec9_f2<-filter(Dec9_foraging2,ID=="L159")
+L159Dec9_d2 <-filter(Dec9_dives2,ID=="L159")
+#L159Dec9_W1$Observer<-rep(NA)
+#L159Dec9_W1$Observer<-L159Dec9_W1$Observer[is.na(L159Dec9_W1$Observer)]<- "AnJ"
+
+L161Dec9_f2<-filter(Dec9_foraging2,ID=="L161")
+L161Dec9_d2 <-filter(Dec9_dives2,ID=="L161")
+#L161Dec9_W1$Observer<-rep(NA)
+#L161Dec9_W1$Observer<-L161Dec9_W1$Observer[is.na(L161Dec9_W1$Observer)]<- "NiI"
+
+L162Dec9_f2<-filter(Dec9_foraging2,ID=="L162")
+L162Dec9_d2 <-filter(Dec9_dives2,ID=="L162")
+
+L165Dec9_f2<-filter(Dec9_foraging2,ID=="L165")
+L165Dec9_d2 <-filter(Dec9_dives2,ID=="L165")
+#L165Dec9_W1$Observer<-rep(NA)
+#L165Dec9_W1$Observer<-L165Dec9_W1$Observer[is.na(L165Dec9_W1$Observer)]<- "NiI"
+
+L167Dec9_f2<-filter(Dec9_foraging2,ID=="L167")
+L167Dec9_d2 <-filter(Dec9_dives2,ID=="L167")
+#L167Dec9_W1$Observer<-rep(NA)
+#167Dec9_W1$Observer<-L167Dec9_W1$Observer[is.na(L167Dec9_W1$Observer)]<- "MjH"
+```
+
+```{r}
+library(dplyr)
+L153Dec9_f2_accl<-filter(L153Dec9_f2,Minutes<=21)
+L153Dec9_f2_test<-filter(L153Dec9_f2,Minutes>21 & Minutes<=41)
+#L154Dec9_f1_accl<-filter(L154Dec9_f1,Minutes<=22)
+#L154Dec9_f1_test<-filter(L154Dec9_f1,Minutes>22 & Minutes<=42)
+L156Dec9_f2_accl<-filter(L156Dec9_f2,Minutes<=21)
+L156Dec9_f2_test<-filter(L156Dec9_f2,Minutes>21 & Minutes<=41)
+L159Dec9_f2_accl<-filter(L159Dec9_f2,Minutes<=21)
+L159Dec9_f2_test<-filter(L159Dec9_f2,Minutes>21 & Minutes<=41)
+L161Dec9_f2_accl<-filter(L161Dec9_f2,Minutes<=21)
+L161Dec9_f2_test<-filter(L161Dec9_f2,Minutes>21 & Minutes<=41)
+L162Dec9_f2_accl<-filter(L162Dec9_f2,Minutes<=21)
+L162Dec9_f2_test<-filter(L162Dec9_f2,Minutes>21 & Minutes<=41)
+#L165Dec9_f1_accl<-filter(L165Dec9_fL162Dec9_f21,Minutes<=22)
+#L165Dec9_f1_test<-filter(L165Dec9_f1,Minutes>22 & Minutes<=41)
+L167Dec9_f2_accl<-filter(L167Dec9_f2,Minutes<=21)
+L167Dec9_f2_test<-filter(L167Dec9_f2,Minutes>21 & Minutes<=41)
+```
+
+
+```{r}
+library(dplyr)
+L153Dec9_d2_accl<-filter(L153Dec9_d2,Minutes<=21)
+L153Dec9_d2_test<-filter(L153Dec9_d2,Minutes>21 & Minutes<=41)
+#L154Dec9_d1_accl<-filter(L154Dec9_d1,Minutes<=22)
+#L154Dec9_d1_test<-filter(L154Dec9_d1,Minutes>22 & Minutes<=42)
+L156Dec9_d2_accl<-filter(L156Dec9_d2,Minutes<=21)
+L156Dec9_d2_test<-filter(L156Dec9_d2,Minutes>21 & Minutes<=41)
+L159Dec9_d2_accl<-filter(L159Dec9_d2,Minutes<=21)
+L159Dec9_d2_test<-filter(L159Dec9_d2,Minutes>21 & Minutes<=41)
+L161Dec9_d2_accl<-filter(L161Dec9_d2,Minutes<=21)
+L161Dec9_d2_test<-filter(L161Dec9_d2,Minutes>21 & Minutes<=41)
+L162Dec9_d2_accl<-filter(L162Dec9_d2,Minutes<=21)
+L162Dec9_d2_test<-filter(L162Dec9_d2,Minutes>21 & Minutes<=41)
+#L165Dec9_d1_accl<-filter(L165Dec9_dL162Dec9_d21,Minutes<=22)
+#L165Dec9_d1_test<-filter(L165Dec9_d1,Minutes>22 & Minutes<=41)
+L167Dec9_d2_accl<-filter(L167Dec9_d2,Minutes<=21)
+L167Dec9_d2_test<-filter(L167Dec9_d2,Minutes>21 & Minutes<=41)
+```
+
+```{r}
+library(dplyr)
+Dec9_f2_accl_BH<-rbind(L153Dec9_f2_accl,L156Dec9_f2_accl,L161Dec9_f2_accl)
+Dec9_f2_test_BH<-rbind(L153Dec9_f2_test,L156Dec9_f2_test,L161Dec9_f2_test)
+library(dplyr)
+Dec9_f2_accl_BH<-mutate(Dec9_f2_accl_BH,Field=rep("BH"))
+Dec9_f2_accl_BH<-mutate(Dec9_f2_accl_BH,TimePer=rep("accl"))
+Dec9_f2_accl_BH<-mutate(Dec9_f2_accl_BH,FieldType=rep("conditioned"))
+Dec9_f2_test_BH<-mutate(Dec9_f2_test_BH,Field=rep("BH"))
+Dec9_f2_test_BH<-mutate(Dec9_f2_test_BH,TimePer=rep("test"))
+Dec9_f2_test_BH<-mutate(Dec9_f2_test_BH,FieldType=rep("conditioned"))
+```
+
+```{r}
+library(dplyr)
+Dec9_d2_accl_BH<-rbind(L153Dec9_d2_accl,L156Dec9_d2_accl,L161Dec9_d2_accl)
+Dec9_d2_test_BH<-rbind(L153Dec9_d2_test,L156Dec9_d2_test,L161Dec9_d2_test)
+library(dplyr)
+Dec9_d2_accl_BH<-mutate(Dec9_d2_accl_BH,Field=rep("BH"))
+Dec9_d2_accl_BH<-mutate(Dec9_d2_accl_BH,TimePer=rep("accl"))
+Dec9_d2_accl_BH<-mutate(Dec9_d2_accl_BH,FieldType=rep("conditioned"))
+Dec9_d2_test_BH<-mutate(Dec9_d2_test_BH,Field=rep("BH"))
+Dec9_d2_test_BH<-mutate(Dec9_d2_test_BH,TimePer=rep("test"))
+Dec9_d2_test_BH<-mutate(Dec9_d2_test_BH,FieldType=rep("conditioned"))
+```
+
+```{r}
+library(dplyr)
+Dec9_f2_accl_NB<-rbind(L159Dec9_f2_accl, L162Dec9_f2_accl, L167Dec9_f2_accl)
+Dec9_f2_test_NB<-rbind(L159Dec9_f2_test, L162Dec9_f2_test, L167Dec9_f2_test)
+library(dplyr)
+Dec9_f2_accl_NB<-mutate(Dec9_f2_accl_NB,Field=rep("NB"))
+Dec9_f2_accl_NB<-mutate(Dec9_f2_accl_NB,TimePer=rep("accl"))
+Dec9_f2_accl_NB<-mutate(Dec9_f2_accl_NB,FieldType=rep("control"))
+Dec9_f2_test_NB<-mutate(Dec9_f2_test_NB,Field=rep("NB"))
+Dec9_f2_test_NB<-mutate(Dec9_f2_test_NB,TimePer=rep("test"))
+Dec9_f2_test_NB<-mutate(Dec9_f2_test_NB,FieldType=rep("control"))
+```
+
+
+```{r}
+library(dplyr)
+Dec9_d2_accl_NB<-rbind(L159Dec9_d2_accl,L162Dec9_d2_accl, L167Dec9_d2_accl)
+Dec9_d2_test_NB<-rbind(L159Dec9_d2_test,L162Dec9_d2_test, L167Dec9_d2_test)
+library(dplyr)
+Dec9_d2_accl_NB<-mutate(Dec9_d2_accl_NB,Field=rep("NB"))
+Dec9_d2_accl_NB<-mutate(Dec9_d2_accl_NB,TimePer=rep("accl"))
+Dec9_d2_accl_NB<-mutate(Dec9_d2_accl_NB,FieldType=rep("control"))
+Dec9_d2_test_NB<-mutate(Dec9_d2_test_NB,Field=rep("NB"))
+Dec9_d2_test_NB<-mutate(Dec9_d2_test_NB,TimePer=rep("test"))
+Dec9_d2_test_NB<-mutate(Dec9_d2_test_NB,FieldType=rep("control"))
+```
+
+##Master Data Sets
+```{r}
+library(dplyr)
+Dec9_f2<-rbind(Dec9_f2_accl_BH,Dec9_f2_accl_NB,Dec9_f2_test_BH,Dec9_f2_test_NB)
+Dec9_f2<-mutate(Dec9_f2,Date=rep("Dec9"))
+```
+
+```{r}
+library(dplyr)
+Dec9_d2<-rbind(Dec9_d2_accl_BH,Dec9_d2_accl_NB,Dec9_d2_test_BH,Dec9_d2_test_NB)
+Dec9_d2<-mutate(Dec9_d2,Date=rep("Dec9"))
+```
+
+```{r}
+library(dplyr)
+Dec9_f2<-Dec9_f2 %>% group_by(ID,TimePer,Observer,Field,FieldType,Date) %>% summarise(TotalTimeEl=sum(TimeEl)) 
+Dec9_f2_test<-filter(Dec9_f2,TimePer=="test")
+```
+
+```{r}
+library(dplyr)
+Dec9_d2<-Dec9_d2 %>% group_by(ID,TimePer,Observer,Field,FieldType,Date) %>% summarise(Dives=sum(Dives)) 
+Dec9_d2_test<-filter(Dec9_d2,TimePer=="test")
+```
+
+
+#December 10 Foraging Analysis
+
+##Read in files
+```{r}
+L155Dec10_f1<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L155_Dec10_Foraging.csv",skip=15,header=T)
+L157Dec10_f1<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L157_Dec10_Foraging.csv",skip=15,header=T)
+L158Dec10_f1<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L158_Dec10_Foraging.csv",skip=15,header=T)
+L160Dec10_f1<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L150_Dec10_Foraging.csv",skip=15,header=T)
+L163Dec10_f1<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L163_Dec10_Foraging.csv",skip=15,header=T)
+L164Dec10_f1<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L164_Dec10_Foraging.csv",skip=15,header=T)
+L166Dec10_f1<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L166_Dec10_Foraging.csv",skip=15,header=T)
+L168Dec10_f1<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L168_Dec10_Foraging.csv",skip=15,header=T)
+```
+
+
+```{r}
+#library(dplyr)
+#L153Dec9W<-L153Dec9W %>% mutate(diff=Time-lag(Time,default=first(Time)))
+
+L155Dec10_f1$ID<-rep(NA)
+L155Dec10_f1$ID<-L155Dec10_f1$ID[is.na(L155Dec10_f1$ID)]<- "L155"
+L157Dec10_f1$ID<-rep(NA)
+L157Dec10_f1$ID<-L157Dec10_f1$ID[is.na(L157Dec10_f1$ID)]<- "L157"
+L158Dec10_f1$ID<-rep(NA)
+L158Dec10_f1$ID<-L158Dec10_f1$ID[is.na(L158Dec10_f1$ID)]<- "L158"
+L160Dec10_f1$ID<-rep(NA)
+L160Dec10_f1$ID<-L160Dec10_f1$ID[is.na(L160Dec10_f1$ID)]<- "L160"
+L163Dec10_f1$ID<-rep(NA)
+L163Dec10_f1$ID<-L163Dec10_f1$ID[is.na(L163Dec10_f1$ID)]<- "L163"
+L164Dec10_f1$ID<-rep(NA)
+L164Dec10_f1$ID<-L164Dec10_f1$ID[is.na(L164Dec10_f1$ID)]<- "L164"
+L166Dec10_f1$ID<-rep(NA)
+L166Dec10_f1$ID<-L166Dec10_f1$ID[is.na(L166Dec10_f1$ID)]<- "L166"
+L168Dec10_f1$ID<-rep(NA)
+L168Dec10_f1$ID<-L168Dec10_f1$ID[is.na(L168Dec10_f1$ID)]<- "L168"
+```
+
+##Change Names in Files
+```{r}
+library(plyr)
+dfs_Dec10_f1<-list(L155Dec10_f1,L157Dec10_f1,L158Dec10_f1,L160Dec10_f1,L163Dec10_f1,L164Dec10_f1,L166Dec10_f1,L168Dec10_f1)
+
+drops<-c("Total.length","FPS","Subject","Comment","Status")
+
+DropFunction<- function(x) {
+  x<-x[ , !(names(x) %in% drops)]
+  return(x)
+}
+
+
+Dec10_foraging = ldply(dfs_Dec10_f1,DropFunction)
+
+names(Dec10_foraging)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
+  
+```
+
+```{r}
+library(dplyr)
+Dec10_dives1<-subset(Dec10_foraging,Behavior=="dive")
+Dec10_dives1$Dives<-ifelse(Dec10_dives1$Start_Stop=="POINT",1,0)
+Dec10_foraging1<-subset(Dec10_foraging,Behavior!="dive")
+```
+
+```{r}
+Dec10_StartF1<-subset(Dec10_foraging1,Start_Stop== "START")
+names(Dec10_StartF1)<- c("StartTime","Observer", "Behavior","Start","ID")
+Dec10_StopF1<-subset(Dec10_foraging1,Start_Stop=="STOP")
+names(Dec10_StopF1)<-c("StopTime","Observer", "Behavior","Stop","ID")
+```
+
+
+```{r}
+Dec10_foraging1<-cbind(Dec10_StartF1,Dec10_StopF1)
+names(Dec10_foraging1)<-c("StartTime","Observer", "Behavior","Start","ID","StopTime","Obs.2", "Beh.2","Stop","ID.2")
+drops_doubles<-c("Start","Obs.2", "Beh.2","Stop","ID.2")
+Dec10_foraging1<-Dec10_foraging1[ , !(names(Dec10_foraging1) %in% drops_doubles)]
+Dec10_foraging1<-mutate(Dec10_foraging1,TimeEl=StopTime-StartTime)
+Dec10_foraging1<-mutate(Dec10_foraging1,Minutes=StartTime/60)
+Dec10_foraging1<-mutate(Dec10_foraging1,Date=rep("Dec9"))
+Dec10_dives1<-mutate(Dec10_dives1,Date=rep("Dec9"))
+Dec10_dives1<-mutate(Dec10_dives1,Minutes=Time/60)
+```
+
+
+```{r}
+library(dplyr)
+L155Dec10_f1 <-filter(Dec10_foraging1,ID=="L155")
+L155Dec10_d1 <-filter(Dec10_dives1,ID=="L155")
+#L153Dec9_f1$Observer<-rep(NA)
+#L153Dec9_f1$Observer<-L153Dec9_f1$Observer[is.na(L153Dec9_f1$Observer)]<- "KaG"
+
+L157Dec10_f1<-filter(Dec10_foraging1,ID=="L157")
+L157Dec10_d1 <-filter(Dec10_dives1,ID=="L157")
+#L154Dec9_W1$Observer<-rep(NA)
+#L154Dec9_W1$Observer<-L154Dec9_W1$Observer[is.na(L154Dec9_W1$Observer)]<- "KaG"
+
+L158Dec10_f1<-filter(Dec10_foraging1,ID=="L158")
+L158Dec10_d1 <-filter(Dec10_dives1,ID=="L158")
+#L156Dec9_W1$Observer<-rep(NA)
+#L156Dec9_W1$Observer<-L156Dec9_W1$Observer[is.na(L156Dec9_W1$Observer)]<- "AnJ"
+
+L160Dec10_f1<-filter(Dec10_foraging1,ID=="L160")
+L160Dec10_d1 <-filter(Dec10_dives1,ID=="L160")
+#L159Dec9_W1$Observer<-rep(NA)
+#L159Dec9_W1$Observer<-L159Dec9_W1$Observer[is.na(L159Dec9_W1$Observer)]<- "AnJ"
+
+L163Dec10_f1<-filter(Dec10_foraging1,ID=="L163")
+L163Dec10_d1 <-filter(Dec10_dives1,ID=="L163")
+#L161Dec9_W1$Observer<-rep(NA)
+#L161Dec9_W1$Observer<-L161Dec9_W1$Observer[is.na(L161Dec9_W1$Observer)]<- "NiI"
+
+L164Dec10_f1<-filter(Dec10_foraging1,ID=="L164")
+L164Dec10_d1 <-filter(Dec10_dives1,ID=="L164")
+
+L166Dec10_f1<-filter(Dec10_foraging1,ID=="L166")
+L166Dec10_d1 <-filter(Dec10_dives1,ID=="L166")
+#L165Dec9_W1$Observer<-rep(NA)
+#L165Dec9_W1$Observer<-L165Dec9_W1$Observer[is.na(L165Dec9_W1$Observer)]<- "NiI"
+
+L168Dec10_f1<-filter(Dec10_foraging1,ID=="L168")
+L168Dec10_d1 <-filter(Dec10_dives1,ID=="L168")
+#L167Dec9_W1$Observer<-rep(NA)
+#167Dec9_W1$Observer<-L167Dec9_W1$Observer[is.na(L167Dec9_W1$Observer)]<- "MjH"
+```
+
+```{r}
+library(dplyr)
+L155Dec10_f1_accl<-filter(L155Dec10_f1,Minutes<=21)
+L155Dec10_f1_test<-filter(L155Dec10_f1,Minutes>21 & Minutes<=41)
+L157Dec10_f1_accl<-filter(L157Dec10_f1,Minutes<=21)
+L157Dec10_f1_test<-filter(L157Dec10_f1,Minutes>21 & Minutes<=41)
+L158Dec10_f1_accl<-filter(L158Dec10_f1,Minutes<=22)
+L158Dec10_f1_test<-filter(L158Dec10_f1,Minutes>22 & Minutes<=42)
+L160Dec10_f1_accl<-filter(L160Dec10_f1,Minutes<=20)
+L160Dec10_f1_test<-filter(L160Dec10_f1,Minutes>20 & Minutes<=40)
+L163Dec10_f1_accl<-filter(L163Dec10_f1,Minutes<=21)
+L163Dec10_f1_test<-filter(L163Dec10_f1,Minutes>21 & Minutes<=41)
+L164Dec10_f1_accl<-filter(L164Dec10_f1,Minutes<=22)
+L164Dec10_f1_test<-filter(L164Dec10_f1,Minutes>22 & Minutes<=42)
+L166Dec10_f1_accl<-filter(L166Dec10_f1,Minutes<=23)
+L166Dec10_f1_test<-filter(L166Dec10_f1,Minutes>23 & Minutes<=43)
+L168Dec10_f1_accl<-filter(L168Dec10_f1,Minutes<=24)
+L168Dec10_f1_test<-filter(L168Dec10_f1,Minutes>24 & Minutes<=44)
+```
+
+```{r}
+library(dplyr)
+L155Dec10_d1_accl<-filter(L155Dec10_d1,Minutes<=21)
+L155Dec10_d1_test<-filter(L155Dec10_d1,Minutes>21 & Minutes<=41)
+L157Dec10_d1_accl<-filter(L157Dec10_d1,Minutes<=21)
+L157Dec10_d1_test<-filter(L157Dec10_d1,Minutes>21 & Minutes<=41)
+L158Dec10_d1_accl<-filter(L158Dec10_d1,Minutes<=22)
+L158Dec10_d1_test<-filter(L158Dec10_d1,Minutes>22 & Minutes<=42)
+L160Dec10_d1_accl<-filter(L160Dec10_d1,Minutes<=20)
+L160Dec10_d1_test<-filter(L160Dec10_d1,Minutes>20 & Minutes<=40)
+L163Dec10_d1_accl<-filter(L163Dec10_d1,Minutes<=21)
+L163Dec10_d1_test<-filter(L163Dec10_d1,Minutes>21 & Minutes<=41)
+L164Dec10_d1_accl<-filter(L164Dec10_d1,Minutes<=22)
+L164Dec10_d1_test<-filter(L164Dec10_d1,Minutes>22 & Minutes<=42)
+L166Dec10_d1_accl<-filter(L166Dec10_d1,Minutes<=23)
+L166Dec10_d1_test<-filter(L166Dec10_d1,Minutes>23 & Minutes<=43)
+L168Dec10_d1_accl<-filter(L168Dec10_d1,Minutes<=24)
+L168Dec10_d1_test<-filter(L168Dec10_d1,Minutes>24 & Minutes<=44)
+```
+
+
+```{r}
+library(dplyr)
+Dec10_f1_accl_BH<-rbind(L157Dec10_f1_accl,L160Dec10_f1_accl,L164Dec10_f1_accl, L168Dec10_f1_accl)
+Dec10_f1_test_BH<-rbind(L157Dec10_f1_test,L160Dec10_f1_test,L164Dec10_f1_test,L168Dec10_f1_test)
+library(dplyr)
+Dec10_f1_accl_BH<-mutate(Dec10_f1_accl_BH,Field=rep("BH"))
+Dec10_f1_accl_BH<-mutate(Dec10_f1_accl_BH,TimePer=rep("accl"))
+Dec10_f1_accl_BH<-mutate(Dec10_f1_accl_BH,FieldType=rep("conditioned"))
+Dec10_f1_test_BH<-mutate(Dec10_f1_test_BH,Field=rep("BH"))
+Dec10_f1_test_BH<-mutate(Dec10_f1_test_BH,TimePer=rep("test"))
+Dec10_f1_test_BH<-mutate(Dec10_f1_test_BH,FieldType=rep("conditioned"))
+```
+
+```{r}
+library(dplyr)
+Dec10_d1_accl_BH<-rbind(L157Dec10_d1_accl,L160Dec10_d1_accl,L164Dec10_d1_accl, L168Dec10_d1_accl)
+Dec10_d1_test_BH<-rbind((L157Dec10_d1_test,L160Dec10_d1_test,L164Dec10_d1_test,L168Dec10_d1_test)
+library(dplyr)
+Dec10_d1_accl_BH<-mutate(Dec10_d1_accl_BH,Field=rep("BH"))
+Dec10_d1_accl_BH<-mutate(Dec10_d1_accl_BH,TimePer=rep("accl"))
+Dec10_d1_accl_BH<-mutate(Dec10_d1_accl_BH,FieldType=rep("conditioned"))
+Dec10_d1_test_BH<-mutate(Dec10_d1_test_BH,Field=rep("BH"))
+Dec10_d1_test_BH<-mutate(Dec10_d1_test_BH,TimePer=rep("test"))
+Dec10_d1_test_BH<-mutate(Dec10_d1_test_BH,FieldType=rep("conditioned"))
+```
+
+```{r}
+library(dplyr)
+Dec10_f1_accl_NB<-rbind(L155Dec10_f1_accl, L158Dec10_f1_accl, L163Dec10_f1_accl, L166Dec10_f1_accl)
+Dec10_f1_test_NB<-rbind(L155De10_f1_test, L158Dec10_f1_test, L163Dec10_f1_test,L166Dec10_f1_test)
+library(dplyr)
+Dec10_f1_accl_NB<-mutate(Dec10_f1_accl_NB,Field=rep("NB"))
+Dec10_f1_accl_NB<-mutate(Dec10_f1_accl_NB,TimePer=rep("accl"))
+Dec10_f1_accl_NB<-mutate(Dec10_f1_accl_NB,FieldType=rep("control"))
+Dec10_f1_test_NB<-mutate(Dec10_f1_test_NB,Field=rep("NB"))
+Dec10_f1_test_NB<-mutate(Dec10_f1_test_NB,TimePer=rep("test"))
+Dec10_f1_test_NB<-mutate(Dec10_f1_test_NB,FieldType=rep("control"))
+```
+
+
+```{r}
+library(dplyr)
+Dec10_d1_accl_NB<-rbind(L155Dec10_d1_accl, L158Dec10_d1_accl, L163Dec10_d1_accl, L166Dec10_d1_accl)
+Dec10_d1_test_NB<-rbind(L155De10_d1_test, L158Dec10_d1_test, L163Dec10_d1_test,L166Dec10_d1_test)
+library(dplyr)
+Dec10_d1_accl_NB<-mutate(Dec10_d1_accl_NB,Field=rep("NB"))
+Dec10_d1_accl_NB<-mutate(Dec10_d1_accl_NB,TimePer=rep("accl"))
+Dec10_d1_accl_NB<-mutate(Dec10_d1_accl_NB,FieldType=rep("control"))
+Dec10_d1_test_NB<-mutate(Dec10_d1_test_NB,Field=rep("NB"))
+Dec10_d1_test_NB<-mutate(Dec10_d1_test_NB,TimePer=rep("test"))
+Dec10_d1_test_NB<-mutate(Dec10_d1_test_NB,FieldType=rep("control"))
+```
+
+##Master Data Sets
+```{r}
+library(dplyr)
+Dec10_f1<-rbind(Dec10_f1_accl_BH,Dec10_f1_accl_NB,Dec10_f1_test_BH,Dec10_f1_test_NB)
+Dec10_f1<-mutate(Dec10_f1,Date=rep("Dec10"))
+```
+
+```{r}
+library(dplyr)
+Dec10_d1<-rbind(Dec10_d1_accl_BH,Dec10_d1_accl_NB,Dec10_d1_test_BH,Dec10_d1_test_NB)
+Dec10_d1<-mutate(Dec10_d1,Date=rep("Dec10"))
+```
+
+```{r}
+library(dplyr)
+Dec10_f1<-Dec10_f1 %>% group_by(ID,TimePer,Observer,Field,FieldType,Date) %>% summarise(TotalTimeEl=sum(TimeEl)) 
+Dec10_f1_test<-filter(Dec10_f1,TimePer=="test")
+```
+
+```{r}
+library(dplyr)
+Dec10_d1<-Dec10_d1 %>% group_by(ID,TimePer,Observer,Field,FieldType,Date) %>% summarise(Dives=sum(Dives)) 
+Dec10_d1_test<-filter(Dec10_d1,TimePer=="test")
+```
+
+
+#December 10 Analysis 2
+
+##Read in files
+```{r}
+L155Dec10_f2<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L155_Dec10_Foraging2.csv",skip=15,header=T)
+L157Dec10_f2<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L157_Dec10_Foraging2.csv",skip=15,header=T)
+L158Dec10_f2<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L158_Dec10_Foraging2.csv",skip=15,header=T)
+L160Dec10_f2<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L150_Dec10_Foraging2.csv",skip=15,header=T)
+L163Dec10_f2<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L163_Dec10_Foraging2.csv",skip=15,header=T)
+L164Dec10_f2<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L164_Dec10_Foraging2.csv",skip=15,header=T)
+L166Dec10_f2<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L166_Dec10_Foraging2.csv",skip=15,header=T)
+L168Dec10_f2<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L168_Dec10_Foraging2.csv",skip=15,header=T)
+```
+
+
+```{r}
+#library(dplyr)
+#L153Dec9W<-L153Dec9W %>% mutate(diff=Time-lag(Time,default=first(Time)))
+
+L155Dec10_f2$ID<-rep(NA)
+L155Dec10_f2$ID<-L155Dec10_f2$ID[is.na(L155Dec10_f2$ID)]<- "L155"
+L157Dec10_f2$ID<-rep(NA)
+L157Dec10_f2$ID<-L157Dec10_f2$ID[is.na(L157Dec10_f2$ID)]<- "L157"
+L158Dec10_f2$ID<-rep(NA)
+L158Dec10_f2$ID<-L158Dec10_f2$ID[is.na(L158Dec10_f2$ID)]<- "L158"
+L160Dec10_f2$ID<-rep(NA)
+L160Dec10_f2$ID<-L160Dec10_f2$ID[is.na(L160Dec10_f2$ID)]<- "L160"
+L163Dec10_f2$ID<-rep(NA)
+L163Dec10_f2$ID<-L163Dec10_f2$ID[is.na(L163Dec10_f2$ID)]<- "L163"
+L164Dec10_f2$ID<-rep(NA)
+L164Dec10_f2$ID<-L164Dec10_f2$ID[is.na(L164Dec10_f2$ID)]<- "L164"
+L166Dec10_f2$ID<-rep(NA)
+L166Dec10_f2$ID<-L166Dec10_f2$ID[is.na(L166Dec10_f2$ID)]<- "L166"
+L168Dec10_f2$ID<-rep(NA)
+L168Dec10_f2$ID<-L168Dec10_f2$ID[is.na(L168Dec10_f2$ID)]<- "L168"
+```
+
+##Change Names in Files
+```{r}
+library(plyr)
+dfs_Dec10_f2<-list(L155Dec10_f2,L157Dec10_f2,L158Dec10_f2,L160Dec10_f2,L163Dec10_f2,L164Dec10_f2,L166Dec10_f2,L168Dec10_f2)
+
+drops<-c("Total.length","FPS","Subject","Comment","Status")
+
+DropFunction<- function(x) {
+  x<-x[ , !(names(x) %in% drops)]
+  return(x)
+}
+
+
+Dec10_foraging2 = ldply(dfs_Dec10_f2,DropFunction)
+
+names(Dec10_foraging2)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
+  
+```
+
+```{r}
+library(dplyr)
+Dec10_dives2<-subset(Dec10_foraging2,Behavior=="dive")
+Dec10_dives2$Dives<-ifelse(Dec10_dives2$Start_Stop=="POINT",1,0)
+Dec10_foraging2<-subset(Dec10_foraging2,Behavior!="dive")
+```
+
+```{r}
+Dec10_StartF2<-subset(Dec10_foraging2,Start_Stop== "START")
+names(Dec10_StartF2)<- c("StartTime","Observer", "Behavior","Start","ID")
+Dec10_StopF1<-subset(Dec10_foraging2,Start_Stop=="STOP")
+names(Dec10_StopF2)<-c("StopTime","Observer", "Behavior","Stop","ID")
+```
+
+
+```{r}
+Dec10_foraging2<-cbind(Dec10_StartF2,Dec10_StopF2)
+names(Dec10_foraging2)<-c("StartTime","Observer", "Behavior","Start","ID","StopTime","Obs.2", "Beh.2","Stop","ID.2")
+drops_doubles<-c("Start","Obs.2", "Beh.2","Stop","ID.2")
+Dec10_foraging2<-Dec10_foraging2[ , !(names(Dec10_foraging2) %in% drops_doubles)]
+Dec10_foraging2<-mutate(Dec10_foraging2,TimeEl=StopTime-StartTime)
+Dec10_foraging2<-mutate(Dec10_foraging2,Minutes=StartTime/60)
+Dec10_foraging2<-mutate(Dec10_foraging2,Date=rep("Dec10"))
+Dec10_dives2<-mutate(Dec10_dives2,Date=rep("Dec10"))
+Dec10_dives2<-mutate(Dec10_dives2,Minutes=Time/60)
+```
+
+
+```{r}
+library(dplyr)
+L155Dec10_f2 <-filter(Dec10_foraging2,ID=="L155")
+L155Dec10_d2 <-filter(Dec10_dives2,ID=="L155")
+#L153Dec9_f1$Observer<-rep(NA)
+#L153Dec9_f1$Observer<-L153Dec9_f1$Observer[is.na(L153Dec9_f1$Observer)]<- "KaG"
+
+L157Dec10_f2<-filter(Dec10_foraging2,ID=="L157")
+L157Dec10_d2 <-filter(Dec10_dives2,ID=="L157")
+#L154Dec9_W1$Observer<-rep(NA)
+#L154Dec9_W1$Observer<-L154Dec9_W1$Observer[is.na(L154Dec9_W1$Observer)]<- "KaG"
+
+L158Dec10_f2<-filter(Dec10_foraging2,ID=="L158")
+L158Dec10_d2 <-filter(Dec10_dives2,ID=="L158")
+#L156Dec9_W1$Observer<-rep(NA)
+#L156Dec9_W1$Observer<-L156Dec9_W1$Observer[is.na(L156Dec9_W1$Observer)]<- "AnJ"
+
+L160Dec10_f2<-filter(Dec10_foraging2,ID=="L160")
+L160Dec10_d2 <-filter(Dec10_dives2,ID=="L160")
+#L159Dec9_W1$Observer<-rep(NA)
+#L159Dec9_W1$Observer<-L159Dec9_W1$Observer[is.na(L159Dec9_W1$Observer)]<- "AnJ"
+
+L163Dec10_f2<-filter(Dec10_foraging2,ID=="L163")
+L163Dec10_d2 <-filter(Dec10_dives2,ID=="L163")
+#L161Dec9_W1$Observer<-rep(NA)
+#L161Dec9_W1$Observer<-L161Dec9_W1$Observer[is.na(L161Dec9_W1$Observer)]<- "NiI"
+
+L164Dec10_f2 <-filter(Dec10_foraging2,ID=="L164")
+L164Dec10_d2 <-filter(Dec10_dives2,ID=="L164")
+
+L166Dec10_f2 <-filter(Dec10_foraging2,ID=="L166")
+L166Dec10_d2 <-filter(Dec10_dives2,ID=="L166")
+#L165Dec9_W1$Observer<-rep(NA)
+#L165Dec9_W1$Observer<-L165Dec9_W1$Observer[is.na(L165Dec9_W1$Observer)]<- "NiI"
+
+L168Dec10_f2<-filter(Dec10_foraging2,ID=="L168")
+L168Dec10_d2 <-filter(Dec10_dives2,ID=="L168")
+#L167Dec9_W1$Observer<-rep(NA)
+#167Dec9_W1$Observer<-L167Dec9_W1$Observer[is.na(L167Dec9_W1$Observer)]<- "MjH"
+```
+
+```{r}
+library(dplyr)
+L155Dec10_f2_accl<-filter(L155Dec10_f2,Minutes<=21)
+L155Dec10_f2_test<-filter(L155Dec10_f2,Minutes>21 & Minutes<=41)
+L157Dec10_f2_accl<-filter(L157Dec10_f2,Minutes<=21)
+L157Dec10_f2_test<-filter(L157Dec10_f2,Minutes>21 & Minutes<=41)
+L158Dec10_f2_accl<-filter(L158Dec10_f2,Minutes<=22)
+L158Dec10_f2_test<-filter(L158Dec10_f2,Minutes>22 & Minutes<=42)
+L160Dec10_f2_accl<-filter(L160Dec10_f2,Minutes<=20)
+L160Dec10_f2_test<-filter(L160Dec10_f2,Minutes>20 & Minutes<=40)
+L163Dec10_f2_accl<-filter(L163Dec10_f2,Minutes<=21)
+L163Dec10_f2_test<-filter(L163Dec10_f2,Minutes>21 & Minutes<=41)
+L164Dec10_f2_accl<-filter(L164Dec10_f2,Minutes<=22)
+L164Dec10_f2_test<-filter(L164Dec10_f2,Minutes>22 & Minutes<=42)
+L166Dec10_f2_accl<-filter(L166Dec10_f2,Minutes<=23)
+L166Dec10_f2_test<-filter(L166Dec10_f2,Minutes>23 & Minutes<=43)
+L168Dec10_f2_accl<-filter(L168Dec10_f2,Minutes<=24)
+L168Dec10_f2_test<-filter(L168Dec10_f2,Minutes>24 & Minutes<=44)
+```
+
+```{r}
+library(dplyr)
+L155Dec10_d2_accl<-filter(L155Dec10_d2,Minutes<=21)
+L155Dec10_d2_test<-filter(L155Dec10_d2,Minutes>21 & Minutes<=41)
+L157Dec10_d2_accl<-filter(L157Dec10_d2,Minutes<=21)
+L157Dec10_d2_test<-filter(L157Dec10_d2,Minutes>21 & Minutes<=41)
+L158Dec10_d2_accl<-filter(L158Dec10_d2,Minutes<=22)
+L158Dec10_d2_test<-filter(L158Dec10_d2,Minutes>22 & Minutes<=42)
+L160Dec10_d2_accl<-filter(L160Dec10_d2,Minutes<=20)
+L160Dec10_d2_test<-filter(L160Dec10_d2,Minutes>20 & Minutes<=40)
+L163Dec10_d2_accl<-filter(L163Dec10_d2,Minutes<=21)
+L163Dec10_d2_test<-filter(L163Dec10_d2,Minutes>21 & Minutes<=41)
+L164Dec10_d2_accl<-filter(L164Dec10_d2,Minutes<=22)
+L164Dec10_d2_test<-filter(L164Dec10_d2,Minutes>22 & Minutes<=42)
+L166Dec10_d2_accl<-filter(L166Dec10_d2,Minutes<=23)
+L166Dec10_d2_test<-filter(L166Dec10_d2,Minutes>23 & Minutes<=43)
+L168Dec10_d2_accl<-filter(L168Dec10_d2,Minutes<=24)
+L168Dec10_d2_test<-filter(L168Dec10_d2,Minutes>24 & Minutes<=44)
+```
+
+
+```{r}
+library(dplyr)
+Dec10_f2_accl_BH<-rbind(L157Dec10_f2_accl,L160Dec10_f2_accl,L164Dec10_f2_accl, L168Dec10_f2_accl)
+Dec10_f2_test_BH<-rbind(L157Dec10_f2_test,L160Dec10_f2_test,L164Dec10_f2_test,L168Dec10_f2_test)
+library(dplyr)
+Dec10_f2_accl_BH<-mutate(Dec10_f2_accl_BH,Field=rep("BH"))
+Dec10_f2_accl_BH<-mutate(Dec10_f2_accl_BH,TimePer=rep("accl"))
+Dec10_f2_accl_BH<-mutate(Dec10_f2_accl_BH,FieldType=rep("conditioned"))
+Dec10_f2_test_BH<-mutate(Dec10_f2_test_BH,Field=rep("BH"))
+Dec10_f2_test_BH<-mutate(Dec10_f2_test_BH,TimePer=rep("test"))
+Dec10_f2_test_BH<-mutate(Dec10_f2_test_BH,FieldType=rep("conditioned"))
+```
+
+
+```{r}
+library(dplyr)
+Dec10_d2_accl_BH<-rbind(L157Dec10_d2_accl,L160Dec10_d2_accl,L164Dec10_d2_accl, L168Dec10_d2_accl)
+Dec10_d2_test_BH<-rbind((L157Dec10_d2_test,L160Dec10_d2_test,L164Dec10_d2_test, L168Dec10_d2_test)
+library(dplyr)
+Dec10_d2_accl_BH<-mutate(Dec10_d2_accl_BH,Field=rep("BH"))
+Dec10_d2_accl_BH<-mutate(Dec10_d2_accl_BH,TimePer=rep("accl"))
+Dec10_d2_accl_BH<-mutate(Dec10_d2_accl_BH,FieldType=rep("conditioned"))
+Dec10_d2_test_BH<-mutate(Dec10_d2_test_BH,Field=rep("BH"))
+Dec10_d2_test_BH<-mutate(Dec10_d2_test_BH,TimePer=rep("test"))
+Dec10_d2_test_BH<-mutate(Dec10_d2_test_BH,FieldType=rep("conditioned"))
+```
+
+```{r}
+library(dplyr)
+Dec10_f2_accl_NB<-rbind(L155Dec10_f2_accl, L158Dec10_f2_accl, L163Dec10_f2_accl, L166Dec10_f2_accl)
+Dec10_f2_test_NB<-rbind(L155De10_f2_test, L158Dec10_f2_test, L163Dec10_f2_test,L166Dec10_f2_test)
+library(dplyr)
+Dec10_f2_accl_NB<-mutate(Dec10_f2_accl_NB,Field=rep("NB"))
+Dec10_f2_accl_NB<-mutate(Dec10_f2_accl_NB,TimePer=rep("accl"))
+Dec10_f2_accl_NB<-mutate(Dec10_f2_accl_NB,FieldType=rep("control"))
+Dec10_f2_test_NB<-mutate(Dec10_f2_test_NB,Field=rep("NB"))
+Dec10_f2_test_NB<-mutate(Dec10_f2_test_NB,TimePer=rep("test"))
+Dec10_f2_test_NB<-mutate(Dec10_f2_test_NB,FieldType=rep("control"))
+```
+
+
+```{r}
+library(dplyr)
+Dec10_d2_accl_NB<-rbind(L155Dec10_d2_accl, L158Dec10_d2_accl, L163Dec10_d2_accl, L166Dec10_d2_accl)
+Dec10_d2_test_NB<-rbind(L155De10_d2_test, L158Dec10_d2_test, L163Dec10_d2_test,L166Dec10_d2_test)
+library(dplyr)
+Dec10_d2_accl_NB<-mutate(Dec10_d2_accl_NB,Field=rep("NB"))
+Dec10_d2_accl_NB<-mutate(Dec10_d2_accl_NB,TimePer=rep("accl"))
+Dec10_d2_accl_NB<-mutate(Dec10_d2_accl_NB,FieldType=rep("control"))
+Dec10_d2_test_NB<-mutate(Dec10_d2_test_NB,Field=rep("NB"))
+Dec10_d2_test_NB<-mutate(Dec10_d2_test_NB,TimePer=rep("test"))
+Dec10_d2_test_NB<-mutate(Dec10_d2_test_NB,FieldType=rep("control"))
+```
+
+##Master Data Sets
+```{r}
+library(dplyr)
+Dec10_f2<-rbind(Dec10_f2_accl_BH,Dec10_f2_accl_NB,Dec10_f2_test_BH,Dec10_f2_test_NB)
+Dec10_f2<-mutate(Dec10_f2,Date=rep("Dec10"))
+```
+
+```{r}
+library(dplyr)
+Dec10_d2<-rbind(Dec10_d2_accl_BH,Dec10_d2_accl_NB,Dec10_d2_test_BH,Dec10_d2_test_NB)
+Dec10_d2<-mutate(Dec10_d2,Date=rep("Dec10"))
+```
+
+```{r}
+library(dplyr)
+Dec10_f2<-Dec10_f2 %>% group_by(ID,TimePer,Observer,Field,FieldType,Date) %>% summarise(TotalTimeEl=sum(TimeEl)) 
+Dec10_f2_test<-filter(Dec10_f2,TimePer=="test")
+```
+
+```{r}
+library(dplyr)
+Dec10_d2<-Dec10_d1 %>% group_by(ID,TimePer,Observer,Field,FieldType,Date) %>% summarise(Dives=sum(Dives)) 
+Dec10_d2_test<-filter(Dec10_d2,TimePer=="test")
+```
+
+
+
+#December 11 Analysis 1
+
+##Read in files
+
+```##Read in files
+```{r}
+L153Dec11_f1<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L153_Dec11_Foraging.csv",skip=15,header=T)
+L154Dec11_f1<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L154_Dec11_Foraging.csv",skip=15,header=T)
+L156Dec11_f1<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L156_Dec11_Foraging.csv",skip=15,header=T)
+L159Dec11_f1<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L159_Dec11_Foraging.csv",skip=15,header=T)
+L161Dec11_f1<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L161_Dec11_Foraging.csv",skip=15,header=T)
+L162Dec11_f1<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L162_Dec11_Foraging.csv",skip=15,header=T)
+L165Dec11_f1<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L165_Dec11_Foraging.csv",skip=15,header=T)
+L167Dec11_f1<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Foraging/Foraging_CSVFiles/L167_Dec11_Foraging.csv",skip=15,header=T)
+```
+
+
+```{r}
+#library(dplyr)
+#L153Dec9W<-L153Dec9W %>% mutate(diff=Time-lag(Time,default=first(Time)))
+
+L153Dec11_f1$ID<-rep(NA)
+L153Dec11_f1$ID<-L153Dec11_f1$ID[is.na(L153Dec11_f1$ID)]<- "L153"
+L154Dec11_f1$ID<-rep(NA)
+L154Dec11_f1$ID<-L154Dec11_f1$ID[is.na(L154Dec11_f1$ID)]<- "L154"
+L156Dec11_f1$ID<-rep(NA)
+L156Dec11_f1$ID<-L156Dec11_f1$ID[is.na(L156Dec11_f1$ID)]<- "L156"
+L159Dec11_f1$ID<-rep(NA)
+L159Dec11_f1$ID<-L159Dec11_f1$ID[is.na(L159Dec11_f1$ID)]<- "L159"
+L161Dec11_f1$ID<-rep(NA)
+L161Dec11_f1$ID<-L161Dec11_f1$ID[is.na(L162Dec11_f1$ID)]<- "L161"
+L162Dec11_f1$ID<-rep(NA)
+L162Dec11_f1$ID<-L162Dec11_f1$ID[is.na(L163Dec11_f1$ID)]<- "L162"
+L165Dec11_f1$ID<-rep(NA)
+L165Dec11_f1$ID<-L165Dec11_f1$ID[is.na(L165Dec11_f1$ID)]<- "L165"
+L167Dec11_f1$ID<-rep(NA)
+L167Dec11_f1$ID<-L167Dec11_f1$ID[is.na(L167Dec11_f1$ID)]<- "L167"
+```
+
+##Change Names in Files
+```{r}
+library(plyr)
+dfs_Dec11_f1<-list(L153Dec11_f1,L154Dec11_f1,L156Dec11_f1,L159Dec11_f1,L161Dec11_f1,L162Dec11_f1,L165Dec11_f1,L167Dec11_f1)
+
+drops<-c("Total.length","FPS","Subject","Comment","Status")
+
+DropFunction<- function(x) {
+  x<-x[ , !(names(x) %in% drops)]
+  return(x)
+}
+
+
+Dec11_foraging = ldply(dfs_Dec11_f1,DropFunction)
+
+names(Dec11_foraging)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
+  
+```
+
+```{r}
+library(dplyr)
+Dec11_dives1<-subset(Dec11_foraging,Behavior=="dive")
+Dec11_dives1$Dives<-ifelse(Dec11_dives1$Start_Stop=="POINT",1,0)
+Dec11_foraging1<-subset(Dec11_foraging,Behavior!="dive")
+```
+
+```{r}
+Dec11_StartF1<-subset(Dec11_foraging1,Start_Stop== "START")
+names(Dec11_StartF1)<- c("StartTime","Observer", "Behavior","Start","ID")
+Dec11_StopF1<-subset(Dec11_foraging1,Start_Stop=="STOP")
+names(Dec11_StopF1)<-c("StopTime","Observer", "Behavior","Stop","ID")
+```
+
+
+```{r}
+Dec11_foraging1<-cbind(Dec11_StartF1,Dec11_StopF1)
+names(Dec10_foraging1)<-c("StartTime","Observer", "Behavior","Start","ID","StopTime","Obs.2", "Beh.2","Stop","ID.2")
+drops_doubles<-c("Start","Obs.2", "Beh.2","Stop","ID.2")
+Dec11_foraging1<-Dec11_foraging1[ , !(names(Dec11_foraging1) %in% drops_doubles)]
+Dec11_foraging1<-mutate(Dec11_foraging1,TimeEl=StopTime-StartTime)
+Dec11_foraging1<-mutate(Dec11_foraging1,Minutes=StartTime/60)
+Dec11_foraging1<-mutate(Dec11_foraging1,Date=rep("Dec11"))
+Dec11_dives1<-mutate(Dec11_dives1,Date=rep("Dec11"))
+Dec11_dives1<-mutate(Dec11_dives1,Minutes=Time/60)
+```
+
+
+```{r}
+library(dplyr)
+L155Dec11_f1 <-filter(Dec11_foraging1,ID=="L155")
+L155Dec11_d1 <-filter(Dec11_dives1,ID=="L155")
+#L153Dec9_f1$Observer<-rep(NA)
+#L153Dec9_f1$Observer<-L153Dec9_f1$Observer[is.na(L153Dec9_f1$Observer)]<- "KaG"
+
+L157Dec11_f1<-filter(Dec11_foraging1,ID=="L157")
+L157Dec11_d1 <-filter(Dec11_dives1,ID=="L157")
+#L154Dec9_W1$Observer<-rep(NA)
+#L154Dec9_W1$Observer<-L154Dec9_W1$Observer[is.na(L154Dec9_W1$Observer)]<- "KaG"
+
+L158Dec11_f1<-filter(Dec11_foraging1,ID=="L158")
+L158Dec11_d1 <-filter(Dec11_dives1,ID=="L158")
+#L156Dec9_W1$Observer<-rep(NA)
+#L156Dec9_W1$Observer<-L156Dec9_W1$Observer[is.na(L156Dec9_W1$Observer)]<- "AnJ"
+
+L160Dec11_f1<-filter(Dec11_foraging1,ID=="L160")
+L160Dec11_d1 <-filter(Dec11_dives1,ID=="L160")
+#L159Dec9_W1$Observer<-rep(NA)
+#L159Dec9_W1$Observer<-L159Dec9_W1$Observer[is.na(L159Dec9_W1$Observer)]<- "AnJ"
+
+L163Dec11_f1<-filter(Dec11_foraging1,ID=="L163")
+L163Dec11_d1 <-filter(Dec11_dives1,ID=="L163")
+#L161Dec9_W1$Observer<-rep(NA)
+#L161Dec9_W1$Observer<-L161Dec9_W1$Observer[is.na(L161Dec9_W1$Observer)]<- "NiI"
+
+L164Dec11_f1<-filter(Dec11_foraging1,ID=="L164")
+L164Dec11_d1 <-filter(Dec11_dives1,ID=="L164")
+
+L166Dec11_f1<-filter(Dec11_foraging1,ID=="L166")
+L166Dec11_d1 <-filter(Dec11_dives1,ID=="L166")
+#L165Dec9_W1$Observer<-rep(NA)
+#L165Dec9_W1$Observer<-L165Dec9_W1$Observer[is.na(L165Dec9_W1$Observer)]<- "NiI"
+
+L168Dec11_f1<-filter(Dec11_foraging1,ID=="L168")
+L168Dec11_d1 <-filter(Dec11_dives1,ID=="L168")
+#L167Dec9_W1$Observer<-rep(NA)
+#167Dec9_W1$Observer<-L167Dec9_W1$Observer[is.na(L167Dec9_W1$Observer)]<- "MjH"
+```
+
+```{r}
+library(dplyr)
+L153Dec11_f1_accl<-filter(L153Dec11_f1,Minutes<=22)
+L153Dec11_f1_test<-filter(L153Dec11_f1,Minutes>22 & Minutes<=42)
+L154Dec11_f1_accl<-filter(L154Dec11_f1,Minutes<=22)
+L154Dec11_f1_test<-filter(L154Dec11_f1,Minutes>22 & Minutes<=42)
+L156Dec11_f1_accl<-filter(L156Dec11_f1,Minutes<=21)
+L156Dec11_f1_test<-filter(L156Dec11_f1,Minutes>21 & Minutes<=41)
+L159Dec11_f1_accl<-filter(L159Dec11_f1,Minutes<=23)
+L159Dec11_f1_test<-filter(L159Dec11_f1,Minutes>23 & Minutes<=43)
+L161Dec11_f1_accl<-filter(L161Dec11_f1,Minutes<=23)
+L161Dec11_f1_test<-filter(L161Dec11_f1,Minutes>23 & Minutes<=43)
+L162Dec11_f1_accl<-filter(L162Dec11_f1,Minutes<=24)
+L162Dec11_f1_test<-filter(L162Dec11_f1,Minutes>24 & Minutes<=44)
+L165Dec11_f1_accl<-filter(L165Dec11_f1,Minutes<=21)
+L165Dec11_f1_test<-filter(L165Dec11_f1,Minutes>21 & Minutes<=41)
+L167Dec11_f1_accl<-filter(L167Dec11_f1,Minutes<=21)
+L167Dec11_f1_test<-filter(L167Dec11_f1,Minutes>21 & Minutes<=41)
+```
+
+```{r}
+library(dplyr)
+L153Dec11_d1_accl<-filter(L153Dec11_d1,Minutes<=22)
+L153Dec11_d1_test<-filter(L153Dec11_d1,Minutes>22 & Minutes<=42)
+L154Dec11_d1_accl<-filter(L154Dec11_d1,Minutes<=22)
+L154Dec11_d1_test<-filter(L154Dec11_d1,Minutes>22 & Minutes<=42)
+L156Dec11_d1_accl<-filter(L156Dec11_d1,Minutes<=21)
+L156Dec11_d1_test<-filter(L156Dec11_d1,Minutes>21 & Minutes<=41)
+L159Dec11_d1_accl<-filter(L159Dec11_d1,Minutes<=23)
+L159Dec11_d1_test<-filter(L159Dec11_d1,Minutes>23 & Minutes<=43)
+L161Dec11_d1_accl<-filter(L161Dec11_d1,Minutes<=23)
+L161Dec11_d1_test<-filter(L161Dec11_d1,Minutes>23 & Minutes<=43)
+L162Dec11_d1_accl<-filter(L162Dec11_d1,Minutes<=24)
+L162Dec11_d1_test<-filter(L162Dec11_d1,Minutes>24 & Minutes<=44)
+L165Dec11_d1_accl<-filter(L165Dec11_d1,Minutes<=21)
+L165Dec11_d1_test<-filter(L165Dec11_d1,Minutes>21 & Minutes<=41)
+L167Dec11_d1_accl<-filter(L167Dec11_d1,Minutes<=21)
+L167Dec11_d1_test<-filter(L167Dec11_d1,Minutes>21 & Minutes<=41)
+```
+
+```{r}
+library(dplyr)
+Dec10_f1_accl_BH<-rbind()
+Dec10_f1_test_BH<-rbind()
+library(dplyr)
+Dec10_f1_accl_BH<-mutate(Dec10_f1_accl_BH,Field=rep("BH"))
+Dec10_f1_accl_BH<-mutate(Dec10_f1_accl_BH,TimePer=rep("accl"))
+Dec10_f1_accl_BH<-mutate(Dec10_f1_accl_BH,FieldType=rep("conditioned"))
+Dec10_f1_test_BH<-mutate(Dec10_f1_test_BH,Field=rep("BH"))
+Dec10_f1_test_BH<-mutate(Dec10_f1_test_BH,TimePer=rep("test"))
+Dec10_f1_test_BH<-mutate(Dec10_f1_test_BH,FieldType=rep("conditioned"))
+```
+
+```{r}
+library(dplyr)
+Dec10_d1_accl_BH<-rbind(L157Dec10_d1_accl,L160Dec10_d1_accl,L164Dec10_d1_accl, L168Dec10_d1_accl)
+Dec10_d1_test_BH<-rbind((L157Dec10_d1_test,L160Dec10_d1_test,L164Dec10_d1_test,L168Dec10_d1_test)
+library(dplyr)
+Dec10_d1_accl_BH<-mutate(Dec10_d1_accl_BH,Field=rep("BH"))
+Dec10_d1_accl_BH<-mutate(Dec10_d1_accl_BH,TimePer=rep("accl"))
+Dec10_d1_accl_BH<-mutate(Dec10_d1_accl_BH,FieldType=rep("conditioned"))
+Dec10_d1_test_BH<-mutate(Dec10_d1_test_BH,Field=rep("BH"))
+Dec10_d1_test_BH<-mutate(Dec10_d1_test_BH,TimePer=rep("test"))
+Dec10_d1_test_BH<-mutate(Dec10_d1_test_BH,FieldType=rep("conditioned"))
+```
+
+```{r}
+library(dplyr)
+Dec10_f1_accl_NB<-rbind(L155Dec10_f1_accl, L158Dec10_f1_accl, L163Dec10_f1_accl, L166Dec10_f1_accl)
+Dec10_f1_test_NB<-rbind(L155De10_f1_test, L158Dec10_f1_test, L163Dec10_f1_test,L166Dec10_f1_test)
+library(dplyr)
+Dec10_f1_accl_NB<-mutate(Dec10_f1_accl_NB,Field=rep("NB"))
+Dec10_f1_accl_NB<-mutate(Dec10_f1_accl_NB,TimePer=rep("accl"))
+Dec10_f1_accl_NB<-mutate(Dec10_f1_accl_NB,FieldType=rep("control"))
+Dec10_f1_test_NB<-mutate(Dec10_f1_test_NB,Field=rep("NB"))
+Dec10_f1_test_NB<-mutate(Dec10_f1_test_NB,TimePer=rep("test"))
+Dec10_f1_test_NB<-mutate(Dec10_f1_test_NB,FieldType=rep("control"))
+```
+
+
+```{r}
+library(dplyr)
+Dec10_d1_accl_NB<-rbind(L155Dec10_d1_accl, L158Dec10_d1_accl, L163Dec10_d1_accl, L166Dec10_d1_accl)
+Dec10_d1_test_NB<-rbind(L155De10_d1_test, L158Dec10_d1_test, L163Dec10_d1_test,L166Dec10_d1_test)
+library(dplyr)
+Dec10_d1_accl_NB<-mutate(Dec9_d1_accl_NB,Field=rep("NB"))
+Dec10_d1_accl_NB<-mutate(Dec9_d1_accl_NB,TimePer=rep("accl"))
+Dec10_d1_accl_NB<-mutate(Dec9_d1_accl_NB,FieldType=rep("control"))
+Dec10_d1_test_NB<-mutate(Dec9_d1_test_NB,Field=rep("NB"))
+Dec10_d1_test_NB<-mutate(Dec9_d1_test_NB,TimePer=rep("test"))
+Dec10_d1_test_NB<-mutate(Dec10_d1_test_NB,FieldType=rep("control"))
+```
+
+##Master Data Sets
+```{r}
+library(dplyr)
+Dec10_f1<-rbind(Dec10_f1_accl_BH,Dec10_f1_accl_NB,Dec10_f1_test_BH,Dec10_f1_test_NB)
+Dec10_f1<-mutate(Dec10_f1,Date=rep("Dec10"))
+```
+
+```{r}
+library(dplyr)
+Dec10_d1<-rbind(Dec10_d1_accl_BH,Dec10_d1_accl_NB,Dec10_d1_test_BH,Dec10_d1_test_NB)
+Dec10_d1<-mutate(Dec10_d1,Date=rep("Dec10"))
+```
+
+```{r}
+library(dplyr)
+Dec10_f1<-Dec10_f1 %>% group_by(ID,TimePer,Observer,Field,FieldType,Date) %>% summarise(TotalTimeEl=sum(TimeEl)) 
+Dec10_f1_test<-filter(Dec10_f1,TimePer=="test")
+```
+
+```{r}
+library(dplyr)
+Dec10_d1<-Dec10_d1 %>% group_by(ID,TimePer,Observer,Field,FieldType,Date) %>% summarise(Dives=sum(Dives)) 
+Dec10_d1_test<-filter(Dec10_d1,TimePer=="test")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
