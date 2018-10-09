@@ -170,6 +170,66 @@ L167Dec9_W1_accl<-filter(L167Dec9_W1,Minutes<=21)
 L167Dec9_W1_test<-filter(L167Dec9_W1,Minutes>21 & Minutes<=41)
 ```
 
+Five Mins Dec9 Waddle 1
+
+```{r}
+library(dplyr)
+L153Dec9_W1_test5<-filter(L153Dec9_W1,Minutes>21 & Minutes<=26)
+
+L154Dec9_W1_test5<-filter(L154Dec9_W1,Minutes>22 & Minutes<=27)
+
+L156Dec9_W1_test5<-filter(L156Dec9_W1,Minutes>21 & Minutes<=26)
+
+L159Dec9_W1_test5<-filter(L159Dec9_W1,Minutes>21 & Minutes<=26)
+
+L161Dec9_W1_test5<-filter(L161Dec9_W1,Minutes>21 & Minutes<=26)
+#L162Dec9_W1_accl<-filter(L162Dec9_W1,Minutes<=21)
+#L162Dec9_W1_test<-filter(L162Dec9_W1,Minutes>21 & Minutes<=41)
+
+L165Dec9_W1_test5<-filter(L165Dec9_W1,Minutes>22 & Minutes<=27)
+
+L167Dec9_W1_test5<-filter(L167Dec9_W1,Minutes>21 & Minutes<=26)
+
+Dec9_W1_test5_BH<-rbind(L153Dec9_W1_test5,L156Dec9_W1_test5,L161Dec9_W1_test5,L165Dec9_W1_test5)
+Dec9_W1_test5_BH<-mutate(Dec9_W1_test5_BH,FieldType=rep("conditioned"))
+Dec9_W1_test5_NB<-rbind(L154Dec9_W1_test5,L159Dec9_W1_test5,L167Dec9_W1_test5)
+Dec9_W1_test5_NB<-mutate(Dec9_W1_test5_NB,FieldType=rep("control"))
+Dec9_W1_test5<-rbind(Dec9_W1_test5_BH,Dec9_W1_test5_NB)
+
+Dec9_W1_test5<-Dec9_W1_test5 %>% group_by(ID,Observer,FieldType) %>% summarise(TotalTimeEl=sum(TimeEl)) 
+```
+
+#Dec9 W1 ten mins
+
+```{r}
+library(dplyr)
+L153Dec9_W1_test10<-filter(L153Dec9_W1,Minutes>21 & Minutes<=31)
+
+L154Dec9_W1_test10<-filter(L154Dec9_W1,Minutes>22 & Minutes<=32)
+
+L156Dec9_W1_test10<-filter(L156Dec9_W1,Minutes>21 & Minutes<=31)
+
+L159Dec9_W1_test10<-filter(L159Dec9_W1,Minutes>21 & Minutes<=31)
+
+L161Dec9_W1_test10<-filter(L161Dec9_W1,Minutes>21 & Minutes<=31)
+#L162Dec9_W1_accl<-filter(L162Dec9_W1,Minutes<=21)
+#L162Dec9_W1_test<-filter(L162Dec9_W1,Minutes>21 & Minutes<=41)
+
+L165Dec9_W1_test10<-filter(L165Dec9_W1,Minutes>22 & Minutes<=32)
+
+L167Dec9_W1_test10<-filter(L167Dec9_W1,Minutes>21 & Minutes<=31)
+
+Dec9_W1_test10_BH<-rbind(L153Dec9_W1_test10,L156Dec9_W1_test10,L161Dec9_W1_test10,L165Dec9_W1_test10)
+Dec9_W1_test10_BH<-mutate(Dec9_W1_test10_BH,FieldType=rep("conditioned"))
+Dec9_W1_test10_NB<-rbind(L154Dec9_W1_test10,L159Dec9_W1_test10,L167Dec9_W1_test10)
+Dec9_W1_test10_NB<-mutate(Dec9_W1_test10_NB,FieldType=rep("control"))
+Dec9_W1_test10<-rbind(Dec9_W1_test10_BH,Dec9_W1_test10_NB)
+
+Dec9_W1_test10<-Dec9_W1_test10 %>% group_by(ID,Observer,FieldType) %>% summarise(TotalTimeEl=sum(TimeEl)) 
+```
+
+
+
 ```{r}
 library(dplyr)
 Dec9_W1_accl_BH<-rbind(L153Dec9_W1_accl,L156Dec9_W1_accl,L161Dec9_W1_accl,L165Dec9_W1_accl)
@@ -339,6 +399,63 @@ L167Dec9_W2_accl<-filter(L167Dec9_W2,Minutes<=21)
 L167Dec9_W2_test<-filter(L167Dec9_W2,Minutes>21 & Minutes<=41)
 ```
 
+
+Dec9 W2 five min test
+```{r}
+library(dplyr)
+L153Dec9_W2_test5<-filter(L153Dec9_W2,Minutes>21 & Minutes<=26)
+
+L154Dec9_W2_test5<-filter(L154Dec9_W2,Minutes>22 & Minutes<=27)
+
+L156Dec9_W2_test5<-filter(L156Dec9_W2,Minutes>21 & Minutes<=26)
+
+#L159Dec9_W2_test5<-filter(L159Dec9_W2,Minutes>21 & Minutes<=26)
+
+L161Dec9_W2_test5<-filter(L161Dec9_W2,Minutes>21 & Minutes<=26)
+#L162Dec9_W1_accl<-filter(L162Dec9_W1,Minutes<=21)
+#L162Dec9_W1_test<-filter(L162Dec9_W1,Minutes>21 & Minutes<=41)
+
+L165Dec9_W2_test5<-filter(L165Dec9_W2,Minutes>22 & Minutes<=27)
+
+L167Dec9_W2_test5<-filter(L167Dec9_W2,Minutes>21 & Minutes<=26)
+
+Dec9_W2_test5_BH<-rbind(L153Dec9_W2_test5,L156Dec9_W2_test5,L161Dec9_W2_test5,L165Dec9_W2_test5)
+Dec9_W2_test5_BH<-mutate(Dec9_W2_test5_BH,FieldType=rep("conditioned"))
+Dec9_W2_test5_NB<-rbind(L154Dec9_W2_test5,L167Dec9_W2_test5)
+Dec9_W2_test5_NB<-mutate(Dec9_W2_test5_NB,FieldType=rep("control"))
+Dec9_W2_test5<-rbind(Dec9_W2_test5_BH,Dec9_W2_test5_NB)
+
+Dec9_W2_test5<-Dec9_W2_test5 %>% group_by(ID,Observer,FieldType) %>% summarise(TotalTimeEl=sum(TimeEl)) 
+```
+
+Dec9 W2 ten min test
+```{r}
+library(dplyr)
+L153Dec9_W2_test10<-filter(L153Dec9_W2,Minutes>21 & Minutes<=31)
+
+L154Dec9_W2_test10<-filter(L154Dec9_W2,Minutes>22 & Minutes<=32)
+
+L156Dec9_W2_test10<-filter(L156Dec9_W2,Minutes>21 & Minutes<=31)
+
+#L159Dec9_W2_test5<-filter(L159Dec9_W2,Minutes>21 & Minutes<=26)
+
+L161Dec9_W2_test10<-filter(L161Dec9_W2,Minutes>21 & Minutes<=31)
+#L162Dec9_W1_accl<-filter(L162Dec9_W1,Minutes<=21)
+#L162Dec9_W1_test<-filter(L162Dec9_W1,Minutes>21 & Minutes<=41)
+
+L165Dec9_W2_test10<-filter(L165Dec9_W2,Minutes>22 & Minutes<=32)
+
+L167Dec9_W2_test10<-filter(L167Dec9_W2,Minutes>21 & Minutes<=31)
+
+Dec9_W2_test10_BH<-rbind(L153Dec9_W2_test10,L156Dec9_W2_test10,L161Dec9_W2_test10,L165Dec9_W2_test10)
+Dec9_W2_test10_BH<-mutate(Dec9_W2_test10_BH,FieldType=rep("conditioned"))
+Dec9_W2_test10_NB<-rbind(L154Dec9_W2_test10,L167Dec9_W2_test10)
+Dec9_W2_test10_NB<-mutate(Dec9_W2_test10_NB,FieldType=rep("control"))
+Dec9_W2_test10<-rbind(Dec9_W2_test10_BH,Dec9_W2_test10_NB)
+
+Dec9_W2_test10<-Dec9_W2_test10 %>% group_by(ID,Observer,FieldType) %>% summarise(TotalTimeEl=sum(TimeEl)) 
+```
+
 ```{r}
 Dec9_W2_accl_BH<-rbind(L153Dec9_W2_accl,L156Dec9_W2_accl,L165Dec9_W2_accl,L161Dec9_W2_accl)
 Dec9_W2_test_BH<-rbind(L153Dec9_W2_test,L156Dec9_W2_test,L165Dec9_W2_test,L161Dec9_W2_test)
@@ -506,6 +623,65 @@ L167Dec9_W3_accl<-filter(L167Dec9_W3,Minutes<=21)
 L167Dec9_W3_test<-filter(L167Dec9_W3,Minutes>21 & Minutes<=41)
 ```
 
+Dec9 W3 Five mins
+
+```{r}
+library(dplyr)
+L153Dec9_W3_test5<-filter(L153Dec9_W3,Minutes>21 & Minutes<=26)
+
+L154Dec9_W3_test5<-filter(L154Dec9_W3,Minutes>22 & Minutes<=27)
+
+L156Dec9_W3_test5<-filter(L156Dec9_W3,Minutes>21 & Minutes<=26)
+
+#L159Dec9_W3_test5<-filter(L159Dec9_W3,Minutes>21 & Minutes<=26)
+
+L161Dec9_W3_test5<-filter(L161Dec9_W3,Minutes>21 & Minutes<=26)
+
+L162Dec9_W3_test5<-filter(L162Dec9_W3,Minutes>21 & Minutes<=26)
+
+L165Dec9_W3_test5<-filter(L165Dec9_W3,Minutes>22 & Minutes<=27)
+
+L167Dec9_W3_test5<-filter(L167Dec9_W3,Minutes>21 & Minutes<=26)
+
+Dec9_W3_test5_BH<-rbind(L153Dec9_W3_test5,L156Dec9_W3_test5,L161Dec9_W3_test5,L165Dec9_W3_test5)
+Dec9_W3_test5_BH<-mutate(Dec9_W3_test5_BH,FieldType=rep("conditioned"))
+Dec9_W3_test5_NB<-rbind(L154Dec9_W3_test5,L162Dec9_W3_test5,L167Dec9_W3_test5)
+Dec9_W3_test5_NB<-mutate(Dec9_W3_test5_NB,FieldType=rep("control"))
+Dec9_W3_test5<-rbind(Dec9_W3_test5_BH,Dec9_W3_test5_NB)
+
+Dec9_W3_test5<-Dec9_W3_test5 %>% group_by(ID,Observer,FieldType) %>% summarise(TotalTimeEl=sum(TimeEl)) 
+```
+
+Dec9 W3 ten mins
+
+```{r}
+library(dplyr)
+L153Dec9_W3_test10<-filter(L153Dec9_W3,Minutes>21 & Minutes<=31)
+
+L154Dec9_W3_test10<-filter(L154Dec9_W3,Minutes>22 & Minutes<=32)
+
+L156Dec9_W3_test10<-filter(L156Dec9_W3,Minutes>21 & Minutes<=31)
+
+#L159Dec9_W3_test5<-filter(L159Dec9_W3,Minutes>21 & Minutes<=26)
+
+L161Dec9_W3_test10<-filter(L161Dec9_W3,Minutes>21 & Minutes<=31)
+
+L162Dec9_W3_test10<-filter(L162Dec9_W3,Minutes>21 & Minutes<=31)
+
+L165Dec9_W3_test10<-filter(L165Dec9_W3,Minutes>22 & Minutes<=32)
+
+L167Dec9_W3_test10<-filter(L167Dec9_W3,Minutes>21 & Minutes<=31)
+
+Dec9_W3_test10_BH<-rbind(L153Dec9_W3_test10,L156Dec9_W3_test10,L161Dec9_W3_test10,L165Dec9_W3_test10)
+Dec9_W3_test10_BH<-mutate(Dec9_W3_test10_BH,FieldType=rep("conditioned"))
+Dec9_W3_test10_NB<-rbind(L154Dec9_W3_test10,L162Dec9_W3_test10,L167Dec9_W3_test10)
+Dec9_W3_test10_NB<-mutate(Dec9_W3_test10_NB,FieldType=rep("control"))
+Dec9_W3_test10<-rbind(Dec9_W3_test10_BH,Dec9_W3_test10_NB)
+
+Dec9_W3_test10<-Dec9_W3_test10 %>% group_by(ID,Observer,FieldType) %>% summarise(TotalTimeEl=sum(TimeEl)) 
+```
+
+
 ```{r}
 Dec9_W3_accl_BH<-rbind(L153Dec9_W3_accl,L156Dec9_W3_accl,L161Dec9_W3_accl,L165Dec9_W3_accl)
 Dec9_W3_test_BH<-rbind(L153Dec9_W3_test,L156Dec9_W3_test,L161Dec9_W3_test,L165Dec9_W3_test)
@@ -666,6 +842,64 @@ L166Dec10_W1_accl<-filter(L166Dec10_W1,Minutes<=23)
 L166Dec10_W1_test<-filter(L166Dec10_W1,Minutes>23 & Minutes<=43)
 L168Dec10_W1_accl<-filter(L168Dec10_W1,Minutes<=24)
 L168Dec10_W1_test<-filter(L168Dec10_W1,Minutes>24 & Minutes<=44)
+```
+
+Dec10 W five min test
+
+```{r}
+library(dplyr)
+L155Dec10_W1_test5<-filter(L155Dec10_W1,Minutes>21 & Minutes<=26)
+
+L157Dec10_W1_test5<-filter(L157Dec10_W1,Minutes>21 & Minutes<=26)
+
+L158Dec10_W1_test5<-filter(L158Dec10_W1,Minutes>22 & Minutes<=27)
+
+L160Dec10_W1_test5<-filter(L160Dec10_W1,Minutes>20 & Minutes<=25)
+
+L163Dec10_W1_test5<-filter(L163Dec10_W1,Minutes>21 & Minutes<=26)
+
+L164Dec10_W1_test5<-filter(L164Dec10_W1,Minutes>22 & Minutes<=27)
+
+L166Dec10_W1_test5<-filter(L166Dec10_W1,Minutes>23 & Minutes<=28)
+
+L168Dec10_W1_test5<-filter(L168Dec10_W1,Minutes>24 & Minutes<=29)
+
+Dec10_W1_test5_BH<-rbind(L157Dec10_W1_test5,L160Dec10_W1_test5,L164Dec10_W1_test5,L168Dec10_W1_test5)
+Dec10_W1_test5_BH<-mutate(Dec10_W1_test5_BH,FieldType=rep("control"))
+Dec10_W1_test5_NB<-rbind(L155Dec10_W1_test5,L158Dec10_W1_test5,L163Dec10_W1_test5,L166Dec10_W1_test5)
+Dec10_W1_test5_NB<-mutate(Dec10_W1_test5_NB,FieldType=rep("conditioned"))
+Dec10_W1_test5<-rbind(Dec10_W1_test5_BH,Dec10_W1_test5_NB)
+
+Dec10_W1_test5<-Dec10_W1_test5 %>% group_by(ID,Observer,FieldType) %>% summarise(TotalTimeEl=sum(TimeEl)) 
+```
+
+Dec10 Wten min test
+
+```{r}
+library(dplyr)
+L155Dec10_W1_test10<-filter(L155Dec10_W1,Minutes>21 & Minutes<=31)
+
+L157Dec10_W1_test10<-filter(L157Dec10_W1,Minutes>21 & Minutes<=31)
+
+L158Dec10_W1_test10<-filter(L158Dec10_W1,Minutes>22 & Minutes<=32)
+
+L160Dec10_W1_test10<-filter(L160Dec10_W1,Minutes>20 & Minutes<=30)
+
+L163Dec10_W1_test10<-filter(L163Dec10_W1,Minutes>21 & Minutes<=31)
+
+L164Dec10_W1_test10<-filter(L164Dec10_W1,Minutes>22 & Minutes<=32)
+
+L166Dec10_W1_test10<-filter(L166Dec10_W1,Minutes>23 & Minutes<=33)
+
+L168Dec10_W1_test10<-filter(L168Dec10_W1,Minutes>24 & Minutes<=34)
+
+Dec10_W1_test10_BH<-rbind(L157Dec10_W1_test10,L160Dec10_W1_test10,L164Dec10_W1_test10,L168Dec10_W1_test10)
+Dec10_W1_test10_BH<-mutate(Dec10_W1_test10_BH,FieldType=rep("control"))
+Dec10_W1_test10_NB<-rbind(L155Dec10_W1_test10,L158Dec10_W1_test10,L163Dec10_W1_test10,L166Dec10_W1_test10)
+Dec10_W1_test10_NB<-mutate(Dec10_W1_test10_NB,FieldType=rep("conditioned"))
+Dec10_W1_test10<-rbind(Dec10_W1_test10_BH,Dec10_W1_test10_NB)
+
+Dec10_W1_test10<-Dec10_W1_test10 %>% group_by(ID,Observer,FieldType) %>% summarise(TotalTimeEl=sum(TimeEl)) 
 ```
 
 ```{r}
@@ -837,6 +1071,64 @@ L168Dec10_W2_accl<-filter(L168Dec10_W2,Minutes<=24)
 L168Dec10_W2_test<-filter(L168Dec10_W2,Minutes>24 & Minutes<=44)
 ```
 
+Dec10 W2 Test 5 mins 
+```{r}
+library(dplyr)
+L155Dec10_W2_test5<-filter(L155Dec10_W2,Minutes>21 & Minutes<=26)
+
+L157Dec10_W2_test5<-filter(L157Dec10_W2,Minutes>21 & Minutes<=26)
+
+L158Dec10_W2_test5<-filter(L158Dec10_W2,Minutes>22 & Minutes<=27)
+
+L160Dec10_W2_test5<-filter(L160Dec10_W2,Minutes>20 & Minutes<=25)
+
+L163Dec10_W2_test5<-filter(L163Dec10_W2,Minutes>21 & Minutes<=26)
+
+L164Dec10_W2_test5<-filter(L164Dec10_W2,Minutes>22 & Minutes<=27)
+
+L166Dec10_W2_test5<-filter(L166Dec10_W2,Minutes>23 & Minutes<=28)
+
+L168Dec10_W2_test5<-filter(L168Dec10_W2,Minutes>24 & Minutes<=29)
+
+Dec10_W2_test5_BH<-rbind(L157Dec10_W2_test5,L160Dec10_W2_test5,L164Dec10_W2_test5,L168Dec10_W2_test5)
+Dec10_W2_test5_BH<-mutate(Dec10_W2_test5_BH,FieldType=rep("control"))
+Dec10_W2_test5_NB<-rbind(L155Dec10_W2_test5,L158Dec10_W2_test5,L163Dec10_W2_test5,L166Dec10_W2_test5)
+Dec10_W2_test5_NB<-mutate(Dec10_W2_test5_NB,FieldType=rep("conditioned"))
+Dec10_W2_test5<-rbind(Dec10_W2_test5_BH,Dec10_W2_test5_NB)
+
+Dec10_W2_test5<-Dec10_W2_test5 %>% group_by(ID,Observer,FieldType) %>% summarise(TotalTimeEl=sum(TimeEl)) 
+```
+
+
+Dec10 W2 Test 10 mins 
+```{r}
+library(dplyr)
+L155Dec10_W2_test10<-filter(L155Dec10_W2,Minutes>21 & Minutes<=31)
+
+L157Dec10_W2_test10<-filter(L157Dec10_W2,Minutes>21 & Minutes<=31)
+
+L158Dec10_W2_test10<-filter(L158Dec10_W2,Minutes>22 & Minutes<=32)
+
+L160Dec10_W2_test10<-filter(L160Dec10_W2,Minutes>20 & Minutes<=30)
+
+L163Dec10_W2_test10<-filter(L163Dec10_W2,Minutes>21 & Minutes<=31)
+
+L164Dec10_W2_test10<-filter(L164Dec10_W2,Minutes>22 & Minutes<=32)
+
+L166Dec10_W2_test10<-filter(L166Dec10_W2,Minutes>23 & Minutes<=33)
+
+L168Dec10_W2_test10<-filter(L168Dec10_W2,Minutes>24 & Minutes<=34)
+
+Dec10_W2_test10_BH<-rbind(L157Dec10_W2_test10,L160Dec10_W2_test10,L164Dec10_W2_test10,L168Dec10_W2_test10)
+Dec10_W2_test10_BH<-mutate(Dec10_W2_test10_BH,FieldType=rep("control"))
+Dec10_W2_test10_NB<-rbind(L155Dec10_W2_test10,L158Dec10_W2_test10,L163Dec10_W2_test10,L166Dec10_W2_test10)
+Dec10_W2_test10_NB<-mutate(Dec10_W2_test10_NB,FieldType=rep("conditioned"))
+Dec10_W2_test10<-rbind(Dec10_W2_test10_BH,Dec10_W2_test10_NB)
+
+Dec10_W2_test10<-Dec10_W2_test10 %>% group_by(ID,Observer,FieldType) %>% summarise(TotalTimeEl=sum(TimeEl)) 
+```
+
+
 ```{r}
 Dec10_W2_accl_BH<-rbind(L157Dec10_W2_accl,L160Dec10_W2_accl,L164Dec10_W2_accl,L168Dec10_W2_accl)
 Dec10_W2_test_BH<-rbind(L157Dec10_W2_test,L160Dec10_W2_test,L164Dec10_W2_test,L168Dec10_W2_test)
@@ -997,6 +1289,65 @@ L166Dec10_W3_test<-filter(L166Dec10_W3,Minutes>23 & Minutes<=43)
 L168Dec10_W3_accl<-filter(L168Dec10_W3,Minutes<=24)
 L168Dec10_W3_test<-filter(L168Dec10_W3,Minutes>24 & Minutes<=44)
 ```
+
+Dec10 W3 test 5 mins
+
+```{r}
+library(dplyr)
+L155Dec10_W3_test5<-filter(L155Dec10_W3,Minutes>21 & Minutes<=26)
+
+L157Dec10_W3_test5<-filter(L157Dec10_W3,Minutes>21 & Minutes<=26)
+
+L158Dec10_W3_test5<-filter(L158Dec10_W3,Minutes>22 & Minutes<=27)
+
+L160Dec10_W3_test5<-filter(L160Dec10_W3,Minutes>20 & Minutes<=25)
+
+L163Dec10_W3_test5<-filter(L163Dec10_W3,Minutes>21 & Minutes<=26)
+
+L164Dec10_W3_test5<-filter(L164Dec10_W3,Minutes>22 & Minutes<=27)
+
+L166Dec10_W3_test5<-filter(L166Dec10_W3,Minutes>23 & Minutes<=28)
+
+L168Dec10_W3_test5<-filter(L168Dec10_W3,Minutes>24 & Minutes<=29)
+
+Dec10_W3_test5_BH<-rbind(L157Dec10_W3_test5,L160Dec10_W3_test5,L164Dec10_W3_test5,L168Dec10_W3_test5)
+Dec10_W3_test5_BH<-mutate(Dec10_W3_test5_BH,FieldType=rep("control"))
+Dec10_W3_test5_NB<-rbind(L155Dec10_W3_test5,L158Dec10_W3_test5,L163Dec10_W3_test5,L166Dec10_W3_test5)
+Dec10_W3_test5_NB<-mutate(Dec10_W3_test5_NB,FieldType=rep("conditioned"))
+Dec10_W3_test5<-rbind(Dec10_W3_test5_BH,Dec10_W3_test5_NB)
+
+Dec10_W3_test5<-Dec10_W3_test5 %>% group_by(ID,Observer,FieldType) %>% summarise(TotalTimeEl=sum(TimeEl)) 
+```
+
+Dec10 W3 test 10 mins
+
+```{r}
+library(dplyr)
+L155Dec10_W3_test10<-filter(L155Dec10_W3,Minutes>21 & Minutes<=31)
+
+L157Dec10_W3_test10<-filter(L157Dec10_W3,Minutes>21 & Minutes<=31)
+
+L158Dec10_W3_test10<-filter(L158Dec10_W3,Minutes>22 & Minutes<=32)
+
+L160Dec10_W3_test10<-filter(L160Dec10_W3,Minutes>20 & Minutes<=30)
+
+L163Dec10_W3_test10<-filter(L163Dec10_W3,Minutes>21 & Minutes<=31)
+
+L164Dec10_W3_test10<-filter(L164Dec10_W3,Minutes>22 & Minutes<=32)
+
+L166Dec10_W3_test10<-filter(L166Dec10_W3,Minutes>23 & Minutes<=33)
+
+L168Dec10_W3_test10<-filter(L168Dec10_W3,Minutes>24 & Minutes<=34)
+
+Dec10_W3_test10_BH<-rbind(L157Dec10_W3_test10,L160Dec10_W3_test10,L164Dec10_W3_test10,L168Dec10_W3_test10)
+Dec10_W3_test10_BH<-mutate(Dec10_W3_test10_BH,FieldType=rep("control"))
+Dec10_W3_test10_NB<-rbind(L155Dec10_W3_test10,L158Dec10_W3_test10,L163Dec10_W3_test10,L166Dec10_W3_test10)
+Dec10_W3_test10_NB<-mutate(Dec10_W3_test10_NB,FieldType=rep("conditioned"))
+Dec10_W3_test10<-rbind(Dec10_W3_test10_BH,Dec10_W3_test5_NB)
+
+Dec10_W3_test10<-Dec10_W3_test10 %>% group_by(ID,Observer,FieldType) %>% summarise(TotalTimeEl=sum(TimeEl)) 
+```
+
 
 ```{r}
 Dec10_W3_accl_BH<-rbind(L157Dec10_W3_accl,L160Dec10_W3_accl,L164Dec10_W3_accl,L168Dec10_W3_accl)
@@ -1163,6 +1514,64 @@ L167Dec11_W1_accl<-filter(L167Dec11_W1,Minutes<=21)
 L167Dec11_W1_test<-filter(L167Dec11_W1,Minutes>21 & Minutes<=41)
 ```
 
+Dec11 W1 test 5 mins
+
+```{r}
+library(dplyr)
+L153Dec11_W1_test5<-filter(L153Dec11_W1,Minutes>22 & Minutes<=27)
+
+L154Dec11_W1_test5<-filter(L154Dec11_W1,Minutes>22 & Minutes<=27)
+
+L156Dec11_W1_test5<-filter(L156Dec11_W1,Minutes>21 & Minutes<=26)
+
+L159Dec11_W1_test5<-filter(L159Dec11_W1,Minutes>23 & Minutes<=28)
+
+L161Dec11_W1_test5<-filter(L161Dec11_W1,Minutes>23 & Minutes<=28)
+
+L162Dec11_W1_test5<-filter(L162Dec11_W1,Minutes>24 & Minutes<=29)
+
+L165Dec11_W1_test5<-filter(L165Dec11_W1,Minutes>21 & Minutes<=26)
+
+L167Dec11_W1_test5<-filter(L167Dec11_W1,Minutes>21 & Minutes<=26)
+
+Dec11_W1_test5_BH<-rbind(L154Dec11_W1_test5,L159Dec11_W1_test5,L162Dec11_W1_test5,L167Dec11_W1_test5)
+Dec11_W1_test5_BH<-mutate(Dec11_W1_test5_BH,FieldType=rep("conditioned"))
+Dec11_W1_test5_NB<-rbind(L153Dec11_W1_test5,L156Dec11_W1_test5,L161Dec11_W1_test5,L165Dec11_W1_test5)
+Dec11_W1_test5_NB<-mutate(Dec11_W1_test5_NB,FieldType=rep("control"))
+Dec11_W1_test5<-rbind(Dec11_W1_test5_BH,Dec11_W1_test5_NB)
+
+Dec11_W1_test5<-Dec11_W1_test5 %>% group_by(ID,Observer,FieldType) %>% summarise(TotalTimeEl=sum(TimeEl)) 
+```
+
+
+Dec11 W1 test 10 mins
+
+```{r}
+library(dplyr)
+L153Dec11_W1_test10<-filter(L153Dec11_W1,Minutes>22 & Minutes<=27)
+
+L154Dec11_W1_test10<-filter(L154Dec11_W1,Minutes>22 & Minutes<=27)
+
+L156Dec11_W1_test10<-filter(L156Dec11_W1,Minutes>21 & Minutes<=26)
+
+L159Dec11_W1_test10<-filter(L159Dec11_W1,Minutes>23 & Minutes<=28)
+
+L161Dec11_W1_test10<-filter(L161Dec11_W1,Minutes>23 & Minutes<=28)
+
+L162Dec11_W1_test10<-filter(L162Dec11_W1,Minutes>24 & Minutes<=29)
+
+L165Dec11_W1_test10<-filter(L165Dec11_W1,Minutes>21 & Minutes<=26)
+
+L167Dec11_W1_test10<-filter(L167Dec11_W1,Minutes>21 & Minutes<=26)
+
+Dec11_W1_test10_BH<-rbind(L154Dec11_W1_test10,L159Dec11_W1_test10,L162Dec11_W1_test10,L167Dec11_W1_test10)
+Dec11_W1_test10_BH<-mutate(Dec11_W1_test10_BH,FieldType=rep("conditioned"))
+Dec11_W1_test10_NB<-rbind(L153Dec11_W1_test10,L156Dec11_W1_test10,L161Dec11_W1_test10,L165Dec11_W1_test10)
+Dec11_W1_test10_NB<-mutate(Dec11_W1_test10_NB,FieldType=rep("control"))
+Dec11_W1_test10<-rbind(Dec11_W1_test10_BH,Dec11_W1_test10_NB)
+
+Dec11_W1_test5<-Dec11_W1_test5 %>% group_by(ID,Observer,FieldType) %>% summarise(TotalTimeEl=sum(TimeEl)) 
+```
 
 ```{r}
 Dec11_W1_accl_BH<-rbind(L154Dec11_W1_accl,L159Dec11_W1_accl,L162Dec11_W1_accl,L167Dec11_W1_accl)
@@ -1327,6 +1736,37 @@ L167Dec11_W2_accl<-filter(L167Dec11_W2,Minutes<=21)
 L167Dec11_W2_test<-filter(L167Dec11_W2,Minutes>21 & Minutes<=41)
 ```
 
+
+Dec11 W2 test 5 mins
+
+```{r}
+library(dplyr)
+L153Dec11_W2_test5<-filter(L153Dec11_W2,Minutes>22 & Minutes<=27)
+
+L154Dec11_W2_test5<-filter(L154Dec11_W2,Minutes>22 & Minutes<=27)
+
+L156Dec11_W2_test5<-filter(L156Dec11_W2,Minutes>21 & Minutes<=26)
+
+L159Dec11_W2_test5<-filter(L159Dec11_W2,Minutes>23 & Minutes<=28)
+
+L161Dec11_W2_test5<-filter(L161Dec11_W2,Minutes>23 & Minutes<=28)
+
+L162Dec11_W2_test5<-filter(L162Dec11_W2,Minutes>24 & Minutes<=29)
+
+L165Dec11_W2_test5<-filter(L165Dec11_W2,Minutes>21 & Minutes<=26)
+
+L167Dec11_W2_test5<-filter(L167Dec11_W2,Minutes>21 & Minutes<=26)
+
+Dec11_W2_test5_BH<-rbind(L154Dec11_W2_test5,L159Dec11_W2_test5,L162Dec11_W2_test5,L167Dec11_W2_test5)
+Dec11_W2_test5_BH<-mutate(Dec11_W2_test5_BH,FieldType=rep("conditioned"))
+Dec11_W2_test5_NB<-rbind(L153Dec11_W2_test5,L156Dec11_W2_test5,L161Dec11_W2_test5,L165Dec11_W2_test5)
+Dec11_W2_test5_NB<-mutate(Dec11_W2_test5_NB,FieldType=rep("control"))
+Dec11_W2_test5<-rbind(Dec11_W2_test5_BH,Dec11_W2_test5_NB)
+
+Dec11_W2_test5<-Dec11_W2_test5 %>% group_by(ID,Observer,FieldType) %>% summarise(TotalTimeEl=sum(TimeEl)) 
+```
+
+
 ```{r}
 Dec11_W2_accl_BH<-rbind(L154Dec11_W2_accl,L159Dec11_W2_accl,L162Dec11_W2_accl,L167Dec11_W2_accl)
 Dec11_W2_test_BH<-rbind(L154Dec11_W2_test,L159Dec11_W2_test,L162Dec11_W2_test,L167Dec11_W2_test)
@@ -1489,6 +1929,37 @@ L165Dec11_W3_test<-filter(L165Dec11_W3,Minutes>21 & Minutes<=41)
 L167Dec11_W3_accl<-filter(L167Dec11_W3,Minutes<=21)
 L167Dec11_W3_test<-filter(L167Dec11_W3,Minutes>21 & Minutes<=41)
 ```
+
+
+Dec11 W3 test 5 mins
+
+```{r}
+library(dplyr)
+L153Dec11_W3_test5<-filter(L153Dec11_W3,Minutes>22 & Minutes<=27)
+
+L154Dec11_W3_test5<-filter(L154Dec11_W3,Minutes>22 & Minutes<=27)
+
+#L156Dec11_W3_test5<-filter(L156Dec11_W3,Minutes>21 & Minutes<=26)
+
+L159Dec11_W3_test5<-filter(L159Dec11_W3,Minutes>23 & Minutes<=28)
+
+L161Dec11_W3_test5<-filter(L161Dec11_W3,Minutes>23 & Minutes<=28)
+
+L162Dec11_W3_test5<-filter(L162Dec11_W3,Minutes>24 & Minutes<=29)
+
+L165Dec11_W3_test5<-filter(L165Dec11_W3,Minutes>21 & Minutes<=26)
+
+L167Dec11_W3_test5<-filter(L167Dec11_W3,Minutes>21 & Minutes<=26)
+
+Dec11_W3_test5_BH<-rbind(L154Dec11_W3_test5,L159Dec11_W3_test5,L162Dec11_W3_test5,L167Dec11_W3_test5)
+Dec11_W3_test5_BH<-mutate(Dec11_W3_test5_BH,FieldType=rep("conditioned"))
+Dec11_W3_test5_NB<-rbind(L153Dec11_W3_test5,L161Dec11_W3_test5,L165Dec11_W3_test5)
+Dec11_W3_test5_NB<-mutate(Dec11_W3_test5_NB,FieldType=rep("control"))
+Dec11_W3_test5<-rbind(Dec11_W3_test5_BH,Dec11_W3_test5_NB)
+
+Dec11_W3_test5<-Dec11_W3_test5 %>% group_by(ID,Observer,FieldType) %>% summarise(TotalTimeEl=sum(TimeEl)) 
+```
+
 
 ```{r}
 Dec11_W3_accl_BH<-rbind(L154Dec11_W3_accl,L159Dec11_W3_accl,L162Dec11_W3_accl,L167Dec11_W3_accl)
@@ -1658,6 +2129,37 @@ L168Dec12_W1_accl<-filter(L168Dec12_W1,Minutes<=22)
 L168Dec12_W1_test<-filter(L168Dec12_W1,Minutes>22 & Minutes<=42)
 ```
 
+
+Dec12 W1 test 5 mins
+
+```{r}
+library(dplyr)
+L155Dec12_W1_test5<-filter(L155Dec12_W1,Minutes>22 & Minutes<=27)
+
+L157Dec12_W1_test5<-filter(L157Dec12_W1,Minutes>22 & Minutes<=27)
+
+#L158Dec12_W1_test5<-filter(L158Dec12_W1,Minutes>21 & Minutes<=26)
+
+L160Dec12_W1_test5<-filter(L160Dec12_W1,Minutes>21 & Minutes<=26)
+
+L163Dec12_W1_test5<-filter(L163Dec12_W1,Minutes>20 & Minutes<=25)
+
+L164Dec12_W1_test5<-filter(L164Dec12_W1,Minutes>21 & Minutes<=26)
+
+L166Dec12_W1_test5<-filter(L166Dec12_W1,Minutes>25 & Minutes<=30)
+
+L168Dec12_W1_test5<-filter(L168Dec12_W1,Minutes>22 & Minutes<=27)
+
+Dec12_W1_test5_BH<-rbind(L155Dec12_W1_test5,L163Dec12_W1_test5,L166Dec12_W1_test5)
+Dec12_W1_test5_BH<-mutate(Dec12_W1_test5_BH,FieldType=rep("control"))
+Dec12_W1_test5_NB<-rbind(L157Dec12_W1_test5,L160Dec12_W1_test5,L164Dec12_W1_test5,L168Dec12_W1_test5)
+Dec12_W1_test5_NB<-mutate(Dec12_W1_test5_NB,FieldType=rep("conditioned"))
+Dec12_W1_test5<-rbind(Dec12_W1_test5_BH,Dec12_W1_test5_NB)
+
+Dec12_W1_test5<-Dec12_W1_test5 %>% group_by(ID,Observer,FieldType) %>% summarise(TotalTimeEl=sum(TimeEl)) 
+```
+
+
 ```{r}
 Dec12_W1_accl_BH<-rbind(L155Dec12_W1_accl,L163Dec12_W1_accl,L166Dec12_W1_accl)
 Dec12_W1_test_BH<-rbind(L155Dec12_W1_test,L163Dec12_W1_test,L166Dec12_W1_test)
@@ -1823,6 +2325,39 @@ L168Dec12_W2_accl<-filter(L168Dec12_W2,Minutes<=22)
 L168Dec12_W2_test<-filter(L168Dec12_W2,Minutes>22 & Minutes<=42)
 ```
 
+
+Dec12 W2 test 5 mins
+
+```{r}
+library(dplyr)
+L155Dec12_W2_test5<-filter(L155Dec12_W2,Minutes>22 & Minutes<=27)
+
+L157Dec12_W2_test5<-filter(L157Dec12_W2,Minutes>22 & Minutes<=27)
+
+L158Dec12_W2_test5<-filter(L158Dec12_W2,Minutes>21 & Minutes<=26)
+
+L160Dec12_W2_test5<-filter(L160Dec12_W2,Minutes>21 & Minutes<=26)
+
+L163Dec12_W2_test5<-filter(L163Dec12_W2,Minutes>20 & Minutes<=25)
+
+L164Dec12_W2_test5<-filter(L164Dec12_W2,Minutes>21 & Minutes<=26)
+
+L166Dec12_W2_test5<-filter(L166Dec12_W2,Minutes>25 & Minutes<=30)
+
+L168Dec12_W2_test5<-filter(L168Dec12_W2,Minutes>22 & Minutes<=27)
+
+Dec12_W2_test5_BH<-rbind(L155Dec12_W2_test5,L158Dec12_W2_test5,L163Dec12_W2_test5,L166Dec12_W2_test5)
+Dec12_W2_test5_BH<-mutate(Dec12_W2_test5_BH,FieldType=rep("control"))
+Dec12_W2_test5_NB<-rbind(L157Dec12_W2_test5,L160Dec12_W2_test5,L164Dec12_W2_test5,L168Dec12_W2_test5)
+Dec12_W2_test5_NB<-mutate(Dec12_W2_test5_NB,FieldType=rep("conditioned"))
+Dec12_W2_test5<-rbind(Dec12_W2_test5_BH,Dec12_W2_test5_NB)
+
+Dec12_W2_test5<-Dec12_W2_test5 %>% group_by(ID,Observer,FieldType) %>% summarise(TotalTimeEl=sum(TimeEl)) 
+```
+
+
+
+
 ```{r}
 Dec12_W2_accl_BH<-rbind(L155Dec12_W2_accl,L158Dec12_W2_accl,L163Dec12_W2_accl,L166Dec12_W2_accl)
 Dec12_W2_test_BH<-rbind(L155Dec12_W2_test,L158Dec12_W2_test,L163Dec12_W2_test,L166Dec12_W2_test)
@@ -1984,6 +2519,36 @@ L166Dec12_W3_test<-filter(L166Dec12_W3,Minutes>25 & Minutes<=45)
 L168Dec12_W3_accl<-filter(L168Dec12_W3,Minutes<=22)
 L168Dec12_W3_test<-filter(L168Dec12_W3,Minutes>22 & Minutes<=42)
 ```
+
+Dec12 W3 test 5 mins
+
+```{r}
+library(dplyr)
+L155Dec12_W3_test5<-filter(L155Dec12_W2,Minutes>22 & Minutes<=27)
+
+L157Dec12_W3_test5<-filter(L157Dec12_W2,Minutes>22 & Minutes<=27)
+
+L158Dec12_W3_test5<-filter(L158Dec12_W2,Minutes>21 & Minutes<=26)
+
+L160Dec12_W3_test5<-filter(L160Dec12_W2,Minutes>21 & Minutes<=26)
+
+L163Dec12_W3_test5<-filter(L163Dec12_W2,Minutes>20 & Minutes<=25)
+
+L164Dec12_W3_test5<-filter(L164Dec12_W2,Minutes>21 & Minutes<=26)
+
+L166Dec12_W3_test5<-filter(L166Dec12_W2,Minutes>25 & Minutes<=30)
+
+L168Dec12_W3_test5<-filter(L168Dec12_W2,Minutes>22 & Minutes<=27)
+
+Dec12_W3_test5_BH<-rbind(L155Dec12_W3_test5,L158Dec12_W3_test5,L163Dec12_W3_test5,L166Dec12_W3_test5)
+Dec12_W3_test5_BH<-mutate(Dec12_W3_test5_BH,FieldType=rep("control"))
+Dec12_W3_test5_NB<-rbind(L157Dec12_W3_test5,L160Dec12_W3_test5,L164Dec12_W3_test5,L168Dec12_W3_test5)
+Dec12_W3_test5_NB<-mutate(Dec12_W3_test5_NB,FieldType=rep("conditioned"))
+Dec12_W3_test5<-rbind(Dec12_W3_test5_BH,Dec12_W3_test5_NB)
+
+Dec12_W3_test5<-Dec12_W3_test5 %>% group_by(ID,Observer,FieldType) %>% summarise(TotalTimeEl=sum(TimeEl)) 
+```
+
 
 ```{r}
 Dec12_W3_accl_BH<-rbind(L155Dec12_W3_accl,L158Dec12_W3_accl,L163Dec12_W3_accl,L166Dec12_W3_accl)
@@ -2215,6 +2780,72 @@ L159Dec13_W3_accl<-filter(L159Dec13_W3,Minutes<=21)
 L159Dec13_W3_test<-filter(L159Dec13_W3,Minutes>21 & Minutes<=41)
 ```
 
+Dec13 W1 5 mins test
+
+```{r}
+library(dplyr)
+L153Dec13_W1_test5<-filter(L153Dec13_W1,Minutes>21 & Minutes<=26)
+
+L154Dec13_W1_test5<-filter(L154Dec13_W1,Minutes>21 & Minutes<=26)
+
+L156Dec13_W1_test5<-filter(L156Dec13_W1,Minutes>21 & Minutes<=26)
+
+L159Dec13_W1_test5<-filter(L159Dec13_W1,Minutes>21 & Minutes<=26)
+
+
+Dec13_W1_test5_BH<-rbind(L154Dec13_W1_test5,L159Dec13_W1_test5)
+Dec13_W1_test5_BH<-mutate(Dec13_W1_test5_BH,FieldType=rep("conditioned"))
+Dec13_W1_test5_NB<-rbind(L153Dec13_W1_test5,L156Dec13_W1_test5)
+Dec13_W1_test5_NB<-mutate(Dec13_W1_test5_NB,FieldType=rep("control"))
+Dec13_W1_test5<-rbind(Dec13_W1_test5_BH,Dec13_W1_test5_NB)
+
+Dec13_W1_test5<-Dec13_W1_test5 %>% group_by(ID,Observer,FieldType) %>% summarise(TotalTimeEl=sum(TimeEl)) 
+```
+
+
+Dec13 W2 test 5 mins
+```{r}
+library(dplyr)
+L153Dec13_W2_test5<-filter(L153Dec13_W1,Minutes>21 & Minutes<=26)
+
+L154Dec13_W2_test5<-filter(L154Dec13_W1,Minutes>21 & Minutes<=26)
+
+L156Dec13_W2_test5<-filter(L156Dec13_W1,Minutes>21 & Minutes<=26)
+
+L159Dec13_W2_test5<-filter(L159Dec13_W1,Minutes>21 & Minutes<=26)
+
+
+Dec13_W2_test5_BH<-rbind(L154Dec13_W2_test5,L159Dec13_W2_test5)
+Dec13_W2_test5_BH<-mutate(Dec13_W2_test5_BH,FieldType=rep("conditioned"))
+Dec13_W2_test5_NB<-rbind(L153Dec13_W2_test5,L156Dec13_W2_test5)
+Dec13_W2_test5_NB<-mutate(Dec13_W2_test5_NB,FieldType=rep("control"))
+Dec13_W2_test5<-rbind(Dec13_W2_test5_BH,Dec13_W2_test5_NB)
+
+Dec13_W2_test5<-Dec13_W2_test5 %>% group_by(ID,Observer,FieldType) %>% summarise(TotalTimeEl=sum(TimeEl)) 
+```
+
+Dec13 W3 test 5 mins
+```{r}
+library(dplyr)
+L153Dec13_W3_test5<-filter(L153Dec13_W3,Minutes>21 & Minutes<=26)
+
+L154Dec13_W3_test5<-filter(L154Dec13_W3,Minutes>21 & Minutes<=26)
+
+L156Dec13_W3_test5<-filter(L156Dec13_W3,Minutes>21 & Minutes<=26)
+
+L159Dec13_W3_test5<-filter(L159Dec13_W3,Minutes>21 & Minutes<=26)
+
+
+Dec13_W3_test5_BH<-rbind(L154Dec13_W3_test5,L159Dec13_W3_test5)
+Dec13_W3_test5_BH<-mutate(Dec13_W3_test5_BH,FieldType=rep("conditioned"))
+Dec13_W3_test5_NB<-rbind(L153Dec13_W3_test5,L156Dec13_W3_test5)
+Dec13_W3_test5_NB<-mutate(Dec13_W3_test5_NB,FieldType=rep("control"))
+Dec13_W3_test5<-rbind(Dec13_W3_test5_BH,Dec13_W3_test5_NB)
+
+Dec13_W3_test5<-Dec13_W3_test5 %>% group_by(ID,Observer,FieldType) %>% summarise(TotalTimeEl=sum(TimeEl)) 
+```
+
+
 ```{r}
 Dec13_W1_accl_BH<-rbind(L154Dec13_W1_accl,L159Dec13_W1_accl)
 Dec13_W1_test_BH<-rbind(L154Dec13_W1_test,L159Dec13_W1_test)
@@ -2358,6 +2989,29 @@ Dec9_W_Test<-filter(Dec9_W,TimePer=="test")
 
 
 
+##Dec9 Five mins
+
+```{r Dec9}
+library(dplyr)
+Dec9_W_Avg5<-full_join(Dec9_W1_test5,Dec9_W3_test5,by=c("ID","FieldType"),na.rm=T)
+Dec9_W_Avg5<-full_join(Dec9_W_Avg5,Dec9_W2_test5,by=c("ID","FieldType"),na.rm=T)
+Dec9_W_Avg5[is.na(Dec9_W_Avg5)]<- 0
+Dec9_W_Avg5$TotalTimeEl<-as.numeric(Dec9_W_Avg5$TotalTimeEl)
+Dec9_W_Avg5$TotalTimeEl.x<-as.numeric(Dec9_W_Avg5$TotalTimeEl.x)
+Dec9_W_Avg5$TotalTimeEl.y<-as.numeric(Dec9_W_Avg5$TotalTimeEl.y)
+dropnotneeded<-c("Observer.x","Observer.y","Observer")
+Dec9_W_Avg5<-Dec9_W_Avg5[ , !(names(Dec9_W_Avg5) %in% dropnotneeded)]
+Dec9_W_Avg5$Freq <- rowMeans(Dec9_W_Avg5[,3:5])
+dropnotneeded<-c("TotalTimeEl.x","TotalTimeEl.y","TotalTimeEl")
+Dec9_W_Avg5<-Dec9_W_Avg5[ , !(names(Dec9_W_Avg5) %in% dropnotneeded)] 
+
+L162_5<-data.frame("L162","control",0)
+names(L162_5)<-c("ID","FieldType","Freq")
+Dec9_W_Avg5<-rbind(Dec9_W_Avg5,L162_5)
+```
+
+
+
 ###Dec10
 ```{r}
 library(dplyr)
@@ -2377,6 +3031,22 @@ Dec10_W<-Dec10_W_Avg[ , !(names(Dec10_W_Avg) %in% dropnotneeded)]
 Dec10_W_Test<-filter(Dec10_W,TimePer=="test")
 ```
 
+#Dec10 five mins
+
+```{r Dec9}
+library(dplyr)
+Dec10_W_Avg5<-full_join(Dec10_W1_test5,Dec10_W3_test5,by=c("ID","FieldType"),na.rm=T)
+Dec10_W_Avg5<-full_join(Dec10_W_Avg5,Dec10_W2_test5,by=c("ID","FieldType"),na.rm=T)
+Dec10_W_Avg5[is.na(Dec10_W_Avg5)]<- 0
+Dec10_W_Avg5$TotalTimeEl<-as.numeric(Dec10_W_Avg5$TotalTimeEl)
+Dec10_W_Avg5$TotalTimeEl.x<-as.numeric(Dec10_W_Avg5$TotalTimeEl.x)
+Dec10_W_Avg5$TotalTimeEl.y<-as.numeric(Dec10_W_Avg5$TotalTimeEl.y)
+dropnotneeded<-c("Observer.x","Observer.y","Observer")
+Dec10_W_Avg5<-Dec10_W_Avg5[ , !(names(Dec10_W_Avg5) %in% dropnotneeded)]
+Dec10_W_Avg5$Freq <- rowMeans(Dec10_W_Avg5[,3:5])
+dropnotneeded<-c("TotalTimeEl.x","TotalTimeEl.y","TotalTimeEl")
+Dec10_W_Avg5<-Dec10_W_Avg5[ , !(names(Dec10_W_Avg5) %in% dropnotneeded)] 
+```
 
 
 ###Dec11 
@@ -2407,6 +3077,30 @@ Dec11_W<-Dec11_W_Avg[ , !(names(Dec11_W_Avg) %in% dropnotneeded)]
 Dec11_W_Test<-filter(Dec11_W,TimePer=="test")
 ```
 
+#Dec11 five mins
+
+```{r Dec9}
+library(dplyr)
+Dec11_W_Avg5<-full_join(Dec11_W1_test5,Dec11_W3_test5,by=c("ID","FieldType"),na.rm=T)
+Dec11_W_Avg5<-full_join(Dec11_W_Avg5,Dec11_W2_test5,by=c("ID","FieldType"),na.rm=T)
+Dec11_W_Avg5[is.na(Dec11_W_Avg5)]<- 0
+Dec11_W_Avg5$TotalTimeEl<-as.numeric(Dec11_W_Avg5$TotalTimeEl)
+Dec11_W_Avg5$TotalTimeEl.x<-as.numeric(Dec11_W_Avg5$TotalTimeEl.x)
+Dec11_W_Avg5$TotalTimeEl.y<-as.numeric(Dec11_W_Avg5$TotalTimeEl.y)
+dropnotneeded<-c("Observer.x","Observer.y","Observer")
+Dec11_W_Avg5<-Dec11_W_Avg5[ , !(names(Dec11_W_Avg5) %in% dropnotneeded)]
+Dec11_W_Avg5$Freq <- rowMeans(Dec11_W_Avg5[,3:5])
+dropnotneeded<-c("TotalTimeEl.x","TotalTimeEl.y","TotalTimeEl")
+Dec11_W_Avg5<-Dec11_W_Avg5[ , !(names(Dec11_W_Avg5) %in% dropnotneeded)] 
+
+L162_5<-data.frame("L162","conditioned",0)
+names(L162_5)<-c("ID","FieldType","Freq")
+Dec11_W_Avg5<-rbind(Dec11_W_Avg5,L162_5)
+
+L165_5<-data.frame("L165","control",0)
+names(L165_5)<-c("ID","FieldType","Freq")
+Dec11_W_Avg5<-rbind(Dec11_W_Avg5,L165_5)
+```
 
 
 ###Dec12
@@ -2428,6 +3122,27 @@ Dec12_W<-Dec12_W_Avg[ , !(names(Dec12_W_Avg) %in% dropnotneeded)]
 
 #Dec12_W <- Dec12_W_Avg %>% group_by(ID,Date,Field,TimePer,FieldType) %>% summarize(Freq=mean(TotalTimeEl.x:TotalTimeEl.y))
 Dec12_W_Test<-filter(Dec12_W,TimePer=="test")
+```
+
+#December 12 five min test
+
+```{r Dec9}
+library(dplyr)
+Dec12_W_Avg5<-full_join(Dec12_W1_test5,Dec12_W3_test5,by=c("ID","FieldType"),na.rm=T)
+Dec12_W_Avg5<-full_join(Dec12_W_Avg5,Dec12_W2_test5,by=c("ID","FieldType"),na.rm=T)
+Dec12_W_Avg5[is.na(Dec12_W_Avg5)]<- 0
+Dec12_W_Avg5$TotalTimeEl<-as.numeric(Dec12_W_Avg5$TotalTimeEl)
+Dec12_W_Avg5$TotalTimeEl.x<-as.numeric(Dec12_W_Avg5$TotalTimeEl.x)
+Dec12_W_Avg5$TotalTimeEl.y<-as.numeric(Dec12_W_Avg5$TotalTimeEl.y)
+dropnotneeded<-c("Observer.x","Observer.y","Observer")
+Dec12_W_Avg5<-Dec12_W_Avg5[ , !(names(Dec12_W_Avg5) %in% dropnotneeded)]
+Dec12_W_Avg5$Freq <- rowMeans(Dec12_W_Avg5[,3:5])
+dropnotneeded<-c("TotalTimeEl.x","TotalTimeEl.y","TotalTimeEl")
+Dec12_W_Avg5<-Dec12_W_Avg5[ , !(names(Dec12_W_Avg5) %in% dropnotneeded)]
+
+L157_5<-data.frame("L157","conditioned",0)
+names(L157_5)<-c("ID","FieldType","Freq")
+Dec12_W_Avg5<-rbind(Dec12_W_Avg5,L157_5)
 ```
 
 
@@ -2461,6 +3176,56 @@ Dec13_W<-rbind.data.frame(Dec13_W,L153)
 Dec13_W_Test<-filter(Dec13_W,TimePer=="test")
 ```
 
+
+#Dec13 five mins test
+
+```{r Dec9}
+library(dplyr)
+Dec13_W_Avg5<-full_join(Dec13_W1_test5,Dec13_W3_test5,by=c("ID","FieldType"),na.rm=T)
+Dec13_W_Avg5<-full_join(Dec13_W_Avg5,Dec13_W2_test5,by=c("ID","FieldType"),na.rm=T)
+Dec13_W_Avg5[is.na(Dec13_W_Avg5)]<- 0
+Dec13_W_Avg5$TotalTimeEl<-as.numeric(Dec13_W_Avg5$TotalTimeEl)
+Dec13_W_Avg5$TotalTimeEl.x<-as.numeric(Dec13_W_Avg5$TotalTimeEl.x)
+Dec13_W_Avg5$TotalTimeEl.y<-as.numeric(Dec13_W_Avg5$TotalTimeEl.y)
+dropnotneeded<-c("Observer.x","Observer.y","Observer")
+Dec13_W_Avg5<-Dec13_W_Avg5[ , !(names(Dec13_W_Avg5) %in% dropnotneeded)]
+Dec13_W_Avg5$Freq <- rowMeans(Dec13_W_Avg5[,3:5])
+dropnotneeded<-c("TotalTimeEl.x","TotalTimeEl.y","TotalTimeEl")
+Dec13_W_Avg5<-Dec13_W_Avg5[ , !(names(Dec13_W_Avg5) %in% dropnotneeded)]
+
+L153_5<-data.frame("L153","control",0)
+names(L153_5)<-c("ID","FieldType","Freq")
+Dec13_W_Avg5<-rbind(Dec13_W_Avg5,L153_5)
+
+L159_5<-data.frame("L159","conditioned",0)
+names(L159_5)<-c("ID","FieldType","Freq")
+Dec13_W_Avg5<-rbind(Dec13_W_Avg5,L159_5)
+```
+
+
+```{r}
+Dec11_W_Avg5<-Dec11_W_Avg5[!(Dec11_W_Avg5$ID=="L153"),]
+Dec11_W_Avg5<-Dec11_W_Avg5[!(Dec11_W_Avg5$ID=="L154"),]
+Dec11_W_Avg5<-Dec11_W_Avg5[!(Dec11_W_Avg5$ID=="L156"),]
+Dec11_W_Avg5<-Dec11_W_Avg5[!(Dec11_W_Avg5$ID=="L159"),]
+Dec11_W_Avg5<-rbind(Dec11_W_Avg5,Dec13_W_Avg5)
+```
+
+
+#Fivemins Data Set
+
+```{r}
+W_Avg5<- rbind(Dec9_W_Avg5,Dec10_W_Avg5,Dec11_W_Avg5,Dec12_W_Avg5)
+wilcox.test(Freq~FieldType,W_Avg5)
+t.test(Freq~FieldType,W_Avg5)
+
+Purple_Avg5<-rbind(Dec9_W_Avg5,Dec11_W_Avg5)
+Red_Avg5<-rbind(Dec10_W_Avg5,Dec12_W_Avg5)
+```
+
+```{r}
+write.csv(W_Avg5,"WaddlingData_FiveMins.csv")
+```
 
 ###Red Group 
 ```{r}
@@ -2505,6 +3270,7 @@ wilcox.test(Freq~FieldType,Purple_W_Test)
 ###Combined Purple & Red Test Periods
 ```{r}
 WaddleAll<-rbind(Red_W_Test,Purple_W_Test)
+write.csv(WaddleAll,"ConditioningData2017.csv")
 ```
 
 ###Comparison Tests -- SIGNIFICANT!!!!!!! 
@@ -2609,6 +3375,11 @@ boxplot with all the points inside
 boxplot(Freq~FieldType,data=WaddleAll,main="Mean Waddling Time Per Field Type",xlab="Field Type",ylab="Mean Waddling Time (seconds)",col="lightblue")
 ```
 
+```{r}
+boxplot(Freq~FieldType,data=W_Avg5,main="Mean Waddling Time Per Field Type",xlab="Field Type",ylab="Mean Waddling Time (seconds)",col="lightblue")
+```
+
+
 violin plots
 
 ```{r}
@@ -2633,23 +3404,76 @@ ggplot(WaddleAll,aes(x=FieldType,y=Freq))+stat_boxplot(geom='errorbar',color="na
 ###Figure 2
 ```{r}
 library(ggplot2)
-ggplot(Red_W_Test,aes(x=FieldType,y=Freq))+stat_boxplot(geom='errorbar',color="gray1")+geom_boxplot(fill="red2",color="gray1")+scale_y_continuous(name="Mean Waddling Time (seconds)",breaks=seq(0,450,50))+scale_x_discrete((name="Field Type"))+ggtitle("Mean Waddling Time Per Field Type \nNew Brunswick Group")+theme_bw()+theme(plot.title = element_text(hjust = 0.5))+stat_summary(fun.y=mean, geom="point", shape=22, size=3, color="gray1", fill="gray1")
+
+red<-ggplot(Red_W_Test,aes(x=FieldType,y=Freq))+stat_boxplot(geom='errorbar',color="gray1")+geom_boxplot(fill="red2",color="gray1")+scale_y_continuous(name="Mean Waddling Time (seconds)",breaks=seq(0,500,100))+scale_x_discrete((name="Field Type"))+ggtitle("Mean Waddling Time Per Field Type \nNew Brunswick Group")+theme_bw()+theme(plot.title = element_text(hjust = 0.5))+stat_summary(fun.y=mean, geom="point", shape=22, size=3, color="gray1", fill="gray1")
+
+purple<-ggplot(Purple_W_Test,aes(x=FieldType,y=Freq))+stat_boxplot(geom='errorbar',color="gray1")+geom_boxplot(fill="darkorchid3",color="gray1")+scale_y_continuous(name="Mean Waddling Time (seconds)",breaks=seq(0,200,50))+scale_x_discrete((name="Field Type"))+ggtitle("Mean Waddling Time Per Field Type \nBahamas Group")+theme_bw()+theme(plot.title = element_text(hjust = 0.5))+stat_summary(fun.y=mean, geom="point", shape=22, size=3, color="gray1", fill="gray1")
+
+library(ggpubr)
+ggarrange(red,purple,labels=c("A","B"),ncol = 2,nrow = 1)
 ```
 
 
 ```{r}
 library(ggplot2)
-ggplot(Purple_W_Test,aes(x=FieldType,y=Freq))+stat_boxplot(geom='errorbar',color="gray1")+geom_boxplot(fill="darkorchid3",color="gray1")+scale_y_continuous(name="Mean Waddling Time (seconds)",breaks=seq(0,450,50))+scale_x_discrete((name="Field Type"))+ggtitle("Mean Waddling Time Per Field Type \nBahamas Group")+theme_bw()+theme(plot.title = element_text(hjust = 0.5))+stat_summary(fun.y=mean, geom="point", shape=22, size=3, color="gray1", fill="gray1")
+
+ggplot(WaddleAll,aes(x=FieldType,y=Freq))+stat_summary(fun.y="mean",geom="bar",color="cadetblue1",fill="cadetblue1")+stat_summary(fun.y=mean,fun.ymin = function(x) mean(x) - sd(x),fun.ymax = function(x) mean(x) + sd(x),geom="errorbar",color)+theme_bw()+scale_y_continuous(name="Time (seconds)")+scale_x_discrete(name="Field Type")+ggtitle("Mean Food-Seeking Behavior Time per Magnetic Field")
+
+```
+
+
+```{r}
+library(ggplot2)
+
+ggplot(WaddleAll,aes(x=FieldType,y=Freq))+stat_summary(fun.y="mean",geom="bar",color="lightblue",fill="lightblue")+stat_summary(fun.y=mean,fun.ymin = function(x) mean(x) - sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),geom="errorbar",color="black")+theme_bw()+scale_y_continuous(name="Time (seconds)")+scale_x_discrete(name="Field Type")+ggtitle("Mean Food-Seeking Behavior Time per Magnetic Field")
+
 ```
 
 
 
+```{r}
+library(ggplot2)
+
+ggplot(W_Avg5,aes(x=FieldType,y=Freq))+stat_summary(fun.y="mean",geom="bar",color="lightblue",fill="lightblue")+stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),geom="errorbar",color="black")+theme_bw()+scale_y_continuous(name="Time (seconds)")+scale_x_discrete(name="Field Type")+ggtitle("Mean Food-Seeking Behavior Time per Magnetic Field")
+
+```
+
+
+```{r}
+library(ggplot2)
+
+ggplot(W_Avg5,aes(x=FieldType,y=Freq))+stat_summary(fun.y="mean",geom="bar",color="blue",fill="blue")+stat_summary(fun.ymin=mean,fun.ymax = function(x) mean(x) + sd(x),geom="errorbar",color="blue")+theme_bw()+scale_y_continuous(name="Time (seconds)")+scale_x_discrete(name="Field Type")+ggtitle("Mean Food-Seeking Behavior Time per Magnetic Field")
+```
 
 
 
+```{r}
+library(ggplot2)
+
+red<-ggplot(Red_W_Test,aes(x=FieldType,y=Freq))+stat_summary(fun.y="mean",geom="bar",color="red",fill="red")+stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),geom="errorbar",color="black")+theme_bw()+scale_y_continuous(name="Time (seconds)")+scale_x_discrete(name="Field Type")+ggtitle("New Brunswick Group\nMean Food-Seeking Behavior Time\nper Magnetic Field")
 
 
+purple<-ggplot(Purple_W_Test,aes(x=FieldType,y=Freq))+stat_summary(fun.y="mean",geom="bar",color="purple",fill="purple")+stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),geom="errorbar",color="black")+theme_bw()+scale_y_continuous(name="Time (seconds)")+scale_x_discrete(name="Field Type")+ggtitle("Bahamas Group\nMean Food-Seeking Behavior Time\nper Magnetic Field")
 
 
+library(ggpubr)
+ggarrange(red,purple,labels=c("A","B"),ncol = 2,nrow = 1)
+
+```
+
+
+```{r}
+library(ggplot2)
+
+red<-ggplot(Red_Avg5,aes(x=FieldType,y=Freq))+stat_summary(fun.y="mean",geom="bar",color="red",fill="red")+stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),geom="errorbar",color="black")+theme_bw()+scale_y_continuous(breaks=c(0,5,10,15,20,25,30,35),name="Time (seconds)")+scale_x_discrete(name="Field Type")+ggtitle("New Brunswick Group\nMean Food-Seeking Behavior Time\nper Magnetic Field")
+
+
+purple<-ggplot(Purple_Avg5,aes(x=FieldType,y=Freq))+stat_summary(fun.y="mean",geom="bar",color="purple",fill="purple")+stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),geom="errorbar",color="black")+theme_bw()+scale_y_continuous(breaks=c(0,5,10,15,20,25),name="Time (seconds)")+scale_x_discrete(name="Field Type")+ggtitle("Bahamas Group\nMean Food-Seeking Behavior Time\nper Magnetic Field")
+
+
+library(ggpubr)
+ggarrange(red,purple,labels=c("A","B"),ncol = 2,nrow = 1)
+
+```
 
 
