@@ -154,7 +154,7 @@ blue <- dfs_test_mean %>% filter(group=="blue")
 wilcox.test(mean.time~field.type,blue)
 t.test(mean.time~field.type,blue)
 
-write.csv(dfs_test_mean,"C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/2018/2018_testperiod_means.csv")
+write.csv(dfs_test_mean,"C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/2018/2018_testperiod_meansFINAL.csv")
 
 library(ggplot2)
 library(ggpubr)
