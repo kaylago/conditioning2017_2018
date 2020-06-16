@@ -234,7 +234,7 @@ Dec9_W1_test10<-Dec9_W1_test10 %>% group_by(ID,Observer,FieldType) %>% summarise
 library(dplyr)
 Dec9_W1_accl_BH<-rbind(L153Dec9_W1_accl,L156Dec9_W1_accl,L161Dec9_W1_accl,L165Dec9_W1_accl)
 Dec9_W1_test_BH<-rbind(L153Dec9_W1_test,L156Dec9_W1_test,L161Dec9_W1_test,L165Dec9_W1_test)
-library(dplyr)
+
 Dec9_W1_accl_BH<-mutate(Dec9_W1_accl_BH,Field=rep("BH"))
 Dec9_W1_accl_BH<-mutate(Dec9_W1_accl_BH,TimePer=rep("accl"))
 Dec9_W1_accl_BH<-mutate(Dec9_W1_accl_BH,FieldType=rep("conditioned"))
@@ -266,6 +266,7 @@ Dec9_W1_NB<-rbind(Dec9_W1_accl_NB,Dec9_W1_test_NB)
 ```
 
 ```{r}
+detach(package:plyr)
 library(dplyr)
 Dec9_W1<-Dec9_W1 %>% group_by(ID,TimePer,Observer,Field,FieldType,Date) %>% summarise(TotalTimeEl=sum(TimeEl)) 
 Dec9_W1_test<-filter(Dec9_W1,TimePer=="test")
@@ -320,6 +321,7 @@ Dec9_Waddle2 = ldply(dfs_Dec9_2,DropFunction)
 
 names(Dec9_Waddle2)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
 
+detach(package:plyr)
 ```
 
 ##Combine Data to get TimeEl
@@ -545,6 +547,7 @@ Dec9_Waddle3 = ldply(dfs_Dec9_3,DropFunction)
 
 names(Dec9_Waddle3)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
 
+detach(package:plyr)
 ```
 
 ##Combine Data to get TimeEl
@@ -768,6 +771,8 @@ DropFunction<- function(x) {
 Dec10_Waddle = ldply(dfs_Dec10,DropFunction)
 
 names(Dec10_Waddle)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
+
+detach(package:plyr)
 ```
 
 ```{r}
@@ -995,6 +1000,8 @@ DropFunction<- function(x) {
 Dec10_Waddle2 = ldply(dfs_Dec10_2,DropFunction)
 
 names(Dec10_Waddle2)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
+
+detach(package:plyr)
 ```
 
 ```{r}
@@ -1214,6 +1221,8 @@ DropFunction<- function(x) {
 Dec10_Waddle3 = ldply(dfs_Dec10_3,DropFunction)
 
 names(Dec10_Waddle3)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
+
+detach(package:plyr)
 ```
 
 ```{r}
@@ -1436,6 +1445,8 @@ DropFunction<- function(x) {
 Dec11_Waddle = ldply(dfs_Dec11,DropFunction)
 
 names(Dec11_Waddle)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
+
+detach(package:plyr)
 ```
 
 
@@ -1659,6 +1670,8 @@ DropFunction<- function(x) {
 Dec11_Waddle2 = ldply(dfs_Dec11_2,DropFunction)
 
 names(Dec11_Waddle2)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
+
+detach(package:plyr)
 ```
 
 ```{r}
@@ -1853,6 +1866,8 @@ DropFunction<- function(x) {
 Dec11_Waddle3 = ldply(dfs_Dec11_3,DropFunction)
 
 names(Dec11_Waddle3)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
+
+detach(package:plyr)
 ```
 
 ```{r}
@@ -2054,6 +2069,8 @@ DropFunction<- function(x) {
 Dec12_Waddle = ldply(dfs_Dec12,DropFunction)
 
 names(Dec12_Waddle)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
+
+detach(package:plyr)
 ```
 
 
@@ -2248,6 +2265,8 @@ DropFunction<- function(x) {
 Dec12_Waddle2 = ldply(dfs_Dec12_2,DropFunction)
 
 names(Dec12_Waddle2)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
+
+detach(package:plyr)
 ```
 
 
@@ -2443,6 +2462,8 @@ DropFunction<- function(x) {
 Dec12_Waddle3 = ldply(dfs_Dec12_3,DropFunction)
 
 names(Dec12_Waddle3)<-c("Time","Observer", "Behavior", "Start_Stop","ID")
+
+detach(package:plyr)
 ```
 
 
@@ -2660,6 +2681,8 @@ names(Dec13_Waddle2)<-c("Time", "Observer", "Behavior", "Start_Stop","ID")
 Dec13_Waddle3 = ldply(dfs_Dec13_3,DropFunction)
 
 names(Dec13_Waddle3)<-c("Time", "Observer", "Behavior", "Start_Stop","ID")
+
+detach(package:plyr)
 ```
 
 
@@ -3149,7 +3172,6 @@ Dec12_W_Avg5<-rbind(Dec12_W_Avg5,L157_5)
 
 ###Dec13
 
-
 ```{r}
 library(dplyr)
 Dec13_W_Avg<-full_join(Dec13_W1,Dec13_W2,by=c("ID","Date","TimePer","Field","FieldType"),na.rm=T)
@@ -3231,6 +3253,9 @@ write.csv(W_Avg5,"WaddlingData_FiveMins.csv")
 ```{r}
 Red_W<-rbind(Dec10_W,Dec12_W)
 Red_W_Test<-rbind(Dec10_W_Test,Dec12_W_Test)
+Red_W_Test<-Red_W_Test %>% mutate(Group = rep("Red"))
+Red_W_Test<- Red_W_Test %>% mutate(Prop=Freq/(20*60))
+Red_W_Test<- Red_W_Test %>% mutate(MagField = ifelse(Field == "NB","Canada", "Bahamas"))
 ```
 
 
@@ -3259,6 +3284,9 @@ Dec11_W_Test<-rbind(Dec11_W_Test,Dec13_W_Test)
 ```{r}
 Purple_W<-rbind(Dec9_W,Dec11_W)
 Purple_W_Test<-rbind(Dec9_W_Test,Dec11_W_Test)
+Purple_W_Test<- Purple_W_Test %>% mutate(Group = rep("Purple"))
+Purple_W_Test<- Purple_W_Test %>% mutate(Prop=Freq/(20*60))
+Purple_W_Test<- Purple_W_Test %>% mutate(MagField = ifelse(Field == "NB","Canada", "Bahamas"))
 #Purple_updated<-subset(Purple_W_Test,ID!="L167")
 ```
 
@@ -3270,13 +3298,23 @@ wilcox.test(Freq~FieldType,Purple_W_Test)
 ###Combined Purple & Red Test Periods
 ```{r}
 WaddleAll<-rbind(Red_W_Test,Purple_W_Test)
-write.csv(WaddleAll,"ConditioningData2017.csv")
+#write.csv(WaddleAll,"ConditioningData2017.csv")
 ```
 
 ###Comparison Tests -- SIGNIFICANT!!!!!!! 
 ```{r}
+shapiro.test(WaddleAll$Freq) #Not normally distributed
+levene.test(Freq~Group,WaddleAll)
+
+library(car)
+
+leveneTest(Freq~Group,WaddleAll)
+
 t.test(Freq~FieldType,WaddleAll)
 wilcox.test(Freq~FieldType,WaddleAll)
+
+wilcox.test(Prop~FieldType,WaddleAll)
+
 ```
 
 ```{r}
@@ -3294,7 +3332,7 @@ Purple_W_Diff<-mutate(Purple_W_Diff,TimeDiff=Freq.x-Freq.y)
 Purple_W_Diff<-filter(Purple_W_Diff,TimePer=="test")
 dropcols<-c("Field.x","FieldType.x","Date.x","Field.y","FieldType.y","Date.y")
 Purple_W_Diff<-Purple_W_Diff[ , !(names(Purple_W_Diff) %in% dropcols)]
-names(Purple_W_Diff)<-c("ID","TimePer","Cond","Control","TimeDiff")
+#names(Purple_W_Diff)<-c("ID","TimePer","Cond","Control","TimeDiff")
 ```
 
 ```{r}
@@ -3305,7 +3343,7 @@ Red_W_Diff<-mutate(Red_W_Diff,TimeDiff=Freq.x-Freq.y)
 Red_W_Diff<-filter(Red_W_Diff,TimePer=="test")
 dropcols<-c("Field.x","FieldType.x","Date.x","Field.y","FieldType.y","Date.y")
 Red_W_Diff<-Red_W_Diff[ , !(names(Red_W_Diff) %in% dropcols)]
-names(Red_W_Diff)<-c("ID","TimePer","Cond","Control","TimeDiff")
+#names(Red_W_Diff)<-c("ID","TimePer","Cond","Control","TimeDiff")
 ```
 
 ```{r}
@@ -3317,6 +3355,10 @@ cond<-as.vector(Total_Diff$Cond)
 control<-as.vector(Total_Diff$Control)
 wilcox.test(cond,control)
 t.test(cond,control)
+
+cond_data<-rbind(Purple_W_Cond,Red_W_Cond)
+
+wilcox.test(Freq~Group,cond_data)
 ```
 
 ##bootstrap anova 
@@ -3330,21 +3372,104 @@ Kruskal wallis
 ```{r}
 aov<-aov(Freq~FieldType,data=WaddleAll)
 summary(aov)
-res<-bartlett.test(Freq~FieldType,data=WaddleAll)
-res
+#res<-bartlett.test(Freq~FieldType,data=WaddleAll)
+#res
 ```
 
 ```{r}
-WaddleAll %>% group_by(FieldType) %>% summarise(mean=mean(Freq),sd=sd(Freq),sum=sum(Freq))
+WaddleAll %>% group_by(FieldType,Group) %>% summarise(mean=mean(Freq),sd=sd(Freq),sum=sum(Freq))
 ```
 
 ```{r}
-RedStats<-Red_W_Test %>% group_by(FieldType) %>% summarise(mean=mean(Freq),sd=sd(Freq),sum=sum(Freq))
+
+RedStats<-Red_W_Test %>% group_by(FieldType) %>% summarise(meanFreq=mean(Freq),sd=sd(Freq),sum=sum(Freq),meanProp=mean(Prop))
 RedStats<-mutate(RedStats,Group=rep("Red"))
-PurpleStats<-Purple_W_Test %>% group_by(FieldType) %>% summarise(mean=mean(Freq),sd=sd(Freq),sum=sum(Freq))
+
+
+PurpleStats<-Purple_W_Test %>% group_by(FieldType) %>% summarise(meanFreq=mean(Freq),sd=sd(Freq),sum=sum(Freq), meanProp=mean(Prop))
 PurpleStats<-mutate(PurpleStats,Group=rep("Purple"))
+
 WaddleStats<-rbind(RedStats,PurpleStats)
+WaddleStats_cond<- WaddleStats %>% filter(FieldType=="conditioned")
+
+wilcox.test(meanFreq~Group,WaddleStats_cond)
+
+mean(subset(WaddleAll,FieldType=="conditioned")$Prop)
+
+mean(subset(WaddleAll,FieldType=="control")$Prop)
+
+mean(subset(WaddleAll,Group=="Red")$Prop)
+
+mean(Red_W_Cond$Prop)
+mean(Purple_W_Cond$Prop)
+
+mean(Red_W_Control$Prop)
+mean(Purple_W_Control$Prop)
+
+wilcox.test(Red_W_Cond$Prop,Purple_W_Cond$Prop)
 ```
+
+```{r}
+write.csv(WaddleAll,"C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/2018/2017_testperiod_means.csv")
+```
+
+###Comaprison of displacements
+
+```{r}
+
+turtleroom<- read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/TurtleRoomMagField2017_ByTurtle.csv")
+experfields<-read.csv("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/MagFieldInformation_ExperimentalFields.csv")
+
+library(dplyr)
+detach(package:plyr)
+WaddleAll<- merge(WaddleAll,experfields,by.x="Field",all=T)
+WaddleAll<- merge(WaddleAll,turtleroom,by="ID",all=T)
+
+WaddleAll<- WaddleAll %>% mutate(Intensity.Diff = abs(Intensity-Intensity.TurtleRoom))
+WaddleAll<- WaddleAll %>% mutate(Inclination.Diff = abs(Inclination-Inclination.TurtleRoom))
+
+WaddleAll_condfield <- WaddleAll %>% filter(FieldType=="conditioned")
+
+lm.1<- lm(Prop ~ Inclination.Diff*Intensity.Diff,data=WaddleAll)
+summary(lm.1)
+anova(lm.1)
+
+lm.2<- lm(Prop ~ Inclination.Diff*Intensity.Diff*FieldType,data=WaddleAll)
+summary(lm.2)
+anova(lm.2)
+confint(lm.2)
+
+
+lm.3<- lm(Freq ~ Inclination.Diff*Intensity.Diff*Group,data=WaddleAll)
+summary(lm.3)
+anova(lm.3)
+
+lm.4<- lm(Prop ~ Inclination.Diff*Intensity.Diff,data=WaddleAll_condfield)
+summary(lm.4)
+anova(lm.4)
+
+lm.5<-lm(Prop ~ Inclination.Diff*Intensity.Diff*Field,data=WaddleAll)
+summary(lm.5)
+anova(lm.5)
+#Field by itself not indicitive of a response
+
+
+lm.6<-lm(Prop~Inclination.Diff*FieldType+Intensity.Diff*FieldType+Inclination.Diff*Intensity.Diff,data=WaddleAll)
+summary(lm.6)
+anova(lm.6)
+
+lm.7<-lm(Prop~FieldType*Intensity.Diff*Inclination.Diff,data=WaddleAll)
+summary(lm.7)
+anova(lm.7)
+
+library(car)
+Anova(lm.2,type=2)
+anova(lm.2)
+Anova(lm.3,type=2)
+Anova(lm.4,type=2)
+Anova(lm.7,type=2)
+```
+
 
 ```{r}
 library(ggplot2)
@@ -3398,16 +3523,71 @@ stat_summary(fxn=mean)
 ####use this graph - Figure 1
 ```{r}
 library(ggplot2)
-ggplot(WaddleAll,aes(x=FieldType,y=Freq))+stat_boxplot(geom='errorbar',color="navyblue")+geom_boxplot(fill="cadetblue2",color="navyblue")+scale_y_continuous(name="Mean Waddling Time (seconds)",breaks=seq(0,450,50))+scale_x_discrete((name="Field Type"))+ggtitle("Mean Waddling Time Per Field Type")+theme_bw()+theme(plot.title = element_text(hjust = 0.5))+stat_summary(fun.y=mean, geom="point", shape=22, size=3, color="navyblue", fill="navyblue")
+library(extrafont)
+font_import()
+fonttable()
+extrafont::loadfonts(device="win")
+
+figure1<-ggplot(WaddleAll,aes(x=FieldType,y=Prop))+stat_boxplot(geom="errorbar",color="black")+geom_boxplot(outlier.shape=NA,fill="cadetblue3",color="black")+geom_point(color="black",position="jitter")+theme_bw()+scale_y_continuous(name = "Proportion of Time",breaks=c(0.00,0.04,0.08,0.12,0.16,0.2,0.24,0.28,0.32,0.36,0.4))+theme(axis.title.x=element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20))+theme(axis.title.y= element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20))+scale_x_discrete(name="Treatment")+theme(text=element_text(size=18,family="Calibri"))+theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))
+
+my_comparisons<- list(c("conditioned","control"))
+
+figure1+stat_compare_means(comparison=my_comparisons,label="p.signif",label.y = 0.4,method="wilcox.test")
+
+
+
+
+figure2<-ggplot(Red_W_Test,aes(x=FieldType,y=Prop))+stat_boxplot(geom="errorbar",color="black")+geom_boxplot(outlier.shape=NA,fill="indianred",color="black")+geom_point(color="black",position="jitter")+theme_bw()+scale_y_continuous(breaks=c(0.00,0.04,0.08,0.12,0.16,0.2,0.24,0.28,0.32,0.36,0.4))+theme(axis.title.x=element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20))+theme(axis.title.y= element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20))+theme(text=element_text(size=18,family="Calibri"),axis.title.x = element_blank(),axis.title.y=element_blank())+theme(plot.margin = margin(t=40,r=20,b=10,l=20))+ggtitle("Group 1")+theme(plot.title = element_text(size = 22,hjust=0.5,family = "Calibri",margin = margin(t=0,r=0,b=20,l=0)))+theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+stat_compare_means(comparison=my_comparisons,label="p.signif",label.y = 0.4,method="wilcox.test")
+figure2
+
+
+
+figure3<-ggplot(Purple_W_Test,aes(x=FieldType,y=Prop))+stat_boxplot(geom="errorbar",color="black")+geom_boxplot(outlier.shape=NA,fill="thistle3",color="black")+geom_point(color="black",position="jitter")+theme_bw()+scale_y_continuous(breaks=c(0.00,0.04,0.08,0.12,0.16,0.2,0.24,0.28,0.32,0.36,0.4),limits=c(0.00,0.4))+theme(axis.title.x=element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20))+theme(axis.title.y= element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20))+theme(text=element_text(size=18,family="Calibri"),axis.title.x = element_blank(),axis.title.y=element_blank())+theme(plot.margin = margin(t=40,r=20,b=10,l=10))+ggtitle("Group 2")+theme(plot.title = element_text(size = 22,hjust=0.5,family = "Calibri",margin = margin(t=0,r=0,b=20,l=0)))+theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+stat_compare_means(comparison=my_comparisons,label="p.signif",label.y = 0.4,method="wilcox.test")
+figure3
+
+
+library(cowplot)
+library(grid)
+library(gridExtra)
+library(ggpubr)
+figure4a<-plot_grid(figure2,figure3,rel_widths = c(1,1))+draw_label("A",fontfamily = "Calibri", x = 0, y = 1, hjust = -0.5, vjust = 1.5)+draw_label("B",fontfamily = "Calibri",x=0.5,y=1,hjust=0.5,vjust=1.5)
+figure4a
+grid.arrange(arrangeGrob(figure4a,top=text_grob(""),
+                bottom = text_grob("Treatment", color = "black",
+                                   hjust = 0.5, size = 20,family="Calibri"),
+                left = text_grob("Proportion of Time", color = "black", rot = 90,size=20,family="Calibri"),padding=unit(2,"line"
+                )))
+
+
+mean(Red_W_Test$Prop)
+mean(Purple_W_Test$Prop)
+mean(WaddleAll_condfield$Prop)
+
+
+mean(subset(WaddleAll,FieldType=="control")$Prop)
+
+mean(subset(Red_W_Test,FieldType=="control")$Prop)
+
+
+mean(subset(Purple_W_Test,FieldType=="control")$Prop)
 ```
 
-###Figure 2
+
 ```{r}
 library(ggplot2)
 
-red<-ggplot(Red_W_Test,aes(x=FieldType,y=Freq))+stat_boxplot(geom='errorbar',color="gray1")+geom_boxplot(fill="red2",color="gray1")+scale_y_continuous(name="Mean Waddling Time (seconds)",breaks=seq(0,500,100))+scale_x_discrete((name="Field Type"))+ggtitle("Mean Waddling Time Per Field Type \nNew Brunswick Group")+theme_bw()+theme(plot.title = element_text(hjust = 0.5))+stat_summary(fun.y=mean, geom="point", shape=22, size=3, color="gray1", fill="gray1")
+red<-ggplot(Red_W_Test,aes(x=FieldType,y=Freq))+stat_boxplot(geom='errorbar',color="gray1")+geom_boxplot(fill="red2",color="gray1")+scale_y_continuous(name="Time (seconds)",breaks=seq(0,500,100))+scale_x_discrete((name="Field Type"))+ggtitle("New Brunswick Group\nMean Food-Seeking Behavior Time\nPer Magnetic Field")+theme_bw()+theme(plot.title = element_text(hjust = 0.5))+stat_summary(fun.y=mean, geom="point", shape=22, size=3, color="gray1", fill="gray1")
+red
 
-purple<-ggplot(Purple_W_Test,aes(x=FieldType,y=Freq))+stat_boxplot(geom='errorbar',color="gray1")+geom_boxplot(fill="darkorchid3",color="gray1")+scale_y_continuous(name="Mean Waddling Time (seconds)",breaks=seq(0,200,50))+scale_x_discrete((name="Field Type"))+ggtitle("Mean Waddling Time Per Field Type \nBahamas Group")+theme_bw()+theme(plot.title = element_text(hjust = 0.5))+stat_summary(fun.y=mean, geom="point", shape=22, size=3, color="gray1", fill="gray1")
+
+red<-ggplot(Red_W_Test,aes(x=FieldType,y=Prop))+stat_summary(fun.y="mean",geom="bar",color="#990000",fill="#990000")+stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),geom="errorbar",color="black")+theme_bw()+scale_y_continuous(breaks=c(0.00,0.04,0.08,0.12,0.16,0.2))+ggtitle("Group 1") +theme(text=element_text(size=24))+theme(plot.title = element_text(margin = margin(t = 20, r = 0, b = 20, l = 0),hjust=0.5))+theme(axis.title.x=element_blank())+theme(axis.title.y=element_blank())+theme(plot.margin=unit(c(0.2,0.2,0.3,0.5),"cm"))
+red
+
+
+purple<-ggplot(Purple_W_Test,aes(x=FieldType,y=Freq))+stat_boxplot(geom='errorbar',color="gray1")+geom_boxplot(fill="darkorchid3",color="gray1")+scale_y_continuous(name="Time (seconds)",breaks=seq(0,200,50))+scale_x_discrete((name="Field Type"))+ggtitle("Bahamas Group \nMean Food-Seeking Behavior Time\nPer Magnetic Field")+theme_bw()+theme(plot.title = element_text(hjust = 0.5))+stat_summary(fun.y=mean, geom="point", shape=22, size=3, color="gray1", fill="gray1")
 
 library(ggpubr)
 ggarrange(red,purple,labels=c("A","B"),ncol = 2,nrow = 1)
@@ -3417,7 +3597,7 @@ ggarrange(red,purple,labels=c("A","B"),ncol = 2,nrow = 1)
 ```{r}
 library(ggplot2)
 
-ggplot(WaddleAll,aes(x=FieldType,y=Freq))+stat_summary(fun.y="mean",geom="bar",color="cadetblue1",fill="cadetblue1")+stat_summary(fun.y=mean,fun.ymin = function(x) mean(x) - sd(x),fun.ymax = function(x) mean(x) + sd(x),geom="errorbar",color)+theme_bw()+scale_y_continuous(name="Time (seconds)")+scale_x_discrete(name="Field Type")+ggtitle("Mean Food-Seeking Behavior Time per Magnetic Field")
+ggplot(WaddleAll,aes(x=FieldType,y=Prop))+stat_summary(fun.y="mean",geom="bar",fill="cadetblue1")+stat_summary(fun.y=mean,fun.ymin = function(x) mean(x) - sd(x),fun.ymax = function(x) mean(x) + sd(x),geom="errorbar")+theme_bw()+scale_y_continuous(name="Time (seconds)")+scale_x_discrete(name="Field Type")+ggtitle("Mean Food-Seeking Behavior Time per Magnetic Field")
 
 ```
 
@@ -3425,7 +3605,7 @@ ggplot(WaddleAll,aes(x=FieldType,y=Freq))+stat_summary(fun.y="mean",geom="bar",c
 ```{r}
 library(ggplot2)
 
-ggplot(WaddleAll,aes(x=FieldType,y=Freq))+stat_summary(fun.y="mean",geom="bar",color="lightblue",fill="lightblue")+stat_summary(fun.y=mean,fun.ymin = function(x) mean(x) - sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),geom="errorbar",color="black")+theme_bw()+scale_y_continuous(name="Time (seconds)")+scale_x_discrete(name="Field Type")+ggtitle("Mean Food-Seeking Behavior Time per Magnetic Field")
+ggplot(WaddleAll,aes(x=FieldType,y=Prop))+stat_summary(fun.y="mean",geom="bar",color="lightblue",fill="lightblue")+stat_summary(fun.y=mean,fun.ymin = function(x) mean(x) - sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),geom="errorbar",color="black")+theme_bw()+scale_y_continuous(name="Time (seconds)")+scale_x_discrete(name="Field Type")+ggtitle("Mean Food-Seeking Behavior Time per Magnetic Field")
 
 ```
 
@@ -3446,23 +3626,129 @@ ggplot(W_Avg5,aes(x=FieldType,y=Freq))+stat_summary(fun.y="mean",geom="bar",colo
 ```
 
 
-
+#######Figures for ISTS PRESENTATION
 ```{r}
 library(ggplot2)
 
-red<-ggplot(Red_W_Test,aes(x=FieldType,y=Freq))+stat_summary(fun.y="mean",geom="bar",color="red",fill="red")+stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),geom="errorbar",color="black")+theme_bw()+scale_y_continuous(name="Time (seconds)")+scale_x_discrete(name="Field Type")+ggtitle("New Brunswick Group\nMean Food-Seeking Behavior Time\nper Magnetic Field")
+red<-ggplot(Red_W_Test,aes(x=FieldType,y=Prop))+stat_summary(fun.y="mean",geom="bar",color="#990000",fill="#990000")+stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),geom="errorbar",color="black")+theme_bw()+scale_y_continuous(breaks=c(0.00,0.04,0.08,0.12,0.16,0.2))+ggtitle("Group 1") +theme(text=element_text(size=24))+theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5))+theme(axis.title.x=element_blank())+theme(axis.title.y=element_blank())+theme(plot.margin = margin(t=40,r=20,b=10,l=10)))
+red
 
 
-purple<-ggplot(Purple_W_Test,aes(x=FieldType,y=Freq))+stat_summary(fun.y="mean",geom="bar",color="purple",fill="purple")+stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),geom="errorbar",color="black")+theme_bw()+scale_y_continuous(name="Time (seconds)")+scale_x_discrete(name="Field Type")+ggtitle("Bahamas Group\nMean Food-Seeking Behavior Time\nper Magnetic Field")
-
+purple<-ggplot(Purple_W_Test,aes(x=FieldType,y=Prop))+stat_summary(fun.y="mean",geom="bar",color="#CC99FF",fill="#CC99FF")+stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),geom="errorbar",color="black")+theme_bw()+theme(text=element_text(size=24),axis.title.x = element_blank(),axis.title.y=element_blank(),axis.text.y=element_blank()) + scale_y_continuous(breaks=c(0.00,0.04,0.08,0.12,0.16,0.2),limits=c(0.00,0.14))+ggtitle("Group 2")+ theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5))+theme(plot.margin=unit(c(0.2,0.2,0.3,0.2),"cm"))
+purple
 
 library(ggpubr)
-ggarrange(red,purple,labels=c("A","B"),ncol = 2,nrow = 1)
+figure<- ggarrange(red,purple,labels= c("A","B"),ncol = 2,nrow = 1)
+figure
+#par(oma=c(2,2,2,2))
+annotate_figure(figure,
+                top = text_grob("Food-Seeking Behavior", color = "black", face = "bold", size = 28),
+                bottom = text_grob("Treatment", color = "black",
+                                   hjust = 0.5, face = "italic", size = 24),
+                left = text_grob("Proportion of Time", color = "black", rot = 90,size=24,face="italic")
+                )
 
 ```
 
 
-```{r}
+####Bar Figures for Paper
+```{r BAR FIGURES - MEAN PROPO}
+library(ggplot2)
+
+redgroup<-ggplot(Red_W_Test,aes(x=FieldType,y=Prop))+stat_summary(fun.y="mean",geom="bar",color="gray29",fill="gray29")+stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),geom="errorbar",color="black")+theme_bw()+scale_y_continuous(breaks=c(0.00,0.04,0.08,0.12,0.16),expand=c(0,0))+ggtitle("Group 1") +theme(text=element_text(size=18,family = "Calibri"))+theme(plot.title = element_text(margin = margin(t = 20, r = 0, b = 20, l = 0),hjust=0.5,size=22,family = "Calibri"))+theme(axis.title.x=element_blank())+theme(axis.title.y=element_blank())+theme(plot.margin = margin(t=40,r=20,b=10,l=10))+coord_cartesian(ylim = c(0.0,0.16))
+redgroup
+
+
+purplegroup<-ggplot(Purple_W_Test,aes(x=FieldType,y=Prop))+stat_summary(fun.y="mean",geom="bar",color="gray54",fill="gray54")+stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),geom="errorbar",color="black")+theme_bw()+theme(text=element_text(size=18,family = "Calibri"),axis.title.x = element_blank(),axis.title.y=element_blank()) + scale_y_continuous(breaks=c(0.00,0.04,0.08,0.12,0.16),limits=c(0.00,0.16),expand=c(0,0))+ggtitle("Group 2")+ theme(plot.title = element_text(margin = margin(t = 20, r = 0, b = 20, l = 0),hjust=0.5,size=20,family = "Calibri"))+theme(plot.margin = margin(t=40,r=20,b=10,l=10))
+purplegroup
+
+
+library(cowplot)
+library(grid)
+library(gridExtra)
+library(ggpubr)
+figure_bar<-plot_grid(redgroup,purplegroup,align = 'h',rel_widths = c(1,1),rel_heights = c(1,1))+draw_label("A",fontfamily = "Calibri", x = 0, y = 1, hjust = -0.5, vjust = 1.5)+draw_label("B",fontfamily = "Calibri",x=0.5,y=1,hjust=0.5,vjust=1.5)
+figure_bar
+grid.arrange(arrangeGrob(figure_bar,top=text_grob(""),
+                bottom = text_grob("Treatment", color = "black",
+                                   hjust = 0.5, size = 20,family="Calibri"),
+                left = text_grob("Proportion of Time", color = "black", rot = 90,size=20,family="Calibri"),padding=unit(2,"line"
+                )))
+
+
+
+
+fig4<-ggplot(WaddleAll,aes(x=FieldType,y=Prop))+stat_summary(fun.y="mean",geom="bar",fill="grey48")+stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),geom="errorbar",color="black")+theme_bw()+scale_y_continuous(name="Proportion of Time",breaks=c(0.00,0.04,0.08,0.12,0.16),expand = c(0,0))+scale_x_discrete(name="Treatment")+theme(plot.margin=margin(20,20,20,20))+theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"))+theme(text=element_text(size=20,family="Calibri"))+coord_cartesian(ylim=c(0,0.14))
+fig4
+
+
+
+```
+
+
+
+
+
+
+
+
+
+Change fnt size:
+theme_bw()+theme(element_text(size=10))+
+
+Using ggarrange:
+figure <- ggarrange(sp, bp + font("x.text", size = 10),
+                    ncol = 1, nrow = 2)
+annotate_figure(figure,
+                top = text_grob("Visualizing mpg", color = "red", face = "bold", size = 14),
+                bottom = text_grob("Data source: \n mtcars data set", color = "blue",
+                                   hjust = 1, x = 1, face = "italic", size = 10),
+                left = text_grob("Figure arranged using ggpubr", color = "green", rot = 90),
+                right = "I'm done, thanks :-)!",
+                fig.lab = "Figure 1", fig.lab.face = "bold"
+                )
+                
+                
+Change margins:
+theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)))
+theme(axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0)))
+theme(plot.title = element_text(margin = margin(t = 20, r = 0, b = 20, l = 0)))
+
+
+Remove Axes Titles:
+theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+
+```{r BAR FIGURES}
+library(ggplot2)
+
+
+fig<-ggplot(WaddleAll,aes(x=FieldType,y=Prop,fill=Group))+stat_summary(fun.y="mean",geom="bar")+stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),geom="errorbar",color="black")+theme_bw()+scale_y_continuous(name="Proportion of Time",breaks=c(0.00,0.04,0.08,0.12,0.16))+scale_x_discrete(name="Treatment")+ggtitle("Food-Seeking Behaviors per Magnetic Field")+theme(plot.title = element_text(size=24,face="bold",margin = margin(t = 20, r = 0, b = 20, l = 0),hjust=0.5))+theme(plot.margin=unit(c(1,1,1,1),"cm"))+facet_wrap(.~MagField)+scale_fill_manual(labels=c("Group 2","Group 1"),values=c("#CC99FF","#990000"))+theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,face="italic"),axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,face = "italic"))+theme(text=element_text(size=20))+ guides(fill = guide_legend(reverse=TRUE))+theme(strip.background = element_rect(fill="white"))
+fig
+
+
+fig2<-ggplot(WaddleAll,aes(x=FieldType,y=Prop))+stat_summary(fun.y="mean",geom="bar",fill="#3399FF")+stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),geom="errorbar",color="black")+theme_bw()+scale_y_continuous(name="Proportion of Time",breaks=c(0.00,0.04,0.08,0.12,0.16))+scale_x_discrete(name="Treatment")+ggtitle("Food-Seeking Behaviors per Treatment")+theme(plot.title = element_text(size=24,face="bold",margin = margin(t = 20, r = 0, b = 20, l = 0),hjust=0.5))+theme(plot.margin=unit(c(1,1,1,1),"cm"))+theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,face="italic"),axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,face = "italic"))+theme(text=element_text(size=20))
+fig2
+
+
+
+```
+
+
+###Change Strip Color
+g <- ggplot_gtable(ggplot_build(fig))
+stripr <- which(grepl('strip-r', g$layout$name))
+fills <- c("red","purple")
+k <- 1
+for (i in stripr) {
+  j <- which(grepl('rect', g$grobs[[i]]$grobs[[1]]$childrenOrder))
+  g$grobs[[i]]$grobs[[1]]$children[[j]]$gp$fill <- fills[k]
+  k <- k+1
+}
+grid.draw(g)
+
+```{r FIGS 5 MINUTE DATA}
 library(ggplot2)
 
 red<-ggplot(Red_Avg5,aes(x=FieldType,y=Freq))+stat_summary(fun.y="mean",geom="bar",color="red",fill="red")+stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),geom="errorbar",color="black")+theme_bw()+scale_y_continuous(breaks=c(0,5,10,15,20,25,30,35),name="Time (seconds)")+scale_x_discrete(name="Field Type")+ggtitle("New Brunswick Group\nMean Food-Seeking Behavior Time\nper Magnetic Field")
@@ -3475,5 +3761,55 @@ library(ggpubr)
 ggarrange(red,purple,labels=c("A","B"),ncol = 2,nrow = 1)
 
 ```
+
+
+```{r SUPPLEMENTAL FIGS}
+library(ggplot2)
+
+
+figure.s3<- ggplot(WaddleAll_condfield,aes(x=Inclination.Diff,y=Prop))+geom_point(aes(color=Group,size=0.01))+theme_bw()+scale_y_continuous(breaks=c(0.00,0.08,0.16,0.24,0.32,0.4),limits=c(0.00,0.36))+theme(axis.title.x=element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=16))+scale_x_continuous(name="Difference in\n Inclination Angle",breaks = c(0,2.5,5,7.5,10,12.5),limits=c(2.5,12.5))+theme(axis.title.y= element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=16))+theme(text=element_text(size=16,family="Calibri"),axis.title.y = element_blank())+theme(plot.margin = margin(t=40,r=20,b=10,l=10))+scale_color_manual(labels=c("Group 2","Group 1"),values=c("grey20","grey60"),guide=guide_legend(reverse = T))+scale_size(guide='none')
+figure.s3
+
+
+figure.s4<- ggplot(WaddleAll_condfield,aes(x=Intensity.Diff,y=Prop))+geom_point(aes(color=Group,size=0.01))+theme_bw()+scale_y_continuous(breaks=c(0.00,0.08,0.16,0.24,0.32,0.4),limits=c(0.00,0.36))+theme(axis.title.x=element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=16))+scale_x_continuous(name="Difference in\n Field Intensity",limits=c(0,8))+theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=16))+theme(text=element_text(size=16,family="Calibri"),axis.title.y = element_blank())+theme(plot.margin = margin(t=40,r=20,b=10,l=10))+scale_color_manual(labels=c("Group 2","Group 1"),values=c("grey20","grey60"),guide=guide_legend(reverse = T))+scale_size(guide='none')
+figure.s4
+
+
+library(cowplot)
+library(grid)
+library(gridExtra)
+library(ggpubr)
+figure_bar<-plot_grid(figure.s3 +theme(legend.position = 'none'),figure.s4+theme(legend.position = 'none'),align = 'h',rel_widths = c(1,1),rel_heights = c(1,1))+draw_label("A",fontfamily = "Calibri", x = 0, y = 1, hjust = -0.5, vjust = 1.5)+draw_label("B",fontfamily = "Calibri",x=0.5,y=1,hjust=0.5,vjust=1.5)
+figure_bar
+grid.arrange(arrangeGrob(figure_bar,top=text_grob(""),
+                bottom = text_grob(""),
+                left = text_grob("Proportion of Time", color = "black", rot = 90,size=16,family="Calibri"),padding=unit(2,"line"
+                )))
+
+legend<-get_legend(figure.s3+theme(legend.position = "bottom"))
+
+figure.s5<-plot_grid(figure_bar,legend,ncol=1,rel_heights = c(1,0.1))
+figure.s5
+grid.arrange(arrangeGrob(figure.s5,top=text_grob(""),
+                bottom = text_grob(""),
+                left = text_grob("Proportion of Time", color = "black", rot = 90,size=16,family="Calibri"),padding=unit(2,"line"
+                )))
+
+
+figure.s6<- ggplot(WaddleAll,aes(x=Intensity.Diff,y=Prop))+geom_point(aes(color=FieldType,size=0.01))+theme_bw()+scale_y_continuous(name="Proportion of Time",breaks=c(0.00,0.08,0.16,0.24,0.32,0.4),limits=c(0.00,0.36))+theme(axis.title.x=element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=16))+scale_x_continuous(name="Difference in\n Field Intensity",limits=c(5,75),breaks=c(0,25,50))+theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=16))+theme(text=element_text(size=16,family="Calibri"))+theme(plot.margin = margin(t=40,r=20,b=10,l=10))+scale_color_manual(values=c("grey20","grey60"),guide=guide_legend(reverse = T))+scale_size(guide='none')
+
+labels <- c(Red = "Group 1", Purple = "Group 2")
+
+WaddleAll$Group <- factor(WaddleAll$Group, levels=c("Red","Purple"))
+
+figure.s6 + facet_grid(.~Group, labeller=labeller(Group = labels))
+
+figure.s7<- ggplot(WaddleAll,aes(x=Inclination.Diff,y=Prop))+geom_point(aes(color=FieldType,size=0.01))+facet_wrap(.~Group)+theme_bw()+scale_y_continuous(name="Proportion of Time",breaks=c(0.00,0.08,0.16,0.24,0.32,0.4),limits=c(0.00,0.36))+theme(axis.title.x=element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=16))+scale_x_continuous(name="Difference in\n Field Inclination",limits=c(2.5,12.5),breaks=c(0,5,10))+theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=16))+theme(text=element_text(size=16,family="Calibri"))+theme(plot.margin = margin(t=40,r=20,b=10,l=10))+scale_color_manual(values=c("grey20","grey60"),guide=guide_legend(reverse = T))+scale_size(guide='none')
+figure.s7+facet_grid(.~Group, labeller=labeller(Group = labels))
+
+```
+
+
+
 
 
