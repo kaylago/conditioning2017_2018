@@ -10,7 +10,7 @@ editor_options:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 rm(list=ls())
-setwd("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/BORIS_Videos/Behavioral_Observations/Waddling/CSV_WaddleFiles")
+setwd("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2017/Behavioral_Observations/Waddling/CSV_WaddleFiles/")
 getwd()
 ```
 
@@ -271,7 +271,7 @@ library(dplyr)
 Dec9_W1<-Dec9_W1 %>% group_by(ID,TimePer,Observer,Field,FieldType,Date) %>% summarise(TotalTimeEl=sum(TimeEl)) 
 Dec9_W1_test<-filter(Dec9_W1,TimePer=="test")
 ```
-
+##good to here
 
 
 #Dec 9 Second Analysis
