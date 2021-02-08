@@ -130,7 +130,7 @@ nov_data <- nov_data %>% mutate(freq=mean.duration/1200)
 
 #nov_data_alt <- nov_data %>% filter(turtle.id != "L192")# %>% filter(turtle.id!= "L200") 
 
-write.csv(nov_data_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/nov_data_observers_2-4-2021_updated.csv")
+write.csv(nov_data_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/nov_data_observers_2-5-2021_updated.csv")
 
 write.csv(nov_data,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/nov_data_11-9.csv")
 
@@ -139,6 +139,9 @@ write.csv(nov_data,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/D
 observer_difference <- nov_data_obs %>% group_by(turtle.id,date) %>% summarize(difference=max(total.duration)-min(total.duration))
 
 mean(observer_difference$difference) #15.6 seconds
+
+library(car)
+leveneTest(mean.duration~field,data=dfs_nov18_total) #passes
 
 wilcox.test(mean.duration~field,nov_data)
 
@@ -194,7 +197,7 @@ nov_plot<-ggplot(nov_data,aes(x=field,y=freq))+
   annotate("text",
            x = c(1.5),
            y = c(0.1),
-           label = c("p = 0.038"),
+           label = c("p = 0.0028"),
            family = "Calibri", fontface = 3, size=5)
 nov_plot
 

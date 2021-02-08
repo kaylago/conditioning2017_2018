@@ -14,9 +14,9 @@ groupdata <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/201
 library(dplyr)
 rf_data = rf_data[order(sapply(rf_data,ncol),decreasing = F)]
 
-rf_data_15 <- rf_data[c(17:61)]
+rf_data_15 <- rf_data[c(17:63)]
 rf_data_14 <- rf_data[c(1:16)]
-rf_data_16 <- rf_data[c(62:73)]
+rf_data_16 <- rf_data[c(64:72)]
 
 detach(package:dplyr)
 library(plyr)
@@ -124,39 +124,65 @@ rf_data <- rf_data %>% arrange(turtle.id,date)
 
 rf_data <- rf_data %>% mutate(freq=mean.duration/1200)
 
-write.csv(rf_data_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/rf_data_observers_11-9.csv")
+observer_difference <- rf_data_obs %>% group_by(turtle.id,date) %>% summarize(difference=max(total.duration)-min(total.duration))
+
+mean(observer_difference$difference)
+
+write.csv(rf_data_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/rf_data_observers_2-5-21.csv")
 
 #write.csv(rf_data,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/rf_data_6-28.csv")
 
 #one_monthdata_alt <- one_monthdata %>% filter(id != "L190") #%>% filter(id != "L191")
-
+library(car)
+leveneTest(mean.duration~field,data=rf_data) #passes
 
 wilcox.test(freq~field,rf_data)
 
+wilcox.test(freq~field,rf_data,paired=TRUE)
+
 t.test(freq~field,rf_data)
 
-nov_data<- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/nov_data_10-22.csv",header=T)
+nov_data <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/nov_data_observers_2-4-2021_updated.csv")
+
+nov_data_obs <- nov_data %>% select(-c(X))
+
+nov_data <- nov_data %>% group_by(turtle.id,date,field,group) %>% summarise(mean.duration=mean(total.duration))
 
 nov_data <- nov_data %>% mutate(exper=rep("2mo"))
 
-nov_data <- nov_data %>% select(-c("X"))
+nov_data <- nov_data %>% mutate(freq=mean.duration/1200)
+
+nov_data$date <- as.Date(nov_data$date,format= "%m/%d/%y")
+
+#nov_data <- nov_data %>% select(-c("X"))
 
 rf_data <- rf_data %>% mutate(exper=rep("rf"))
 
 detach(package:plyr)
 library(dplyr)
 
+nov_data_obs<-as.data.frame(nov_data_obs)
+rf_data_obs<-as.data.frame(rf_data_obs)
+
+all_obs <- rbind(rf_data_obs,nov_data_obs)
+
+observer_difference_all <- all_obs %>% group_by(turtle.id,date) %>% summarize(difference=max(total.duration)-min(total.duration))
+
+mean(observer_difference_all$difference)
 
 nov_data<- as.data.frame(nov_data)
 rf_data<- as.data.frame(rf_data)
 
 alldata <-rbind(nov_data,rf_data)
 
+alldata <- alldata %>% arrange(turtle.id)
 
-wilcox.test(freq~exper,subset(alldata,field=="MA"))
+wilcox.test(freq~exper,subset(alldata,field=="MA"),paired=TRUE)
+
+wilcox.test(freq~exper,subset(alldata,field=="MA"),paired=TRUE)
 t.test(freq~exper,subset(alldata,field=="MA"))
 
-wilcox.test(freq~field,nov_data)
+wilcox.test(freq~field,nov_data,paired=TRUE)
 
 
 library(ggplot2)
@@ -187,7 +213,7 @@ rfplot<-ggplot(rf_data,aes(x=field,y=freq))+
   scale_y_continuous("Proportion of Time",breaks = c(0,0.01,0.02,0.04,0.08,0.16),expand=c(0,0),limits=c(0,0.16))+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
-  ggtitle("Radiofrequency") +
+  #ggtitle("Radiofrequency") +
   theme(text=element_text(size=18,family="calibri"))+
   theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face="plain"))+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
@@ -197,13 +223,119 @@ rfplot<-ggplot(rf_data,aes(x=field,y=freq))+
         axis.line = element_line(colour = "black"))+
   theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())+
-  theme(axis.title.x = element_blank(),axis.title.y=element_blank())+
+  #theme(axis.title.x = element_blank(),axis.title.y=element_blank())+
   geom_line(data=annotation_df1,aes(x=field.type,y=y))+
   geom_segment(data=annotation_df2,aes(x="MA",xend="MA/RF",y=0.08,yend=0.08))+
   geom_line(data=annotation_df3,aes(x=field.type,y=y))+
   annotate("text",
            x = c(1.5),
-           y = c(0.085),
-           label = c("p = 0.77"),
+           y = c(0.09),
+           label = c("p = 0.99"),
            family = "Calibri", fontface = 3, size=5)
 rfplot
+
+annotation_df1 <- data.frame(field.type=rep(c("FL","FL")),
+                             y=c(0.086,0.09))
+
+annotation_df2 <- data.frame(field.type=rep(c("FL","MA")),
+                             y=c(0.09,0.09))
+
+annotation_df3 <- data.frame(field.type=rep(c("MA","MA")),
+                             y=c(0.09,0.086))
+
+
+
+nov_plot<-ggplot(nov_data,aes(x=field,y=freq))+
+  stat_summary(fun.y= mean,geom="bar",color="grey",fill="grey")+
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+               geom="errorbar",color="black")+
+  #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
+  geom_point(position=position_jitter(width=0.1))+
+  theme_bw()+
+  coord_trans(y="sqrt")+
+  #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
+  scale_y_continuous("Proportion of Time",breaks = c(0,0.01,0.02,0.04,0.08,0.16),expand=c(0,0),limits=c(0,0.16))+
+  #coord_cartesian(ylim=c(0,0.1))+
+  scale_x_discrete("Treatment")+
+  ggtitle("") +
+  theme(text=element_text(size=22,family="calibri"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face="plain"))+
+  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"))+
+  theme(panel.border = element_blank(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"))+
+  theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())+
+  #theme(axis.title.x = element_blank(),axis.title.y=element_blank())+
+  geom_line(data=annotation_df1,aes(x=field.type,y=y))+
+  geom_segment(data=annotation_df2,aes(x="FL",xend="MA",y=0.09,yend=0.09))+
+  geom_line(data=annotation_df3,aes(x=field.type,y=y))+
+  annotate("text",
+           x = c(1.5),
+           y = c(0.1),
+           label = c("p = 0.0028"),
+           family = "Calibri", fontface = 3, size=5)
+nov_plot
+
+alldata$field <- as.character(alldata$field)
+
+alldata <- alldata %>% mutate(field=ifelse(exper=="2mo"&field=="MA","MA1",ifelse(exper=="rf" & field=="MA","MA2",field)))
+
+alldata$field <- factor(alldata$field, levels=c("FL","MA1","MA2","MA/RF"),labels = c("FL","MA-1","MA-2","MA-RF"))
+
+anno<- data.frame(field=c("FL","MA-1","MA-2","MA-RF"),
+                             y=c(0.086,0.09,0.1,0))
+
+
+all_plot<-ggplot(alldata,aes(x=field,y=freq),group=exper)+
+  stat_summary(fun.y= mean,geom="bar",color="grey")+
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+               geom="errorbar",color="black")+
+  #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
+  geom_point(position=position_jitter(width=0.15))+
+  theme_bw()+
+  coord_trans(y="sqrt")+
+  #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
+  scale_y_continuous("Proportion of Time",breaks = c(0,0.01,0.02,0.04,0.08,0.16),expand=c(0,0),limits=c(0,0.2))+
+  #coord_cartesian(ylim=c(0,0.1))+
+  scale_x_discrete("Treatment")+
+  ggtitle("") +
+  theme(text=element_text(size=22,family="calibri"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face="plain"))+
+  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"))+
+  theme(panel.border = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent", color = NA))+
+  geom_segment(aes(x="FL",xend="MA-1"),y=0.08,yend=0.08)+
+  geom_segment(aes(x="FL",xend="FL"),y=0.075,yend=0.08)+
+  geom_segment(aes(x="MA-1",xend="MA-1"),y=0.075,yend=0.08)+
+  geom_segment(aes(x="MA-1",xend="MA-2"),y=0.13,yend=0.13)+
+  geom_segment(aes(x="MA-1",xend="MA-1"),y=0.13,yend=0.125)+
+  geom_segment(aes(x="MA-2",xend="MA-2"),y=0.13,yend=0.125)+
+  geom_segment(aes(x="MA-2",xend="MA-RF"),y=0.16,yend=0.16)+
+  geom_segment(aes(x="MA-2",xend="MA-2"),y=0.155,yend=0.16)+
+  geom_segment(aes(x="MA-RF",xend="MA-RF"),y=0.16,yend=0.155)+
+  #geom_segment(aes(x="MA-RF",xend="MA-RF"),y=0.15,yend=0.155)+
+  annotate("text",
+           x = c(1.5),
+           y = c(0.09),
+           label = c("p = 0.002*"),
+           family = "Calibri", fontface = 3, size=5)+
+  annotate("text",
+         x = c(2.5),
+         y = c(0.14),
+         label = c("p = 0.78"),
+         family = "Calibri", fontface = 3, size=5)+
+  annotate("text",
+           x = c(3.5),
+           y = c(0.175),
+           label = c("p = 0.99"),
+           family = "Calibri", fontface = 3, size=5)
+all_plot
+
+ggsave(all_plot, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/rf_all_2019_new.png",  bg = "transparent")

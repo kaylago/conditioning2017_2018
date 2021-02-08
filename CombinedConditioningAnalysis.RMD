@@ -10,29 +10,57 @@ rm(list=ls())
 ```
 
 ```{r read in data}
-data2018 <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/FinalData/2018_testperiod_meansFINAL.csv")
-data2017 <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/FinalData/2017_testperiod_means.csv") 
+data2018 <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2018/2018_observers_data_2-5-2021_updated.csv")
+data2017 <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/CompactObserverData_AllYears/2017_data_observers_2-1-2021_updated.csv") 
+data2019<- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/nov_data_observers_2-4-2021_updated.csv")
+
+data2019 <- data2019 %>% mutate(field.type=ifelse(field=="MA","conditioned","control"))
+
+columns17 <- c("x","turtle.id","date","observer","field","field.type","mean.duration","group")
+columns18 <- c("x","date","turtle.id","observer","group","field","field.type","mean.duration")
+columns19 <- c("x","turtle.id","date","observer","field","group","mean.duration","field.type")
+
+
+renameFunction<-function(x,columns){
+  names(x) <- columns
+  return(x)
+}
+
+data2017 <- renameFunction(data2017,columns17)
+data2018 <- renameFunction(data2018,columns18)
+data2019 <- renameFunction(data2019,columns19)
+
+data2017 <- data2017 %>% mutate(year=rep(2017))
+data2018 <- data2018 %>% mutate(year=rep(2018))
+data2019 <- data2019 %>% mutate(year=rep(2019))
+
+data <- rbind(data2017,data2018)
+data <- rbind(data,data2019)
+
 
 
 ```
 
-```{r adjust data frames}
-library(dplyr)
+```{r total observer difference}
+observer_difference <- data %>% group_by(turtle.id,date) %>% summarize(difference=max(mean.duration)-min(mean.duration))
 
-data2017 <- data2017 %>% mutate(date=ifelse(Date=="Dec9","12/9/2017",ifelse(Date=="Dec10","12/10/2017",ifelse(Date=="Dec11","12/11/2017",ifelse(Date=="Dec12","12/12/2017","12/13/2017")))))
-data2017$date <- as.Date(data2017$date,format="%m/%d/%Y")
+mean(observer_difference$difference)#16.9 for ALL years
 
-data2017 <- data2017 %>% select(c("ID","FieldType","date","Freq","Group","Prop","MagField"))
-names(data2017)<-c("id","field.type","date","mean.time","group","prop","field")
+data<- data %>% group_by(turtle.id,date,field,field.type,group,year) %>% summarise(mean.duration=mean(mean.duration))
 
-data2018<- data2018 %>% select(-c("X"))
+data <- data %>% mutate(freq=mean.duration/1200)
 
-data<- rbind(data2017,data2018)
 ```
 
 ```{r statistical tests and models, echo=TRUE}
-wilcox.test(prop~field.type,data)
-t.test(prop~field.type,data)
+wilcox.test(freq~field.type,subset(data,year==2019),paired=TRUE)
+
+wilcox.test(freq~field.type,subset(data,year==2018),paired=TRUE)
+
+wilcox.test(freq~field.type,subset(data,year==2017),paired=TRUE)
+
+
+wilcox.test(freq~field.type,data,paired=TRUE)
 
 diff.lm<- lm(prop~group,subset(field.type="conditioned",data))
 summary(diff.lm)

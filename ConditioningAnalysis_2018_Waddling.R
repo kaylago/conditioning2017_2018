@@ -122,8 +122,8 @@ library(dplyr)
 data2 = data2[order(sapply(data2,ncol),decreasing = F)]
 
 
-data_15 <- data2[c(1:9)]
-data_16 <- data2[c(10:13)]
+data_15 <- data2[c(1:8)]
+data_16 <- data2[c(9:15)]
 
 
 detach(package:dplyr)
@@ -190,7 +190,9 @@ data2 <- data2 %>% mutate(trial.end=video.change+20)
 
 data2 <- data2 %>% filter(minutes>=video.change) %>% filter(minutes<=trial.end)
 
-data2_obs <- data2 %>% group_by(date,turtle.id,observer,group,field,field.type)%>% summarize(mean.duration=sum(duration))
+#data2 <- unique(data2)
+
+data2_obs <- data2 %>% group_by(date,turtle.id,observer,group,field,field.type)%>% summarise(mean.duration=sum(duration))
 
 col_order <- c("date","turtle.id","observer","group","field","field.type","mean.duration")
 data2_obs <- data2_obs[ , col_order]
@@ -212,6 +214,10 @@ nov18_observers <- as.data.frame(nov18_observers)
 
 nov18_observers<- rbind(nov18_observers,data2_obs)
 
+#L181_nov30 <- data2 %>% filter(turtle.id=="L181") %>% filter(observer != "KG")
+
+#L181_nov30 <- L181_nov30 %>% group_by(turtle.id,date) %>% summarize(duration=sum(duration))
+
 waddle_zero <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2018/Waddling_zero_2018.csv",header=T)
 
 waddle_zero$date <- as.Date(waddle_zero$date,format="%m/%d/%Y")
@@ -227,7 +233,7 @@ observer_difference <- nov18_observers %>% group_by(turtle.id,date) %>% summariz
 mean(observer_difference$difference) #16.3 second
 
 #write.csv(dfs_acclim_summary,file="C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/2018/dfs_acclim_summary.csv")
-write.csv(nov18_observers,file="C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2018/2018_observers_data_2-3-2021_updated.csv")
+write.csv(nov18_observers,file="C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2018/2018_observers_data_2-5-2021_updated.csv")
 
 
 
@@ -269,7 +275,8 @@ a#nova(lme1)
 #nov_2018 <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2018/2018_observers_data_12-2-2020_num2.csv",header=TRUE)
 observer_difference <- nov18_observers %>% group_by(turtle.id,date) %>% summarize(difference=max(mean.duration)-min(mean.duration))
 
-mean(observer_difference$difference)
+mean(observer_difference$difference)#19
+
 
 wilcox.test(freq~field.type,dfs_nov18_total,paired=TRUE)
 #t.test(mean.time~field.type,dfs_test_mean)

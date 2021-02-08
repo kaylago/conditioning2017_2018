@@ -292,6 +292,8 @@ dec_data_total_obs <- bind_rows(dec_data_obs,waddle_zero)
 
 dec_data_total_obs <- dec_data_total_obs %>% arrange(turtle.id,date)
 
+
+
 #write.csv(dec_data_total_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2017/2017_data_observers_2-1-2021_updated.csv")
 
 library(dplyr)
