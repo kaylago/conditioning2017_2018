@@ -216,7 +216,7 @@ jul_plot<-ggplot(finaldata,aes(x=field.type,y=freq))+
   )
 jul_plot
 
-ggsave(jul_plot, filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2020_Spring/Figures/jul_plot.png",  bg = "transparent")
+ggsave(jul_plot, width = 5, height=7,units="in",filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2020_Spring/Figures/jul_plot.png",  bg = "transparent")
 
 
 obx_plot_20 <-ggplot(obx,aes(x=field.type,y=freq))+
