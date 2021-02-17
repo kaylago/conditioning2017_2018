@@ -1,9 +1,8 @@
-##November 2 month tests
-
+##November NONSENSE TESTS
 rm(list=ls())
 
 
-setwd("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/November2019_2mo/")
+setwd("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/November2019_NS/")
 temp = list.files(pattern="*.csv")
 nov_data = lapply(temp, read.csv,header= T)
 
@@ -14,8 +13,8 @@ groupdata <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/201
 library(dplyr)
 nov_data = nov_data[order(sapply(nov_data,ncol),decreasing = F)]
 
-nov_data_15 <- nov_data[c(0:59)]
-nov_data_16 <- nov_data[c(60:69)]
+nov_data_15 <- nov_data[c(0:63)]
+nov_data_16 <- nov_data[c(64:64)]
 #nov_data_14 <- nov_data[c(0:1)]
 #nov_data_5 <- nov_data[c(0:1)]
 
@@ -66,8 +65,9 @@ library(dplyr)
 nov_data <- nov_data %>% separate(turtle.id, into = c('turtle.id','date'), sep = 4, convert=TRUE)
 nov_data <- nov_data %>% separate(date, into = c('delete','date'),sep=1,convert=TRUE)
 nov_data <- nov_data %>% separate(date,into = c('date','observer'),sep=5,convert=TRUE)
-nov_data <- nov_data %>% separate(observer,into = c('delete2','observer'),sep=1,convert = TRUE)
-nov_data <- nov_data %>% select(-c("delete","delete2"))
+nov_data <- nov_data %>% separate(observer,into = c('exper','observer'),sep=4,convert = TRUE)
+nov_data <- nov_data %>% select(-c("delete"))
+nov_data <- nov_data %>% mutate(exper=rep("NS"))
 
 #nov_data <- nov_data %>% separate(observer, into = c('experiment','observer'), sep=2,convert=TRUE)
 #nov_data <- nov_data %>% separate(observer, into = c('delete','observer'),sep=-2,convert=TRUE)
@@ -115,6 +115,7 @@ groupdata <- groupdata %>% select(c("turtle.id","date","group","field","experime
 
 detach(package:plyr)
 nov_data <- merge(nov_data,groupdata,by=c("turtle.id","date"))
+nov_data <- nov_data %>% mutate(field=ifelse(field=="MA ","MA",as.character(field)))
 
 nov_data <- nov_data %>% group_by(turtle.id,date,observer,field,group) %>% filter(minutes >= video.change)
 
@@ -130,24 +131,68 @@ nov_data <- nov_data %>% arrange(turtle.id,date)
 
 nov_data <- nov_data %>% mutate(freq=mean.duration/1200)
 
-#nov_data_alt <- nov_data %>% filter(turtle.id != "L192")# %>% filter(turtle.id!= "L200") 
+nov_data <- as.data.frame(nov_data)
 
-write.csv(nov_data_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/nov_data_observers_2-13-2021_updated.csv")
 
-write.csv(nov_data,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/nov_data_11-9.csv")
 
-#one_monthdata_alt <- one_monthdata %>% filter(id != "L190") #%>% filter(id != "L191")
+class(nov_data$field)
 
-observer_difference <- nov_data_obs %>% group_by(turtle.id,date) %>% summarize(difference=max(total.duration)-min(total.duration))
 
-mean(observer_difference$difference) #13 seconds
+nov_data <- nov_data %>% mutate(treatment=ifelse(field=="MA","conditioned",ifelse(field=="FL","control",ifelse(field=="FLint/Minc","nonsense1","nonsense2"))))
 
-library(car)
-leveneTest(mean.duration~field,data=nov_data) #passes
+nov_data <- nov_data%>% mutate(treatment2=ifelse(field=="MA","conditioned",ifelse(field=="FL","control","nonsense")))
 
-wilcox.test(mean.duration~field,nov_data,paired=TRUE)
 
-t.test(freq~field,nov_data)
+class(nov_data$treatment)
+nov_data$treatment <- as.factor(as.character(nov_data$treatment))
+
+pairwise.wilcox.test(nov_data$freq,nov_data$treatment2,paired=TRUE)
+
+nov_data_og <- nov_data %>% filter(field!="FLint/Minc") %>% filter(field!="FLinc/Mint")
+
+group_1 <- nov_data %>% filter(treatment=="nonsense1")
+
+group_1 <- group_1 %>% mutate(field.grouping = rep("group1"))
+
+group_1 <- group_1 %>% select(c(turtle.id,field.grouping))
+
+group_2 <- nov_data %>% filter(treatment=="nonsense2")
+
+group_2 <- group_2 %>% mutate(field.grouping = rep("group2"))
+
+group_2 <- group_2 %>% select(c(turtle.id,field.grouping))
+
+field.grouping <- rbind(group_1,group_2)
+
+
+
+
+
+nov_data <- merge(nov_data,field.grouping,by=c("turtle.id"))
+
+nonsense1 <- nov_data %>% filter(field.grouping=="group1")
+
+nonsense1_alt <- nonsense1 %>% filter(field!="FL")
+
+wilcox.test(freq~treatment,nonsense1_alt,paired=TRUE)
+
+nonsense2 <- nov_data %>% filter(field.grouping=="group2")
+
+nonsense2_alt <- nonsense2 %>% filter(field!="FL")
+
+wilcox.test(freq~treatment,nonsense2_alt,paired=TRUE)
+
+pairwise.wilcox.test(nonsense1$freq,nonsense1$treatment,paired=TRUE)
+
+pairwise.wilcox.test(nonsense2$freq,nonsense2$treatment,paired=TRUE)
+
+wilcox.test(freq~field,nov_data_og,paired=TRUE)
+
+
+
+
+t.test(freq~field,nov_data_og)
+
 
 
 library(ggplot2)
@@ -191,7 +236,7 @@ nov_plot<-ggplot(nov_data,aes(x=field,y=freq))+
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), 
         axis.line = element_line(colour = "black"))+
   theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank())+
+        panel.grid.minor = element_blank())
   #theme(axis.title.x = element_blank(),axis.title.y=element_blank())+
   geom_line(data=annotation_df1,aes(x=field.type,y=y))+
   geom_segment(data=annotation_df2,aes(x="FL",xend="MA",y=0.09,yend=0.09))+
@@ -202,4 +247,5 @@ nov_plot<-ggplot(nov_data,aes(x=field,y=freq))+
            label = c("p = 0.0005"),
            family = "Calibri", fontface = 3, size=5)
 nov_plot
+
 

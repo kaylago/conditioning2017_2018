@@ -15,8 +15,8 @@ library(dplyr)
 data = data[order(sapply(data,ncol),decreasing = F)]
 
 
-data_15 <- data[c(0:50)]
-data_16 <- data[c(51:62)]
+data_15 <- data[c(0:49)]
+data_16 <- data[c(50:60)]
 
 
 
@@ -98,8 +98,13 @@ groupdata <- groupdata %>% separate(time.change, into = c("time.change.mins","ti
 
 groupdata <- groupdata %>% mutate(time.change.sec=time.change.sec/60) %>% mutate(video.change = time.change.mins+time.change.sec)
 
-groupdata <- groupdata %>% mutate(end.trial=video.change+20)
+#l194 <- groupdata %>% filter(turtle.id=="L194")
+#groupdata <- groupdata %>% filter(turtle.id!="L194")
 
+groupdata <- groupdata %>% mutate(end.trial=video.change+20)
+#l194 <- l194  %>% mutate(end.trial=video.change+15)
+
+groupdata<- rbind(groupdata,l194)
 
 groupdata$date <- as.Date(groupdata$date,format= "%d-%b-%y")
 
@@ -118,7 +123,7 @@ data_obs <- finaldata %>% group_by(turtle.id,date,observer,field,group,field.typ
 
 data_obs <- data_obs %>% arrange(turtle.id,date)
 
-write.csv(data_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2020_Spring/DataSheets/Spring2020_observerdata_2-4-2021.csv")
+write.csv(data_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2020_Spring/DataSheets/Spring2020_observerdata_2-13-2021_updated.csv")
 
 finaldata <- data_obs %>% group_by(turtle.id,date,field,group,field.type) %>% summarise(mean.duration=mean(total.duration))
 
@@ -128,25 +133,26 @@ finaldata <- finaldata %>% mutate(freq=mean.duration/1200)
 
 observer_difference <- data_obs %>% group_by(turtle.id,date) %>% summarize(difference=max(total.duration)-min(total.duration))
 
-mean(observer_difference$difference) #18.03
+mean(observer_difference$difference) #8.1
 
+wilcox.test(freq~field.type,data=finaldata,paired=TRUE)
 wilcox.test(freq~field.type,data=finaldata)
 
 t.test(freq~field.type,data=finaldata)
 
-finaldata2 <- finaldata %>% filter(turtle.id != "L188") %>% filter(turtle.id !="L197")
+#finaldata2 <- finaldata %>% filter(turtle.id != "L188") %>% filter(turtle.id !="L197")
 
 obx <- finaldata %>% filter(group!="orange") %>% filter(group!="purple")
 
 nb <- finaldata %>% filter(group!="grey") %>% filter(group!="teal")
 
-nb2 <- nb %>% filter (turtle.id != "L192") %>% filter(turtle.id != "L188")
+#nb2 <- nb %>% filter (turtle.id != "L190") #%>% filter(turtle.id != "L188")
 
-obx2 <- obx %>% filter(turtle.id != "L197")
+#obx2 <- obx %>% filter(turtle.id != "L197")
 
 wilcox.test(freq~field.type,data=nb,paired=TRUE)
 
-wilcox.test(freq~field.type,data=obx)
+wilcox.test(freq~field.type,data=obx,paired=TRUE)
 
 
 
@@ -228,7 +234,7 @@ obx_plot_20 <-ggplot(obx,aes(x=field.type,y=freq))+
   theme_bw()+
   coord_trans(y="sqrt")+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
-  scale_y_continuous("Proportion of Time",breaks=c(0,0.04,0.08,0.12,0.2,0.3,0.4),expand=c(0,0),limits=c(0,0.5))+
+  scale_y_continuous("Proportion of Time",breaks=c(0,0.04,0.08,0.12,0.2,0.3,0.4),expand=c(0,0),limits=c(0,0.15))+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
   ggtitle("") +
@@ -262,7 +268,7 @@ nb_plot_20 <-ggplot(nb,aes(x=field.type,y=freq))+
   theme_bw()+
   coord_trans(y="sqrt")+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
-  scale_y_continuous("Proportion of Time",breaks=c(0,0.04,0.08,0.12,0.2,0.3,0.4),expand=c(0,0),limits=c(0,0.5))+
+  scale_y_continuous("Proportion of Time",breaks=c(0,0.04,0.08,0.12,0.2,0.3,0.4),expand=c(0,0),limits=c(0,0.15))+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
   ggtitle("") +
@@ -282,7 +288,7 @@ nb_plot_20 <-ggplot(nb,aes(x=field.type,y=freq))+
   annotate("text",
            x = c(1.5),
            y = c(0.25),
-           label = c("p = 0.039"),
+           label = c("p = 0.01"),
            family = "Calibri", fontface = 3, size=5)
 nb_plot_20
 

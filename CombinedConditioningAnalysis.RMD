@@ -10,15 +10,27 @@ rm(list=ls())
 ```
 
 ```{r read in data}
-data2018 <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2018/2018_observers_data_2-5-2021_updated.csv")
-data2017 <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/CompactObserverData_AllYears/2017_data_observers_2-1-2021_updated.csv") 
-data2019<- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/nov_data_observers_2-4-2021_updated.csv")
+data2018 <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/CompactObserverData_AllYears/2018_data_observers_2-13-2021_updated.csv")
+
+data2017 <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/CompactObserverData_AllYears/2017_data_observers_2-13-2021_updated.csv")
+
+data2019<- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/CompactObserverData_AllYears/2019_data_observers_2-13-2021_updated.csv")
+
+data2020 <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2020_Spring/DataSheets/Spring2020_observerdata_2-13-2021_updated.csv")
+
+library(dplyr)
+
+data2020<- data2020 %>% mutate(group=ifelse(group=="orange","maroon",ifelse(group=="purple","maroon","teal")))
 
 data2019 <- data2019 %>% mutate(field.type=ifelse(field=="MA","conditioned","control"))
+
+data2019 <- data2019 %>% mutate(group=rep("green"))
 
 columns17 <- c("x","turtle.id","date","observer","field","field.type","mean.duration","group")
 columns18 <- c("x","date","turtle.id","observer","group","field","field.type","mean.duration")
 columns19 <- c("x","turtle.id","date","observer","field","group","mean.duration","field.type")
+columns20 <- c("x","turtle.id","date","observer","field","group","field.type","mean.duration")
+
 
 
 renameFunction<-function(x,columns){
@@ -29,13 +41,16 @@ renameFunction<-function(x,columns){
 data2017 <- renameFunction(data2017,columns17)
 data2018 <- renameFunction(data2018,columns18)
 data2019 <- renameFunction(data2019,columns19)
+data2020 <- renameFunction(data2020,columns20)
 
 data2017 <- data2017 %>% mutate(year=rep(2017))
 data2018 <- data2018 %>% mutate(year=rep(2018))
 data2019 <- data2019 %>% mutate(year=rep(2019))
+data2020 <- data2020 %>% mutate(year=rep(2020))
 
 data <- rbind(data2017,data2018)
 data <- rbind(data,data2019)
+data<- rbind(data,data2020)
 
 
 
@@ -44,25 +59,65 @@ data <- rbind(data,data2019)
 ```{r total observer difference}
 observer_difference <- data %>% group_by(turtle.id,date) %>% summarize(difference=max(mean.duration)-min(mean.duration))
 
-mean(observer_difference$difference)#16.9 for ALL years
+mean(observer_difference$difference)#13 for ALL years
 
 data<- data %>% group_by(turtle.id,date,field,field.type,group,year) %>% summarise(mean.duration=mean(mean.duration))
 
 data <- data %>% mutate(freq=mean.duration/1200)
 
+library(car)
+leveneTest(freq~field,data = data)
+leveneTest(freq~field, data=subset(data,year==2017))
+leveneTest(freq~field, data=subset(data,year==2018))
+leveneTest(freq~field, data=subset(data,year==2019))
+leveneTest(freq~field, data=subset(data,year==2020))
+
 ```
 
 ```{r statistical tests and models, echo=TRUE}
-wilcox.test(freq~field.type,subset(data,year==2019),paired=TRUE)
+wilcox.test(freq~field.type,subset(data,year==2019),paired=TRUE)#0.00057
 
-wilcox.test(freq~field.type,subset(data,year==2018),paired=TRUE)
+wilcox.test(freq~field.type,subset(data,year==2019))
 
-wilcox.test(freq~field.type,subset(data,year==2017),paired=TRUE)
+wilcox.test(freq~field.type,subset(data,year==2018),paired=TRUE)#6.10e-5
 
+wilcox.test(freq~field.type,subset(data,year==2018))
 
-wilcox.test(freq~field.type,data,paired=TRUE)
+wilcox.test(freq~field.type,subset(data,year==2017),paired=TRUE)#0.001
 
-diff.lm<- lm(prop~group,subset(field.type="conditioned",data))
+wilcox.test(freq~field.type,subset(data,year==2017))
+
+wilcox.test(freq~field.type,subset(data,year==2020),paired=TRUE)#0.002
+
+wilcox.test(freq~field.type,subset(data,year==2020))
+
+wilcox.test(freq~field.type,subset(data,group=="purple"),paired=TRUE)#.007
+
+wilcox.test(freq~field.type,subset(data,group=="purple"))
+
+wilcox.test(freq~field.type,subset(data,group=="red"),paired=TRUE)#.05
+
+wilcox.test(freq~field.type,subset(data,group=="red"))
+
+wilcox.test(freq~field.type,subset(data,group=="blue"),paired=TRUE)#.007
+
+wilcox.test(freq~field.type,subset(data,group=="blue"))
+
+wilcox.test(freq~field.type,subset(data,group=="orange"),paired=TRUE)#0.01
+
+wilcox.test(freq~field.type,subset(data,group=="orange"))
+
+#wilcox.test(freq~field.type,subset(data,group=="yellow"),paired=TRUE)
+
+wilcox.test(freq~field.type,subset(data,group=="green"),paired=TRUE)#.0005
+
+wilcox.test(freq~field.type,subset(data,group=="teal"),paired=TRUE)#0.01
+
+wilcox.test(freq~field.type,subset(data,group=="maroon"),paired=TRUE)#0.1
+
+wilcox.test(freq~field.type,data,paired=TRUE)#2.76e-10
+
+diff.lm<- lm(freq~group,subset(field.type="conditioned",data))
 summary(diff.lm)
 library(emmeans)
 
@@ -70,39 +125,25 @@ emmeans(diff.lm, list(pairwise ~ group), adjust = "tukey")
 
 cond_data<- data %>% filter(field.type=="conditioned")
 
-pairwise.wilcox.test(cond_data$prop,cond_data$group)
+pairwise.wilcox.test(data$freq,data$group)#all 1
 
+detach(package:dplyr)
+library(plyr)
 library(dplyr)
-data %>% filter(field.type=="conditioned") %>% summarise(mean(prop))
-data %>% filter(field.type=="conditioned") %>% summarise(mean(mean.time))
-data %>% filter(field.type=="control") %>% summarise(mean(prop))
-data %>% filter(field.type=="control") %>% summarise(mean(mean.time))
 
-summary <- data %>% group_by(group,field.type) %>% summarise(mean(prop))
+attach(subset(data,field.type=="conditioned"))
+mean(freq)
+mean(mean.duration)
+detach()
 
-write.csv(summary,"C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/WritingTools/summary.csv")
+attach(subset(data,field.type=="control"))
+mean(freq)
+mean(mean.duration)
+detach()
 
-summary_seconds <- data %>% group_by(group,field.type) %>% summarise(mean(mean.time))
+data_summarize <- data %>% group_by(group,year,field,field.type) %>% summarize(mean.duration=mean(mean.duration),mean.freq=mean(freq))
 
-write.csv(summary_seconds,"C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/WritingTools/summary_seconds.csv")
-
-wilcox.test(prop~field.type,subset(data,group=="blue"))
-wilcox.test(prop~field.type,subset(data,group=="orange"))
-wilcox.test(prop~field.type,subset(data,group=="Red"))
-wilcox.test(prop~field.type,subset(data,group=="Purple"))
-
-library(car)
-leveneTest(prop~group,data = data)
-leveneTest(prop~group,data = data2017)
-leveneTest(prop~group,data = data2018)
-
-leveneTest(prop~field,data = data)
-leveneTest(prop~field,data = data2017)
-leveneTest(prop~field,data = data2018)
-
-leveneTest(prop~field.type,data = data)
-leveneTest(prop~field.type,data = data2017)
-leveneTest(prop~field.type,data = data2018)
+write.csv(data_summarize,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/FinalData/Summarized_Data_AllYears.csv")
 
 
 library(nlme)
@@ -147,297 +188,325 @@ annotation_df3 <- data.frame(field.type=rep(c("control","control")),
                             y=c(0.47,0.45))
 
 
-figure1<-ggplot(data,aes(x=field.type,y=prop))+
-  stat_boxplot(geom="errorbar",color="black")+
-  geom_boxplot(outlier.shape=NA,fill="#CCCCCC",color="black")+
-  geom_point(color="black",position="jitter")+
-  theme_bw()+scale_y_continuous(name = "Proportion of Time",breaks=c(0.00,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5),limits=c(0,0.5))+
-  theme(axis.title.x=element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20))+
-  theme(axis.title.y= element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20))+
-  scale_x_discrete(name="Treatment")+theme(text=element_text(size=18,family="Calibri"),axis.text = element_text(color="black",size=16))+
-  theme(panel.border = element_blank(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line =  element_line(colour = "black"))+
-  geom_line(data=annotation_df1,aes(x=field.type,y=y))+
-  geom_segment(data=annotation_df2,aes(x="conditioned",xend="control",y=0.47,yend=0.47))+
-  geom_line(data=annotation_df3,aes(x=field.type,y=y))+
-   annotate("text",
+all_plot<-ggplot(data,aes(x=field.type,y=freq))+
+  stat_summary(fun.y= mean,geom="bar",color="grey",fill="grey")+
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+               geom="errorbar",color="black")+
+  #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
+  geom_point(position=position_jitter(width=0.1))+
+  theme_bw()+
+  coord_trans(y="sqrt")+
+  #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
+  scale_y_continuous("Proportion of Time",breaks = c(0,0.01,0.05,0.15,0.3,0.5),expand=c(0,0),limits=c(0,0.55))+
+  #coord_cartesian(ylim=c(0,0.1))+
+  scale_x_discrete("Treatment")+
+  ggtitle("") +
+  theme(text=element_text(size=18,family="calibri"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face="plain"))+
+  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"))+
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"))+
+  #theme(axis.title.x = element_blank(),axis.title.y=element_blank())+
+  geom_segment(aes(x="conditioned",xend="conditioned"),y=.45,yend=.47)+
+  geom_segment(aes(x="conditioned",xend="control"),y=0.47,yend=0.47)+
+  geom_segment(aes(x="control",xend="control"),y=.45,yend=.47)+
+  annotate("text",
            x = c(1.5),
            y = c(0.49),
-           label = c("p < 0.0001"),
-           family = "Calibri", fontface = 3, size=6)
-figure1
+           label = c("p = 2.796e-10"),
+           family = "Calibri", fontface = 3, size=5)+
+  theme(
+    rect = element_rect(fill = "transparent") # all rectangles
+  )+
+  theme(
+    panel.background = element_rect(fill = "transparent"), # bg of the panel
+    plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+    legend.background = element_rect(fill = "transparent"), # get rid of legend bg
+    legend.box.background = element_rect(fill = "transparent") # get rid of legend panel bg
+  )
+all_plot
+
+ggsave(all_plot, dpi=300, width = 5, height=7,units="in",filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/all_plot.png",  bg = "transparent")
 
 
-
-figure2<-ggplot(subset(data,group=="Red"),aes(x=field.type,y=prop))+
-  stat_boxplot(color="black")+
-  geom_boxplot(outlier.shape=NA,fill="#DEDEDE",color="black")+
-  geom_point(color="black",position="jitter")+
+red <-ggplot(subset(data,group=="red"),aes(x=field.type,y=freq))+
+  stat_summary(fun.y= mean,geom="bar",color="#990000",fill="#990000")+
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+               geom="errorbar",color="black")+
+  #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
+  geom_point(position=position_jitter(width=0.15))+
   theme_bw()+
-  scale_y_continuous(breaks=c(0.00,0.1,0.2,0.3,0.4,0.5),limits=c(0,0.5))+
-  theme(axis.title.x=element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20))+
-  theme(axis.title.y= element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20))+
-  theme(text=element_text(size=16,family="Calibri"),axis.title.x = element_blank(),axis.title.y=element_blank())+
-  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
-  ggtitle("Canada Group")+
-  theme(plot.title = element_text(size = 16,hjust=0.5,family = "Calibri Light",margin = margin(t=0,r=0,b=10,l=0)))+
-  theme(panel.border = element_blank(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+
-  geom_line(data=annotation_df1,aes(x=field.type,y=y))+
-  geom_segment(data=annotation_df2,aes(x="conditioned",xend="control",y=0.47,yend=0.47))+
-  geom_line(data=annotation_df3,aes(x=field.type,y=y))+
-   annotate("text",
-           x = c(1.5),
-           y = c(0.5),
-           label = c("p = 0.0069"),
-           family = "", fontface = 3, size=4)
-figure2
-
-
-figure3<-ggplot(subset(data,group=="Purple"),aes(x=field.type,y=prop))+
-  stat_boxplot(color="black")+
-  geom_boxplot(outlier.shape=NA,fill="#BABABA",color="black")+
-  geom_point(color="black",position="jitter")+
-  theme_bw()+
-  scale_y_continuous(breaks=c(0.00,0.1,0.2,0.3,0.4,0.5),limits=c(0,0.5))+
-  theme(axis.title.x=element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20))+
-  theme(axis.title.y= element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20))+
-  theme(text=element_text(size=16,family="Calibri"),axis.title.x = element_blank(),axis.title.y=element_blank())+
-  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
-  ggtitle("Bahamas Group")+
-  theme(plot.title = element_text(size = 16,hjust=0.5,family = "Calibri Light",margin = margin(t=0,r=0,b=10,l=0)))+
-  theme(panel.border = element_blank(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+
-  geom_line(data=annotation_df1,aes(x=field.type,y=y))+
-  geom_segment(data=annotation_df2,aes(x="conditioned",xend="control",y=0.47,yend=0.47))+
-  geom_line(data=annotation_df3,aes(x=field.type,y=y))+
-   annotate("text",
-           x = c(1.5),
-           y = c(0.5),
-           label = c("p = 0.03"),
-           family = "", fontface = 3, size=4)
-figure3
-
-
-figure4<-ggplot(subset(data,group=="blue"),aes(x=field.type,y=prop))+
-  stat_boxplot(color="black")+
-  geom_boxplot(outlier.shape=NA,fill="#A6A6A6",color="black")+
-  geom_point(color="black",position="jitter")+
-  theme_bw()+
-  scale_y_continuous(breaks=c(0.00,0.1,0.2,0.3,0.4,0.5),limits=c(0,0.5))+
-  theme(axis.title.x=element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20))+
-  theme(axis.title.y= element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20))+
-  theme(text=element_text(size=16,family="Calibri"),axis.title.x = element_blank(),axis.title.y=element_blank())+
-  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
-  ggtitle("Cuba Group")+
-  theme(plot.title = element_text(size = 16,hjust=0.5,family = "Calibri Light",margin = margin(t=0,r=0,b=10,l=0)))+
-  theme(panel.border = element_blank(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+
-  geom_line(data=annotation_df1,aes(x=field.type,y=y))+
-  geom_segment(data=annotation_df2,aes(x="conditioned",xend="control",y=0.47,yend=0.47))+
-  geom_line(data=annotation_df3,aes(x=field.type,y=y))+
-   annotate("text",
-           x = c(1.5),
-           y = c(0.5),
-           label = c("p = 0.049"),
-           family = "", fontface = 3, size=4)
-figure4
-
-
-figure5<-ggplot(subset(data,group=="orange"),aes(x=field.type,y=prop))+
-  stat_boxplot(color="black")+
-  geom_boxplot(outlier.shape=NA,fill="#707070",color="black")+
-  geom_point(color="black",position="jitter")+
-  theme_bw()+
-  scale_y_continuous(breaks=c(0.00,0.1,0.2,0.3,0.4,0.5),limits=c(0,0.5))+
-  theme(axis.title.x=element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20))+
-  theme(axis.title.y= element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20))+
-  theme(text=element_text(size=16,family="Calibri"),axis.title.x = element_blank(),axis.title.y=element_blank())+
-  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
-  ggtitle("New England Group")+
-  theme(plot.title = element_text(size = 16,hjust=0.5,family = "Calibri Light",margin = margin(t=0,r=0,b=10,l=0)))+
-  theme(panel.border = element_blank(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+
-  geom_line(data=annotation_df1,aes(x=field.type,y=y))+
-  geom_segment(data=annotation_df2,aes(x="conditioned",xend="control",y=0.47,yend=0.47))+
-  geom_line(data=annotation_df3,aes(x=field.type,y=y))+
-   annotate("text",
-           x = c(1.5),
-           y = c(0.5),
-           label = c("p = 0.028"),
-           family = "", fontface = 3, size=4)
-figure5
-
-figure6<-plot_grid(figure2,figure3,figure5,figure4,rel_widths = c(1,1),rel_heights = c(1,1))+
-  draw_label("A",fontfamily = "Calibri Light", x = 0.01, y = 1, hjust = -0.5, vjust = 1.5)+
-  draw_label("B",fontfamily = "Calibri Light",x=0.5,y=1,hjust=0.5,vjust=1.5)+
-  draw_label("C",fontfamily = "Calibri Light",x=0.01,y=0.5,hjust=-0.5,vjust=1.5)+
-  draw_label("D",fontfamily = "Calibri Light",x=0.5,y=0.5,hjust=0.5,vjust=1.5)
-figure6
-grid.arrange(arrangeGrob(figure6,
-                         bottom = text_grob("Treatment", color = "black",
-                                            hjust = 0.5, size = 18,family="Calibri Light"),
-                         left = text_grob("Proportion of Time", color = "black",
-                                          rot=90,size=18,family="Calibri Light"),padding=unit(1,"line")))
-
-
-figure7<-ggplot(data,aes(x=field.type,y=prop))+
-  stat_summary(fun.y="mean",geom="bar",fill="grey48")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) +
-                 sd(x)/length(x),geom="errorbar",color="black")+
-  geom_jitter(pch=16,width=0.2)+
-  theme_bw()+
-  scale_y_continuous(name="Proportion of Time",breaks=c(0.00,0.1,0.2,0.3,0.4,0.5),expand = c(0,0))+
-  scale_x_discrete(name="Treatment")+
-  theme(plot.margin=margin(20,20,20,20))+
-  theme(axis.title.y = element_text(color="black",margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri Light"),
-        axis.title.x = element_text(color="black",margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri Light"),axis.text = element_text(color="black",size=16))+
-  theme(text=element_text(size=20,family="Calibri Light"))+
-  coord_cartesian(ylim=c(0,0.5))+
-  theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
-  geom_segment(aes(x="conditioned",xend="conditioned"),y=0.12,yend=0.13)+
-  geom_segment(data=annotation_df2,aes(x="conditioned",xend="control",y=0.13,yend=0.13))+
-  geom_segment(aes(x="control",xend="control"),y=0.13,yend=0.12)+
-   annotate("text",
-           x = c(1.5),
-           y = c(0.14),
-           label = c("p < 0.0001"),
-           family = "Calibri", fontface = 3, size=6)
-figure7
-
-
-figure8<-ggplot(subset(data,group=="Red"),aes(x=field.type,y=prop))+
-  stat_summary(fun.y="mean",geom="bar",color="black",fill="#CC6666")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),geom="errorbar",color="black")+
-  geom_jitter(pch=16,width=0.2)+
-  theme_bw()+
-  scale_y_continuous(breaks=c(0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5),expand = c(0,0),"Proportion of Time")+
-  coord_cartesian(ylim=c(0,0.5))+
+  coord_trans(y="sqrt")+
+  #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
+  scale_y_continuous("Proportion of Time",breaks=c(0,0.01,0.05,0.15,0.3,0.5),expand=c(0,0),limits=c(0,0.55))+
+  #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
-  ggtitle("Canada Group") +
-  theme(text=element_text(size=16,family="Calibri Light"))+
-  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 10, l = 0),hjust=0.5,size=22,family="Calibri Light"))+
+  ggtitle("") +
+  theme(text=element_text(size=18,family="calibri"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face="plain"))+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"),axis.text = element_text(color="black",size=16))+
-  theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
-  theme(axis.title.x = element_blank(),axis.title.y=element_blank())+
-  geom_segment(aes(x="conditioned",xend="conditioned"),y=0.15,yend=0.16)+
-  geom_segment(data=annotation_df2,aes(x="conditioned",xend="control",y=0.16,yend=0.16))+
-  geom_segment(aes(x="control",xend="control"),y=0.16,yend=0.15)+
-   annotate("text",
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"))+
+  theme(panel.border = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"))+
+  theme(axis.title.y = element_blank(),axis.title.x = element_blank())+
+  geom_segment(aes(x="conditioned",xend="conditioned"),y=.2,yend=.22)+
+  geom_segment(aes(x="conditioned",xend="control"),y=0.22,yend=0.22)+
+  geom_segment(aes(x="control",xend="control"),y=.2,yend=.22)+
+  annotate("text",
            x = c(1.5),
-           y = c(0.2),
-           label = c("p = 0.0069"),
-           family = "Calibri", fontface = 3, size=6)
-figure8
+           y = c(0.25),
+           label = c("p = 0.05"),
+           family = "Calibri", fontface = 3, size=5)
+red
 
-figure9<-ggplot(subset(data,group=="Purple"),aes(x=field.type,y=prop))+
-  stat_summary(fun.y="mean",geom="bar",color="black",fill="#CC99FF")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),geom="errorbar",color="black")+
-  geom_jitter(pch=16,width=0.2)+
+ggsave(red, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/novascotia_2017_plot.png",  bg = "transparent")
+
+
+pur <-ggplot(subset(data,group=="purple"),aes(x=field.type,y=freq))+
+  stat_summary(fun.y= mean,geom="bar",color="#CC99FF",fill="#CC99FF")+
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+               geom="errorbar",color="black")+
+  #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
+  geom_point(position=position_jitter(width=0.15))+
   theme_bw()+
-  scale_y_continuous(breaks=c(0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5),expand = c(0,0),"Proportion of Time")+
-  coord_cartesian(ylim=c(0,0.5))+
+  coord_trans(y="sqrt")+
+  #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
+  scale_y_continuous("Proportion of Time",breaks=c(0,0.01,0.05,0.15,0.3,0.5),expand=c(0,0),limits=c(0,0.55))+
+  #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
-  ggtitle("Bahamas Group") +
-  theme(text=element_text(size=16,color="black",family="Calibri Light"))+
-  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 10, l = 0),hjust=0.5,size=22,family="Calibri Light"))+
+  ggtitle("") +
+  theme(text=element_text(size=18,family="calibri"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face="plain"))+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"),axis.text = element_text(color="black",size=16))+
-  theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
-  theme(axis.title.x = element_blank(),axis.title.y=element_blank())+
-  geom_segment(aes(x="conditioned",xend="conditioned"),y=0.15,yend=0.16)+
-  geom_segment(data=annotation_df2,aes(x="conditioned",xend="control",y=0.16,yend=0.16))+
-  geom_segment(aes(x="control",xend="control"),y=0.16,yend=0.15)+
-   annotate("text",
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"))+
+  theme(panel.border = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"))+
+  theme(axis.title.y = element_blank(),axis.title.x = element_blank())+
+  geom_segment(aes(x="conditioned",xend="conditioned"),y=.2,yend=.22)+
+  geom_segment(aes(x="conditioned",xend="control"),y=0.22,yend=0.22)+
+  geom_segment(aes(x="control",xend="control"),y=.2,yend=.22)+
+  annotate("text",
            x = c(1.5),
-           y = c(0.2),
-           label = c("p = 0.03"),
-           family = "Calibri", fontface = 3, size=6)
-figure9
+           y = c(0.25),
+           label = c("p = 0.007"),
+           family = "Calibri", fontface = 3, size=5)
+pur
 
-figure10<-ggplot(subset(data,group=="blue"),aes(x=field.type,y=prop))+
-  stat_summary(fun.y="mean",geom="bar",color="black",fill="#68BCBC")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),geom="errorbar",color="black")+
-  geom_jitter(pch=16,width=0.2)+
+ggsave(pur, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/bahamas_2017_plot.png",  bg = "transparent")
+
+org <-ggplot(subset(data,group=="orange"),aes(x=field.type,y=freq))+
+  stat_summary(fun.y= mean,geom="bar",color="#FF9933",fill="#FF9933")+
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+               geom="errorbar",color="black")+
+  #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
+  geom_point(position=position_jitter(width=0.15))+
   theme_bw()+
- scale_y_continuous(breaks=c(0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5),expand = c(0,0),"Proportion of Time")+
-  coord_cartesian(ylim=c(0,0.5))+
+  coord_trans(y="sqrt")+
+  #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
+  scale_y_continuous("Proportion of Time",breaks=c(0,0.01,0.05,0.15,0.3,0.5),expand=c(0,0),limits=c(0,0.55))+
+  #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
-  ggtitle("Cuba Group") +
-  theme(text=element_text(size=16,family="Calibri Light"))+
-  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 10, l = 0),hjust=0.5,size=22,family="Calibri Light"))+
+  ggtitle("") +
+  theme(text=element_text(size=18,family="calibri"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face="plain"))+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"),axis.text = element_text(color="black",size=16))+
-  theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
-  theme(axis.title.x = element_blank(),axis.title.y=element_blank())+
-  geom_segment(aes(x="conditioned",xend="conditioned"),y=0.15,yend=0.16)+
-  geom_segment(data=annotation_df2,aes(x="conditioned",xend="control",y=0.16,yend=0.16))+
-  geom_segment(aes(x="control",xend="control"),y=0.16,yend=0.15)+
-   annotate("text",
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"))+
+  theme(panel.border = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"))+
+  theme(axis.title.y = element_blank(),axis.title.x = element_blank())+
+  geom_segment(aes(x="conditioned",xend="conditioned"),y=.2,yend=.22)+
+  geom_segment(aes(x="conditioned",xend="control"),y=0.22,yend=0.22)+
+  geom_segment(aes(x="control",xend="control"),y=.2,yend=.22)+
+  annotate("text",
            x = c(1.5),
-           y = c(0.2),
-           label = c("p = 0.049"),family = "Calibri", fontface = 3, size=6)
-figure10
+           y = c(0.25),
+           label = c("p = 0.01"),
+           family = "Calibri", fontface = 3, size=5)
+org
 
-figure11<-ggplot(subset(data,group=="orange"),aes(x=field.type,y=prop))+
-  stat_summary(fun.y="mean",geom="bar",color="black",fill="#D0750D")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),geom="errorbar",color="black")+
-  geom_jitter(pch=16,width=0.2)+
+ggsave(org, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/longisland_2018_plot.png",  bg = "transparent")
+
+
+blu <-ggplot(subset(data,group=="blue"),aes(x=field.type,y=freq))+
+  stat_summary(fun.y= mean,geom="bar",color="royalblue4",fill="royalblue4")+
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+               geom="errorbar",color="black")+
+  #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
+  geom_point(position=position_jitter(width=0.15))+
   theme_bw()+
-  scale_y_continuous(breaks=c(0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5),expand = c(0,0),"Proportion of Time")+
-  coord_cartesian(ylim=c(0,0.5))+
+  coord_trans(y="sqrt")+
+  #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
+  scale_y_continuous("Proportion of Time",breaks=c(0,0.01,0.05,0.15,0.3,0.5),expand=c(0,0),limits=c(0,0.55))+
+  #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
-  ggtitle("New England Group") +
-  theme(text=element_text(size=16,family="Calibri Light"))+
-  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 10, l = 0),hjust=0.5,size=22,family="Calibri Light"))+
+  ggtitle("") +
+  theme(text=element_text(size=18,family="calibri"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face="plain"))+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"),axis.text = element_text(color="black",size=16))+
-  theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
-  theme(axis.title.x = element_blank(),axis.title.y=element_blank())+
-  geom_segment(aes(x="conditioned",xend="conditioned"),y=0.15,yend=0.16)+
-  geom_segment(data=annotation_df2,aes(x="conditioned",xend="control",y=0.16,yend=0.16))+
-  geom_segment(aes(x="control",xend="control"),y=0.16,yend=0.15)+
-   annotate("text",
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"))+
+  theme(panel.border = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"))+
+  theme(axis.title.y = element_blank(),axis.title.x = element_blank())+
+  geom_segment(aes(x="conditioned",xend="conditioned"),y=.2,yend=.22)+
+  geom_segment(aes(x="conditioned",xend="control"),y=0.22,yend=0.22)+
+  geom_segment(aes(x="control",xend="control"),y=.2,yend=.22)+
+  annotate("text",
            x = c(1.5),
-           y = c(0.2),
-           label = c("p = 0.028"),family = "Calibri", fontface = 3, size=6)
-figure11
+           y = c(0.25),
+           label = c("p = 0.007"),
+           family = "Calibri", fontface = 3, size=5)
+blu
 
-figure12<-plot_grid(figure8,figure9,figure11,figure10,rel_widths = c(1,1))+
-  draw_label("A",fontfamily = "Calibri", x = 0, y = 1, hjust = -0.5, vjust = 1.5)+
-  draw_label("B",fontfamily = "Calibri",x=0.5,y=1,hjust=0.5,vjust=1.5)+
-  draw_label("C",fontfamily = "Calibri",x=0.01,y=0.5,hjust=0.5,vjust=1.5)+
-  draw_label("D",fontfamily = "Calibri",x=0.5,y=0.5,hjust=0.5,vjust=1.5)
-figure12
-grid.arrange(arrangeGrob(figure12,
-                         bottom = text_grob("Treatment", color = "black",
-                                            hjust = 0.5, size = 20,family="Calibri Light"),
-                         left = text_grob("Proportion of Time", color = "black",
-                                          rot=90,size=20,family="Calibri Light"),padding=unit(1,"line")))
+ggsave(blu, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/cuba_2018_plot.png",  bg = "transparent")
 
-figure13<-plot_grid(figure8,figure9,rel_widths = c(1,1))+
-  draw_label("A",fontfamily = "Calibri", x = 0, y = 1, hjust = -0.5, vjust = 1.5)+
-  draw_label("B",fontfamily = "Calibri",x=0.5,y=1,hjust=0.5,vjust=1.5)#+
-  #draw_label("C",fontfamily = "Calibri",x=0.01,y=0.5,hjust=0.5,vjust=1.5)+
-  #draw_label("D",fontfamily = "Calibri",x=0.5,y=0.5,hjust=0.5,vjust=1.5)
-figure13
-grid.arrange(arrangeGrob(figure13,
-                         bottom = text_grob("Treatment", color = "black",
-                                            hjust = 0.5, size = 20,family="Calibri Light"),
-                         left = text_grob("Proportion of Time", color = "black",
-                                          rot=90,size=20,family="Calibri Light"),padding=unit(1,"line")))
 
-figure14<-plot_grid(figure10,figure11,rel_widths = c(1,1))+
-  draw_label("A",fontfamily = "Calibri", x = 0, y = 1, hjust = -0.5, vjust = 1.5)+
-  draw_label("B",fontfamily = "Calibri",x=0.5,y=1,hjust=0.5,vjust=1.5)#+
-  #draw_label("C",fontfamily = "Calibri",x=0.01,y=0.5,hjust=0.5,vjust=1.5)+
-  #draw_label("D",fontfamily = "Calibri",x=0.5,y=0.5,hjust=0.5,vjust=1.5)
-figure14
-grid.arrange(arrangeGrob(figure14,
-                         bottom = text_grob("Treatment", color = "black",
-                                            hjust = 0.5, size = 20,family="Calibri Light"),
-                         left = text_grob("Proportion of Time", color = "black",
-                                          rot=90,size=20,family="Calibri Light"),padding=unit(1,"line")))
+grn <-ggplot(subset(data,group=="green"),aes(x=field.type,y=freq))+
+  stat_summary(fun.y= mean,geom="bar",color="olivedrab",fill="olivedrab")+
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+               geom="errorbar",color="black")+
+  #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
+  geom_point(position=position_jitter(width=0.15))+
+  theme_bw()+
+  coord_trans(y="sqrt")+
+  #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
+  scale_y_continuous("Proportion of Time",breaks=c(0,0.01,0.05,0.15,0.3,0.5),expand=c(0,0),limits=c(0,0.55))+
+  #coord_cartesian(ylim=c(0,0.1))+
+  scale_x_discrete("Treatment")+
+  ggtitle("") +
+  theme(text=element_text(size=18,family="calibri"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face="plain"))+
+  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"))+
+  theme(panel.border = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"))+
+  theme(axis.title.y = element_blank(),axis.title.x = element_blank())+
+  geom_segment(aes(x="conditioned",xend="conditioned"),y=.2,yend=.22)+
+  geom_segment(aes(x="conditioned",xend="control"),y=0.22,yend=0.22)+
+  geom_segment(aes(x="control",xend="control"),y=.2,yend=.22)+
+  annotate("text",
+           x = c(1.5),
+           y = c(0.25),
+           label = c("p = 0.0005"),
+           family = "Calibri", fontface = 3, size=5)
+grn
+
+ggsave(grn, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/mass_2019_plot.png",  bg = "transparent")
+
+teal <-ggplot(subset(data,group=="teal"),aes(x=field.type,y=freq))+
+  stat_summary(fun.y= mean,geom="bar",color="turquoise4",fill="turquoise4")+
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+               geom="errorbar",color="black")+
+  #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
+  geom_point(position=position_jitter(width=0.15))+
+  theme_bw()+
+  coord_trans(y="sqrt")+
+  #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
+  scale_y_continuous("Proportion of Time",breaks=c(0,0.01,0.05,0.15,0.3,0.5),expand=c(0,0),limits=c(0,0.55))+
+  #coord_cartesian(ylim=c(0,0.1))+
+  scale_x_discrete("Treatment")+
+  ggtitle("") +
+  theme(text=element_text(size=18,family="calibri"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face="plain"))+
+  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"))+
+  theme(panel.border = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"))+
+  theme(axis.title.y = element_blank(),axis.title.x = element_blank())+
+  geom_segment(aes(x="conditioned",xend="conditioned"),y=.2,yend=.22)+
+  geom_segment(aes(x="conditioned",xend="control"),y=0.22,yend=0.22)+
+  geom_segment(aes(x="control",xend="control"),y=.2,yend=.22)+
+  annotate("text",
+           x = c(1.5),
+           y = c(0.25),
+           label = c("p = 0.01"),
+           family = "Calibri", fontface = 3, size=5)
+teal
+
+ggsave(teal, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/obx_2020_plot.png",  bg = "transparent")
+
+pink <-ggplot(subset(data,group=="maroon"),aes(x=field.type,y=freq))+
+  stat_summary(fun.y= mean,geom="bar",color="lightpink3",fill="lightpink3")+
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+               geom="errorbar",color="black")+
+  #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
+  geom_point(position=position_jitter(width=0.15))+
+  theme_bw()+
+  coord_trans(y="sqrt")+
+  #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
+  scale_y_continuous("Proportion of Time",breaks=c(0,0.01,0.05,0.15,0.3,0.5),expand=c(0,0),limits=c(0,0.55))+
+  #coord_cartesian(ylim=c(0,0.1))+
+  scale_x_discrete("Treatment")+
+  ggtitle("") +
+  theme(text=element_text(size=18,family="calibri"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face="plain"))+
+  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"))+
+  theme(panel.border = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"))+
+  theme(axis.title.y = element_blank(),axis.title.x = element_blank())+
+  geom_segment(aes(x="conditioned",xend="conditioned"),y=.2,yend=.22)+
+  geom_segment(aes(x="conditioned",xend="control"),y=0.22,yend=0.22)+
+  geom_segment(aes(x="control",xend="control"),y=.2,yend=.22)+
+  annotate("text",
+           x = c(1.5),
+           y = c(0.25),
+           label = c("p = 0.1"),
+           family = "Calibri", fontface = 3, size=5)
+pink
+
+ggsave(pink, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/newbruns_2020_plot.png",  bg = "transparent")
+
+
+figure6<-plot_grid(red,pur,org,blu,grn,teal,pink,rel_widths = c(1,1),rel_heights = c(1,1))+
+  draw_label("A",fontfamily = "Calibri Light", x = 0.01, y = .983, hjust = -0.5, vjust = 1.5)+
+  draw_label("B",fontfamily = "Calibri Light",x=0.345,y=.983,hjust=0.5,vjust=1.5)+
+  draw_label("C",fontfamily = "Calibri Light",x=0.68,y=.983,hjust=0.5,vjust=1.5)+
+  draw_label("D",fontfamily = "Calibri Light",x=0.01,y=0.65,hjust=-0.5,vjust=1.5)+
+  draw_label("E",fontfamily = "Calibri Light",x=0.345,y=0.65,hjust=-0.5,vjust=1.5)+
+  draw_label("F",fontfamily = "Calibri Light",x=0.68,y=0.65,hjust=-0.5,vjust=1.5)+
+  draw_label("G",fontfamily = "Calibri Light",x=0.01,y=0.32,hjust=-0.75,vjust=1.5)
+
+figure6<-grid.arrange(arrangeGrob(figure6,
+                         bottom = text_grob("Treatment", color = "black",face = "bold",
+                                            hjust = 0.5, size = 24,family="Calibri"),
+                         left = text_grob("Proportion of Time", color = "black",face="bold",
+                                          rot=90,size=24,family="Calibri"),
+             top = text_grob("",size=18),padding=unit(3,"line")))
+
+
+ggsave(figure6, dpi=300,width=15,height=15,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/joined_fig.png",  bg = "white")
 
 
 
@@ -452,60 +521,40 @@ turtleroom<- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Fin
 experfields<-read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/FinalData/MagFieldInformation.csv")
 
 
-names(turtleroom) <- c("id","tr_int","tr_inc","year")
-names(experfields) <- c("field","inc","int","year")
-
-acclfields <- experfields[c(5:6),c(1:4)]
-names(acclfields) <- c("field","accl_inc","accl_int","year")
-
-experimentfields <- experfields[c(1:4),c(1:4)]
+names(turtleroom) <- c("turtle.id","tr.int","tr.inc","year")
+names(experfields) <- c("mag.field","inc","int","year","group")
 
 
-acclfields <- acclfields %>% select(-c(field))
 
 library(dplyr)
 library(tidyr)
-turtgroup <- data %>% select(c(id,field.type,field))
+#turtgroup <- data %>% select(c(turtle.id,field.type,field))
 
-turtleroom <- merge(turtgroup,turtleroom)
+data <- merge(data,turtleroom,by=c("turtle.id","year"))
 
-magfield_turts <- merge(turtleroom,acclfields)
-magfield_turts <- merge(magfield_turts,experimentfields)
+data <- merge(data,experfields,by=c("group","year"))
+
+data <- data %>% mutate(int.diff=abs(int-tr.int)) %>% mutate(inc.diff = abs(inc-tr.inc))
+
+data <- data %>% mutate(acc.inc=rep(60.2),acc.int=rep(48))
+
+data <- data %>% mutate(accint.diff=abs(int-acc.int)) %>% mutate(accinc.diff = abs(inc-acc.inc))
 
 
-magfield_turts <- magfield_turts %>% mutate(tr_int_diff=abs(int-tr_int)) %>% mutate(tr_inc_diff = abs(inc-tr_inc)) %>% mutate(accl_inc_diff = abs(inc-accl_inc)) %>% mutate(accl_int_diff=abs(int-accl_int))
 
-
-magfield_turts <- merge(data,magfield_turts)
-
-
-mean_magfield <- magfield_turts %>% group_by(group,field.type,field) %>% summarise(mean_freq=mean(prop),meandiff_tr_inc=mean(tr_inc_diff),meandiff_tr_int=mean(tr_int_diff),meandiff_accl_inc=mean(accl_inc_diff),meandiff_accl_int=mean(accl_int_diff))
-
-mean_magfield <-mean_magfield %>% filter(field.type=="conditioned")
-
-magfield_turts <- magfield_turts %>% filter(field.type=="conditioned")
-
-magfield_turts %>% filter(group=="Red")
-
-magfield_turts <- magfield_turts %>% mutate(log_prop=log10(prop))
-
-lm_int <- lm(log_prop~tr_int_diff*tr_inc_diff,data = magfield_turts)
+lm_int <- lm(freq~int.diff,data = data)
 summary(lm_int)
 anova(lm_int)
 
-magfield_turts %>% filter(group=="orange" & prop > 0.3)
+lm_inc <- lm(freq~inc.diff,data = data)
+summary(lm_inc)
+anova(lm_inc)
 
-magfield_turts_alt <- magfield_turts %>% filter(id != "L173" & id!= "L183")
+#magfield_turts %>% filter(group=="orange" & prop > 0.3)
 
-lm_int <- lm(log_prop~tr_int_diff,data = magfield_turts_alt)
-summary(lm_int)
-anova(lm_int)
+#magfield_turts_alt <- magfield_turts %>% filter(id != "L173" & id!= "L183")
 
-lm_int2 <- lm(mean_freq~meandiff_accl_int+meandiff_accl_inc,data = mean_magfield)
-summary(lm_int2)
-anova(lm_int2)
 
-wilcox.test(prop~field.type,subset(magfield_turts_alt,group=="orange"))
 
 ```
 
@@ -513,35 +562,46 @@ wilcox.test(prop~field.type,subset(magfield_turts_alt,group=="orange"))
 ```{r SUPPLEMENTAL FIGS}
 
 
+data$group2  <- factor(data$group, levels=c("red","purple","blue","orange","green","teal","maroon"),labels=c("Nova Scotia","Bahamas","Cuba","Long Island","Massachusetts","Outer Banks","New Brunswick"))
 
-figure_supp1<- ggplot(magfield_turts,aes(x=tr_inc_diff,y=prop))+
-  geom_point(aes(color=group,size=0.01))+
+
+figure_supp1<- ggplot(data,aes(x=inc.diff,y=freq))+
+  geom_point(aes(color=group2,size=0.01))+
   theme_bw()+
+  scale_color_manual(values = c("#990000","darkorchid","#FF9933","midnightblue","olivedrab","turquoise4","lightpink3"))+
   theme(axis.title.x=element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=16))+
+  coord_trans(y="sqrt")+
   scale_x_continuous(name="Difference in\n Inclination Angle (degrees)")+
-  scale_y_continuous(name="Proportion of time spent\nexhibiting food-seeking behavior",limits = c(0,0.5))+
+  scale_y_continuous(name="Proportion of time spent\nexhibiting food-seeking behavior",limits = c(0,0.5),expand = c(0,0))+
   theme(axis.title.y= element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=16))+
   theme(text=element_text(size=16,family="Calibri"))+
   theme(plot.margin = margin(t=40,r=20,b=10,l=10))+
-  scale_color_manual(labels=c("Bahamas","Canada","Cuba","New England"),values=c("orchid4","orangered4","cadetblue","darkorange"))+
+  labs(color="Group")+
+  #scale_color_manual(labels=c("Bahamas","Canada","Cuba","New England"),values=c("orchid4","orangered4","cadetblue","darkorange"))+
   scale_size(guide='none') + 
   theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.grid.minor = element_blank())
 figure_supp1
 
+ggsave(figure_supp1, dpi=300,width=15,height=15,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/supp1_inc.png",  bg = "white")
 
-figure_supp2<- ggplot(magfield_turts,aes(x=tr_int_diff,y=prop))+
-  geom_point(aes(color=group,size=0.01))+
+figure_supp2<- ggplot(data,aes(x=int.diff,y=freq))+
+  geom_point(aes(color=group2,size=0.01))+
+   scale_color_manual(values = c("#990000","darkorchid","#FF9933","midnightblue","olivedrab","turquoise4","lightpink3"))+
   theme_bw()+
   theme(axis.title.x=element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=16))+
+  coord_trans(y="sqrt")+
   scale_x_continuous(name="Difference in\n Intensity (microTesla)")+
-  scale_y_continuous(name="Proportion of time spent\nexhibiting food-seeking behavior",limits=c(0,0.5))+
+  scale_y_continuous(name="Proportion of time spent\nexhibiting food-seeking behavior",limits=c(0,0.5),expand = c(0,0))+
   theme(axis.title.y= element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=16))+
   theme(text=element_text(size=16,family="Calibri"))+
   theme(plot.margin = margin(t=40,r=20,b=10,l=10))+
-  scale_color_manual(labels=c("Bahamas","Canada","Cuba","New England"),values=c("orchid4","orangered4","cadetblue","darkorange"))+
+  labs(color="Group")+
+  #scale_color_manual(labels=c("Bahamas","Canada","Cuba","New England"),values=c("orchid4","orangered4","cadetblue","darkorange"))+
   scale_size(guide='none')+
   theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.grid.minor = element_blank())
 figure_supp2
+
+ggsave(figure_supp2, dpi=300,width=15,height=15,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/supp2_int.png",  bg = "white")
 
 figure_supp2<- ggplot(magfield_turts_alt,aes(x=tr_int_diff,y=prop))+
   geom_point(aes(color=group,size=0.01))+
@@ -558,12 +618,6 @@ figure_supp2<- ggplot(magfield_turts_alt,aes(x=tr_int_diff,y=prop))+
   theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.grid.minor = element_blank())
 figure_supp2
 
-figure_supp3<- ggplot(magfield_turts,aes(x=accl_inc_diff,y=prop))+geom_point(aes(color=group,size=0.01))+theme_bw()+theme(axis.title.x=element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=16))+scale_x_continuous(name="Difference in\n Inclination Angle")+theme(axis.title.y= element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=16))+theme(text=element_text(size=16,family="Calibri"),axis.title.y = element_blank())+theme(plot.margin = margin(t=40,r=20,b=10,l=10))#+scale_color_manual(labels=c("Group 2","Group 1"),values=c("grey20","grey60"),guide=guide_legend(reverse = T))+scale_size(guide='none')
-figure_supp3
-
-
-figure_supp4<- ggplot(magfield_turts,aes(x=accl_int_diff,y=prop))+geom_point(aes(color=group,size=0.01))+theme_bw()+scale_y_continuous(breaks=c(0.00,0.08,0.16,0.24,0.32,0.4),limits=c(0.00,0.36))+theme(axis.title.x=element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=16))+scale_x_continuous(name="Difference in\n Intensity")+theme(axis.title.y= element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=16))+theme(text=element_text(size=16,family="Calibri"),axis.title.y = element_blank())+theme(plot.margin = margin(t=40,r=20,b=10,l=10))#+scale_color_manual(labels=c("Group 2","Group 1"),values=c("grey20","grey60"),guide=guide_legend(reverse = T))+scale_size(guide='none')
-figure_supp4
 
 
 figure_bar<-plot_grid(figure.s3 +theme(legend.position = 'none'),figure.s4+theme(legend.position = 'none'),align = 'h',rel_widths = c(1,1),rel_heights = c(1,1))+draw_label("A",fontfamily = "Calibri", x = 0, y = 1, hjust = -0.5, vjust = 1.5)+draw_label("B",fontfamily = "Calibri",x=0.5,y=1,hjust=0.5,vjust=1.5)

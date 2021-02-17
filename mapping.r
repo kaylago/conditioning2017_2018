@@ -85,7 +85,7 @@ ggplot() +
 
 cond_sites <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/ForR_lat_long_field_locations_2021.csv",header=T)
 
-cond_sites$location  <- factor(cond_sites$location, levels=c("Acclimation","Nova Scotia","Bahamas","Long Island","Cuba","Florida","Massachusetts","Outer Banks (OBX)","New Brunswick"))
+cond_sites$location  <- factor(cond_sites$location, levels=c("Acclimation","Nova Scotia","Bahamas","Long Island","Cuba","Florida","Massachusetts","Outer Banks","New Brunswick"))
 
 #cond_sites_19 <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/ForR_lat_long_2019.csv",header=T)
 
@@ -281,4 +281,30 @@ ggplot(data = world) +
                          pad_x = unit(.1, "in"), pad_y = unit(0.08, "in"),
                          style = north_arrow_fancy_orienteering)
 
+bhi<- read.csv("C:/Users/kkmgo/Dropbox/Biol395_Data/Isabel/BHI_point.csv")
+
+sargassosea_map<- ggplot(data = world) +
+  geom_sf(fill="antiquewhite",color="black") +
+  #geom_sf(data = sites, size = 1, shape = 16, fill = "black") +
+  geom_point(data=bhi,aes(x=long,y=lat),size=5,color="red")+
+  #scale_color_manual(values = c("black", "#990000","darkorchid","#FF9933","midnightblue","grey55","olivedrab","turquoise4","lightpink3"))+
+  #geom_text(data=labels,aes(x=long,y=lat,label=label),size=3,fontface="bold",color="black")+
+  #geom_text(data=anno,aes(x=long,y=lat,label="Florida"),size=3,fontface="bold",color="grey60")+
+  coord_sf(xlim = c(-90, 8), ylim = c(0, 60), expand = FALSE)+
+  labs(x="Longitude",y="Latitude")+
+  #scale_fill_continuous(name="Zones")+
+  guides(alpha=FALSE,size=FALSE,color=FALSE)+
+  theme(panel.grid.major = element_line(color = "white", linetype = "dashed", 
+                                        size = 0.5), panel.background = element_rect(fill = "lightsteelblue1"),axis.line = element_line(color="black"))+
+  theme(axis.title=element_text(size=12,family="Calibri"),axis.text = element_text(color="black",size=11,family="Calibri"),plot.margin = unit(c(1,1,1,1),"cm"),axis.text.x = element_text(angle=45,hjust=1))+
+  annotation_scale(location = "br", width_hint = 0.5) +
+  annotation_north_arrow(location = "tl", which_north = "true", 
+                         pad_x = unit(.1, "in"), pad_y = unit(0.08, "in"),
+                         style = north_arrow_fancy_orienteering)+
+  theme(
+    plot.background = element_rect(fill = "transparent", color = NA)) # bg of the plot
+
+sargassosea_map
+
+ggsave(sargassosea_map, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Biol395_Data/Isabel/sargassosea_map.png",  bg = "transparent")
 

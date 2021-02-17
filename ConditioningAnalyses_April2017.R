@@ -12,8 +12,9 @@ newdata = ldply(temp1, read.csv, header= T)
 
 
 #setwd("C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/2017/BehavioralObservations_AprTests/OldAprAnalyses/OldAprAnalyses/")
-temp2 = list.files("OldAprAnalyses",pattern="*.csv",full.name=TRUE)
-olddata = ldply(temp2, read.csv,skip=15, header= T)
+#temp2 = list.files("OldAprAnalyses",pattern="*.csv",full.name=TRUE)
+#olddata = ldply(temp2, read.csv,skip=15, header= T)
+
 
 groupdata <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2017/2017_AprTests_Groups.csv",header=T) 
 
@@ -30,14 +31,14 @@ newdata <- renameFunction(newdata,columns)
 
 columnsold <- c("time","media.file.path","totallength","delete","delete2","delete3","comment","status","start_stop")
 
-olddata <- renameFunction(olddata,columnsold)
+#olddata <- renameFunction(olddata,columnsold)
 
 
 
 detach(package:plyr)
 library(dplyr)
 
-olddata <- olddata %>% select(c("time","media.file.path","start_stop"))
+#olddata <- olddata %>% select(c("time","media.file.path","start_stop"))
 
 newdata <- newdata %>% select(-c("obs_date","media_file","length","fps","subject","behavior","delete","modifiers","type","comment_start","comment_stop"))
 
@@ -45,35 +46,35 @@ newdata <- newdata %>% select(-c("obs_date","media_file","length","fps","subject
 
 library(tidyr)
 
-olddata <- olddata %>% separate(media.file.path, into = c('media.file.path', 'turtle.id'), sep = -14, convert = TRUE)
+#olddata <- olddata %>% separate(media.file.path, into = c('media.file.path', 'turtle.id'), sep = -14, convert = TRUE)
 
-olddata <- olddata %>% separate(turtle.id, into = c('turtle.id','delete'),sep=-4,convert=TRUE)
+#olddata <- olddata %>% separate(turtle.id, into = c('turtle.id','delete'),sep=-4,convert=TRUE)
 
-olddata <- olddata %>% separate(turtle.id, into = c('turtle.id','date'),sep=-5,convert=TRUE)
+#olddata <- olddata %>% separate(turtle.id, into = c('turtle.id','date'),sep=-5,convert=TRUE)
 
-olddata <- olddata %>% separate(turtle.id, into = c('turtle.id','delete2'),sep=-1,convert=TRUE)
+#olddata <- olddata %>% separate(turtle.id, into = c('turtle.id','delete2'),sep=-1,convert=TRUE)
 
-olddata <- olddata %>% select(-c("media.file.path","delete","delete2"))
+#olddata <- olddata %>% select(-c("media.file.path","delete","delete2"))
 
-olddata <- olddata %>% mutate(year=rep(2018))
+#olddata <- olddata %>% mutate(year=rep(2018))
 
-olddata$date <- paste(olddata$year,olddata$date,sep = "")
+#olddata$date <- paste(olddata$year,olddata$date,sep = "")
 
-olddata$date <- as.Date(olddata$date, format = "%Y%b%d")
+#olddata$date <- as.Date(olddata$date, format = "%Y%b%d")
 
-olddata_start <- olddata %>% filter(start_stop =="START") %>% group_by(turtle.id,date)
-olddata_stop <- olddata %>% filter(start_stop == "STOP") %>% group_by(turtle.id,date)
+#olddata_start <- olddata %>% filter(start_stop =="START") %>% group_by(turtle.id,date)
+#olddata_stop <- olddata %>% filter(start_stop == "STOP") %>% group_by(turtle.id,date)
 
-olddata_start <- olddata_start %>% mutate(start = time)
-olddata_stop <- olddata_stop %>% mutate(stop = time)
+#olddata_start <- olddata_start %>% mutate(start = time)
+#olddata_stop <- olddata_stop %>% mutate(stop = time)
 
-olddata <- cbind(olddata_start,olddata_stop)
+#olddata <- cbind(olddata_start,olddata_stop)
 
-olddata <- olddata %>% select(-c("start_stop","start_stop1","turtle.id1","time","time1","date1","year1","year"))
+#olddata <- olddata %>% select(-c("start_stop","start_stop1","turtle.id1","time","time1","date1","year1","year"))
 
-olddata <- olddata %>% mutate(duration = stop-start)
+#olddata <- olddata %>% mutate(duration = stop-start)
 
-olddata <- olddata %>% mutate(observer = rep("KG"))
+#olddata <- olddata %>% mutate(observer = rep("KG"))
 
 #names(data)<- c("time","observer.file","id","date","behavior","start_stop")
 
@@ -95,10 +96,12 @@ newdata <- newdata %>% select(-c("delete1","delete2","year"))
 
 col_order <- c("turtle.id","date","observer","start","stop","duration")
 
-olddata <- olddata[ , col_order]
+#olddata <- olddata[ , col_order]
 newdata <- newdata[ , col_order]
 
-data <- bind_rows(olddata,newdata)
+#data <- bind_rows(olddata,newdata)
+
+data <- newdata
 
 data <- data %>% mutate(minutes = start/60)
 
@@ -130,15 +133,17 @@ apr2017_data <- data_obs %>% group_by(turtle.id,date,field,field.type,group) %>%
 
 apr2017_data <- apr2017_data %>% mutate(freq = mean.duration/1200)
 
-wilcox.test(mean.duration~field.type,apr2017_data)
+wilcox.test(freq~field.type,apr2017_data,paired=TRUE)
+
+t.test(freq~field.type,apr2017_data)
 
 red_apr17 <- apr2017_data %>% filter(group=="red")
 
 pur_apr17 <- apr2017_data %>% filter(group=="purple")
 
-wilcox.test(freq~field.type,red_apr17)
+wilcox.test(freq~field.type,red_apr17,paired=TRUE)
 
-wilcox.test(freq~field.type,pur_apr17)
+wilcox.test(freq~field.type,pur_apr17,paired=TRUE)
 
 #plots
 
@@ -162,8 +167,8 @@ annotation_df3 <- data.frame(field.type=rep(c("control","control")),
                              y=c(0.04,0.036))
 
 
-redplot<-ggplot(red_apr17,aes(x=field.type,y=freq))+
-  stat_summary(fun.y="mean",geom="bar",color="#CC6666",fill="#CC6666")+
+plot<-ggplot(apr2017_data,aes(x=field.type,y=freq))+
+  stat_summary(fun.y="mean",geom="bar",color="grey50",fill="grey50")+
   stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
                geom="errorbar",color="black")+
   geom_point(position=position_jitter(width=0.1))+
@@ -173,14 +178,17 @@ redplot<-ggplot(red_apr17,aes(x=field.type,y=freq))+
   scale_y_continuous("Proportion of Time",breaks = c(0,0.01,0.02,0.04,0.08,0.16),expand=c(0,0),limits=c(0,0.1))+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
-  labs(title="Canada Group") +
+  #labs(title="Canada Group") +
   theme(text=element_text(size=18,family="calibri"))+
   theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face = "plain"))+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
         axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"))+
-  theme(panel.border = element_blank(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), 
-        axis.line = element_line(colour = "black"))+
+  theme(panel.border = element_blank(), 
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        panel.background = element_rect(fill = "transparent"))+
   theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())+
   theme(axis.title.x = element_blank(),axis.title.y=element_blank())+
@@ -190,12 +198,48 @@ redplot<-ggplot(red_apr17,aes(x=field.type,y=freq))+
   annotate("text",
            x = c(1.5),
            y = c(0.043),
-           label = c("p = 0.2786"),
+           label = c("p = 0.04"),
+           family = "Calibri", fontface = 3, size=5)
+plot
+
+
+redplot<-ggplot(red_apr17,aes(x=field.type,y=freq))+
+  stat_summary(fun.y="mean",geom="bar",color="#990000",fill="#990000")+
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+               geom="errorbar",color="black")+
+  geom_point(position=position_jitter(width=0.1))+
+  theme_bw()+
+  coord_trans(y="sqrt")+
+  #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
+  scale_y_continuous("Proportion of Time",breaks = c(0,0.01,0.02,0.04,0.08,0.16),expand=c(0,0),limits=c(0,0.1))+
+  #coord_cartesian(ylim=c(0,0.1))+
+  scale_x_discrete("Treatment")+
+  #labs(title="Canada Group") +
+  theme(text=element_text(size=18,family="calibri"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face = "plain"))+
+  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"))+
+  theme(panel.border = element_blank(), 
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        panel.background = element_rect(fill = "transparent"))+
+  theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())+
+  theme(axis.title.x = element_blank(),axis.title.y=element_blank())+
+  geom_line(data=annotation_df1,aes(x=field.type,y=y))+
+  geom_segment(data=annotation_df2,aes(x="conditioned",xend="control",y=0.04,yend=0.04))+
+  geom_line(data=annotation_df3,aes(x=field.type,y=y))+
+  annotate("text",
+           x = c(1.5),
+           y = c(0.043),
+           label = c("p = 0.15"),
            family = "Calibri", fontface = 3, size=5)
 redplot
 
 
-purstats <- pur_apr17 %>% group_by(field.type) %>%  summarise(meanfreq=mean(freq))
+#purstats <- pur_apr17 %>% group_by(field.type) %>%  summarise(meanfreq=mean(freq))
 
 purplot<-ggplot(pur_apr17,aes(x=field.type,y=(freq)))+
   stat_summary(fun.y= mean,geom="bar",color="#CC99FF",fill="#CC99FF")+
@@ -209,7 +253,7 @@ purplot<-ggplot(pur_apr17,aes(x=field.type,y=(freq)))+
   scale_y_continuous("Proportion of Time",breaks = c(0,0.01,0.02,0.04,0.08,0.16),expand=c(0,0),limits=c(0,0.1))+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
-  ggtitle("Bahamas Group") +
+  #ggtitle("Bahamas Group") +
   theme(text=element_text(size=18,family="calibri"))+
   theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face="plain"))+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
@@ -217,8 +261,11 @@ purplot<-ggplot(pur_apr17,aes(x=field.type,y=(freq)))+
         axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"))+
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), 
         axis.line = element_line(colour = "black"))+
-  theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank())+
+  theme(panel.border = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"))+
   theme(axis.title.x = element_blank(),axis.title.y=element_blank())+
   geom_line(data=annotation_df1,aes(x=field.type,y=y))+
   geom_segment(data=annotation_df2,aes(x="conditioned",xend="control",y=0.04,yend=0.04))+
@@ -226,7 +273,7 @@ purplot<-ggplot(pur_apr17,aes(x=field.type,y=(freq)))+
   annotate("text",
            x = c(1.5),
            y = c(0.043),
-           label = c("p = 0.5054"),
+           label = c("p = 0.19"),
            family = "Calibri", fontface = 3, size=5)
 purplot
   
@@ -235,13 +282,16 @@ purplot
 
 
 
-figure6<-plot_grid(redplot,purplot,rel_widths = c(1,1),rel_heights = c(1,1))+
+figure6<-plot_grid(plot,redplot,purplot,rel_widths = c(1,1),rel_heights = c(1,1),ncol=3,nrow=1)+
   draw_label("A",fontfamily = "Calibri Light", x = 0.01, y = 1, hjust = -0.5, vjust = 1.5)+
-  draw_label("B",fontfamily = "Calibri Light",x=0.5,y=1,hjust=0.5,vjust=1.5)
+  draw_label("B",fontfamily = "Calibri Light",x=0.35,y=1,hjust=0.5,vjust=1.5)+
+  draw_label("C",fontfamily = "Calibri Light",x=0.68,y=1,hjust=0.5,vjust=1.5)
   
-figure6
-grid.arrange(arrangeGrob(figure6,
+figure6 <- grid.arrange(arrangeGrob(figure6,
                          bottom = text_grob("Treatment", color = "black",
-                                            hjust = 0.5, size = 18,family="Calibri Light"),
+                                            hjust = 0.5, size = 18,family="Calibri",face="bold"),
                          left = text_grob("Proportion of Time", color = "black",
-                                          rot=90,size=18,family="Calibri Light"),padding=unit(1,"line")))
+                                          rot=90,size=18,family="Calibri",face="bold"),padding=unit(1,"line")))
+figure6
+
+ggsave(figure6, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/april2017_plot.png",  bg = "white")

@@ -212,8 +212,8 @@ library(dplyr)
 data2 = data2[order(sapply(data2,ncol),decreasing = F)]
 
 
-data_15 <- data2[c(1:23)]
-data_16 <- data2[c(24:29)]
+data_15 <- data2[c(1:25)]
+data_16 <- data2[c(26:30)]
 
   
 detach(package:dplyr)
@@ -294,13 +294,13 @@ dec_data_total_obs <- dec_data_total_obs %>% arrange(turtle.id,date)
 
 
 
-#write.csv(dec_data_total_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2017/2017_data_observers_2-1-2021_updated.csv")
+write.csv(dec_data_total_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2017/2017_data_observers_2-13-2021_updated.csv")
 
 library(dplyr)
 
 observer_difference <- dec_data_total_obs %>% group_by(turtle.id,date) %>% summarize(difference=max(total.dur)-min(total.dur))
 
-mean(observer_difference$difference) #16.7 seconds
+mean(observer_difference$difference) #15 seconds
 
 dec_data_total <- dec_data_total_obs %>% group_by(turtle.id,date,field,field.type,group) %>% summarise(mean.duration=mean(total.dur))
 
@@ -325,13 +325,13 @@ wilcox.test(freq~field.type,data=dec_data_total,paired=TRUE)
 
 wilcox.test(freq~field.type,data=dec_data_total)
 
-wilcox.test(freq~field.type,subset(dec_data_total,group=="purple"))
+wilcox.test(freq~field.type,subset(dec_data_total,group=="purple"),paired=TRUE)
 
 t.test(freq~field.type,subset(dec_data_total,group=="purple"))
 
 t.test(mean.duration~field.type,subset(dec_data_total,group=="purple"))
 
-wilcox.test(freq~field.type,subset(dec_data_total,group=="red"))
+wilcox.test(freq~field.type,subset(dec_data_total,group=="red"),paired=TRUE)
 
 t.test(freq~field.type,subset(dec_data_total,group=="red"))
 

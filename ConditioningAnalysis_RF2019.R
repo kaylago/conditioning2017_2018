@@ -114,6 +114,9 @@ rf_data <- merge(rf_data,groupdata,by=c("turtle.id","date"))
 
 rf_data <- rf_data %>% group_by(turtle.id,date,observer,field,group) %>% filter(minutes >= video.change) %>% filter(minutes<= trial.end)
 
+rf_data <- rf_data  %>% mutate(end.trial=video.change+20) %>% filter(minutes <= end.trial)
+
+
 rf_data_obs <- rf_data %>% group_by(turtle.id,date,observer,field,group) %>% summarise(total.duration=sum(duration))
 
 rf_data_obs <- rf_data_obs %>% arrange(turtle.id,date)
