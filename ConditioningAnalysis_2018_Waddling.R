@@ -98,9 +98,9 @@ timechange.file$date <- as.Date(timechange.file$date,format= "%m/%d/%Y")
 dfs_behaviors<- merge(dfs_behaviors,timechange.file, by = c("id","date"))
 
 dfs_acclimation<- dfs_behaviors %>% filter(minutes< field.change)
-dfs_test<-dfs_behaviors %>% filter(minutes>field.change)
+dfs_test<-dfs_behaviors %>% filter(minutes>=field.change)
 
-dfs_test<-dfs_test %>% filter(minutes < (field.change+20))
+dfs_test<-dfs_test %>% filter(minutes <= (field.change+20))
 
 dfs_acclim_summary <- dfs_acclimation %>% group_by(date,id,observer.file,group,field,field.type) %>% summarise(total.time.el=sum(time.el))
 dfs_test_summary <- dfs_test %>% group_by(date,id,observer.file,group,field,field.type) %>% summarise(total.time.el=sum(time.el))
@@ -235,7 +235,7 @@ mean(observer_difference$difference) #16.3 second
 median(observer_difference$difference)
 
 #write.csv(dfs_acclim_summary,file="C:/Users/kkmgo/OneDrive/Documents/Caretta caretta Conditioning 2017/2018/dfs_acclim_summary.csv")
-write.csv(nov18_observers,file="C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2018/2018_observers_data_2-13-2021_updated.csv")
+write.csv(nov18_observers,file="C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2018/2018_observers_data_2-17-2021_updated.csv")
 
 
 

@@ -10,13 +10,13 @@ rm(list=ls())
 ```
 
 ```{r read in data}
-data2018 <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/CompactObserverData_AllYears/2018_data_observers_2-13-2021_updated.csv")
+data2018 <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/CompactObserverData_AllYears/2018_data_observers_2-17-2021_updated.csv")
 
-data2017 <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/CompactObserverData_AllYears/2017_data_observers_2-13-2021_updated.csv")
+data2017 <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/CompactObserverData_AllYears/2017_data_observers_2-17-2021_updated.csv")
 
-data2019<- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/CompactObserverData_AllYears/2019_data_observers_2-13-2021_updated.csv")
+data2019<- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/CompactObserverData_AllYears/2019_data_observers_2-17-2021_updated.csv")
 
-data2020 <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2020_Spring/DataSheets/Spring2020_observerdata_2-13-2021_updated.csv")
+data2020 <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/CompactObserverData_AllYears/2020sp_data_observers_2-17-2021_updated.csv")
 
 library(dplyr)
 
@@ -59,7 +59,7 @@ data<- rbind(data,data2020)
 ```{r total observer difference}
 observer_difference <- data %>% group_by(turtle.id,date) %>% summarize(difference=max(mean.duration)-min(mean.duration))
 
-mean(observer_difference$difference)#13 for ALL years
+mean(observer_difference$difference)#12.9 for ALL years
 
 data<- data %>% group_by(turtle.id,date,field,field.type,group,year) %>% summarise(mean.duration=mean(mean.duration))
 
@@ -91,31 +91,35 @@ wilcox.test(freq~field.type,subset(data,year==2020),paired=TRUE)#0.002
 
 wilcox.test(freq~field.type,subset(data,year==2020))
 
-wilcox.test(freq~field.type,subset(data,group=="purple"),paired=TRUE)#.007
+wilcox.test(freq~field.type,subset(data,group=="purple"),paired=TRUE)#.0078
 
 wilcox.test(freq~field.type,subset(data,group=="purple"))
 
-wilcox.test(freq~field.type,subset(data,group=="red"),paired=TRUE)#.05
+wilcox.test(freq~field.type,subset(data,group=="red"),paired=TRUE)#.039
 
 wilcox.test(freq~field.type,subset(data,group=="red"))
 
-wilcox.test(freq~field.type,subset(data,group=="blue"),paired=TRUE)#.007
+wilcox.test(freq~field.type,subset(data,group=="blue"),paired=TRUE)#.0078
 
 wilcox.test(freq~field.type,subset(data,group=="blue"))
 
-wilcox.test(freq~field.type,subset(data,group=="orange"),paired=TRUE)#0.01
+wilcox.test(freq~field.type,subset(data,group=="orange"),paired=TRUE)#0.015
 
 wilcox.test(freq~field.type,subset(data,group=="orange"))
 
 #wilcox.test(freq~field.type,subset(data,group=="yellow"),paired=TRUE)
 
-wilcox.test(freq~field.type,subset(data,group=="green"),paired=TRUE)#.0005
+wilcox.test(freq~field.type,subset(data,group=="green"),paired=TRUE)#.00057
 
-wilcox.test(freq~field.type,subset(data,group=="teal"),paired=TRUE)#0.01
+wilcox.test(freq~field.type,subset(data,group=="teal"),paired=TRUE)#0.015
 
-wilcox.test(freq~field.type,subset(data,group=="maroon"),paired=TRUE)#0.1
+wilcox.test(freq~field.type,subset(data,group=="maroon"),paired=TRUE)#0.19 remove L190 and is sig
 
-wilcox.test(freq~field.type,data,paired=TRUE)#2.76e-10
+wilcox.test(freq~field.type,data,paired=TRUE)#1.58e-10
+
+t.test(freq~field.type,data)
+
+t.test(mean.duration~field.type,data)
 
 diff.lm<- lm(freq~group,subset(field.type="conditioned",data))
 summary(diff.lm)
@@ -217,7 +221,7 @@ all_plot<-ggplot(data,aes(x=field.type,y=freq))+
   annotate("text",
            x = c(1.5),
            y = c(0.49),
-           label = c("p = 2.796e-10"),
+           label = c("p = 1.52e-10"),
            family = "Calibri", fontface = 3, size=5)+
   theme(
     rect = element_rect(fill = "transparent") # all rectangles
@@ -263,7 +267,7 @@ red <-ggplot(subset(data,group=="red"),aes(x=field.type,y=freq))+
   annotate("text",
            x = c(1.5),
            y = c(0.25),
-           label = c("p = 0.05"),
+           label = c("p = 0.03"),
            family = "Calibri", fontface = 3, size=5)
 red
 
@@ -620,33 +624,7 @@ figure_supp2
 
 
 
-figure_bar<-plot_grid(figure.s3 +theme(legend.position = 'none'),figure.s4+theme(legend.position = 'none'),align = 'h',rel_widths = c(1,1),rel_heights = c(1,1))+draw_label("A",fontfamily = "Calibri", x = 0, y = 1, hjust = -0.5, vjust = 1.5)+draw_label("B",fontfamily = "Calibri",x=0.5,y=1,hjust=0.5,vjust=1.5)
-figure_bar
-grid.arrange(arrangeGrob(figure_bar,top=text_grob(""),
-                bottom = text_grob(""),
-                left = text_grob("Proportion of Time", color = "black", rot = 90,size=16,family="Calibri"),padding=unit(2,"line"
-                )))
 
-legend<-get_legend(figure.s3+theme(legend.position = "bottom"))
-
-figure.s5<-plot_grid(figure_bar,legend,ncol=1,rel_heights = c(1,0.1))
-figure.s5
-grid.arrange(arrangeGrob(figure.s5,top=text_grob(""),
-                bottom = text_grob(""),
-                left = text_grob("Proportion of Time", color = "black", rot = 90,size=16,family="Calibri"),padding=unit(2,"line"
-                )))
-
-
-figure.s6<- ggplot(WaddleAll,aes(x=Intensity.Diff,y=Prop))+geom_point(aes(color=FieldType,size=0.01))+theme_bw()+scale_y_continuous(name="Proportion of Time",breaks=c(0.00,0.08,0.16,0.24,0.32,0.4),limits=c(0.00,0.36))+theme(axis.title.x=element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=16))+scale_x_continuous(name="Difference in\n Field Intensity",limits=c(5,75),breaks=c(0,25,50))+theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=16))+theme(text=element_text(size=16,family="Calibri"))+theme(plot.margin = margin(t=40,r=20,b=10,l=10))+scale_color_manual(values=c("grey20","grey60"),guide=guide_legend(reverse = T))+scale_size(guide='none')
-
-labels <- c(Red = "Group 1", Purple = "Group 2")
-
-WaddleAll$Group <- factor(WaddleAll$Group, levels=c("Red","Purple"))
-
-figure.s6 + facet_grid(.~Group, labeller=labeller(Group = labels))
-
-figure.s7<- ggplot(WaddleAll,aes(x=Inclination.Diff,y=Prop))+geom_point(aes(color=FieldType,size=0.01))+facet_wrap(.~Group)+theme_bw()+scale_y_continuous(name="Proportion of Time",breaks=c(0.00,0.08,0.16,0.24,0.32,0.4),limits=c(0.00,0.36))+theme(axis.title.x=element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=16))+scale_x_continuous(name="Difference in\n Field Inclination",limits=c(2.5,12.5),breaks=c(0,5,10))+theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=16))+theme(text=element_text(size=16,family="Calibri"))+theme(plot.margin = margin(t=40,r=20,b=10,l=10))+scale_color_manual(values=c("grey20","grey60"),guide=guide_legend(reverse = T))+scale_size(guide='none')
-figure.s7+facet_grid(.~Group, labeller=labeller(Group = labels))
 
 ```
 

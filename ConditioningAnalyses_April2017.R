@@ -116,6 +116,8 @@ groupdata <- groupdata %>% mutate(time.in=time.in.hr+time.in.mins) %>% mutate(ti
 
 groupdata <- groupdata %>% mutate(video.change=video.change*60)
 
+groupdata <- groupdata %>% mutate(end.trial=video.change+20)
+
 groupdata$date <- as.Date(groupdata$date,format= "%d-%b-%y")
 
 groupdata <- groupdata %>% select(c("turtle.id","date","group","field","field.type","video.change"))
@@ -125,7 +127,7 @@ groupdata <- groupdata %>% select(c("turtle.id","date","group","field","field.ty
 detach(package:plyr)
 data <- merge(data,groupdata,by=c("turtle.id","date"))
 
-data <- data %>% group_by(turtle.id,date,observer,field,field.type,group) %>% filter(minutes >= video.change) %>% filter(minutes <= video.change+20)
+data <- data %>% group_by(turtle.id,date,observer,field,field.type,group) %>% filter(minutes >= video.change) %>% filter(minutes <= end.trial)
 
 data_obs <- data %>% group_by(turtle.id,date,observer,field,field.type,group) %>% summarise(total.duration=sum(duration))
 

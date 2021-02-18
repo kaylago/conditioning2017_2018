@@ -15,8 +15,8 @@ library(dplyr)
 data = data[order(sapply(data,ncol),decreasing = F)]
 
 
-data_15 <- data[c(0:49)]
-data_16 <- data[c(50:60)]
+data_15 <- data[c(0:51)]
+data_16 <- data[c(52:64)]
 
 
 
@@ -104,7 +104,7 @@ groupdata <- groupdata %>% mutate(time.change.sec=time.change.sec/60) %>% mutate
 groupdata <- groupdata %>% mutate(end.trial=video.change+20)
 #l194 <- l194  %>% mutate(end.trial=video.change+15)
 
-groupdata<- rbind(groupdata,l194)
+#groupdata<- rbind(groupdata,l194)
 
 groupdata$date <- as.Date(groupdata$date,format= "%d-%b-%y")
 
@@ -123,7 +123,7 @@ data_obs <- finaldata %>% group_by(turtle.id,date,observer,field,group,field.typ
 
 data_obs <- data_obs %>% arrange(turtle.id,date)
 
-write.csv(data_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2020_Spring/DataSheets/Spring2020_observerdata_2-13-2021_updated.csv")
+write.csv(data_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2020_Spring/DataSheets/Spring2020_observerdata_2-17-2021_updated.csv")
 
 finaldata <- data_obs %>% group_by(turtle.id,date,field,group,field.type) %>% summarise(mean.duration=mean(total.duration))
 
@@ -146,11 +146,11 @@ obx <- finaldata %>% filter(group!="orange") %>% filter(group!="purple")
 
 nb <- finaldata %>% filter(group!="grey") %>% filter(group!="teal")
 
-#nb2 <- nb %>% filter (turtle.id != "L190") #%>% filter(turtle.id != "L188")
+nb2 <- nb %>% filter (turtle.id != "L190") #%>% filter(turtle.id != "L188")
 
 #obx2 <- obx %>% filter(turtle.id != "L197")
 
-wilcox.test(freq~field.type,data=nb,paired=TRUE)
+wilcox.test(freq~field.type,data=nb2,paired=TRUE)
 
 wilcox.test(freq~field.type,data=obx,paired=TRUE)
 
@@ -209,7 +209,7 @@ jul_plot<-ggplot(finaldata,aes(x=field.type,y=freq))+
   annotate("text",
            x = c(1.5),
            y = c(0.25),
-           label = c("p = 0.0004"),
+           label = c("p = 0.002"),
            family = "Calibri", fontface = 3, size=5)+
   theme(
     rect = element_rect(fill = "transparent") # all rectangles

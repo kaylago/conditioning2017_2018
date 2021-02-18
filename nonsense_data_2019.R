@@ -236,16 +236,18 @@ nov_plot<-ggplot(nov_data,aes(x=field,y=freq))+
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), 
         axis.line = element_line(colour = "black"))+
   theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank())
+        panel.grid.minor = element_blank())+
   #theme(axis.title.x = element_blank(),axis.title.y=element_blank())+
   geom_line(data=annotation_df1,aes(x=field.type,y=y))+
   geom_segment(data=annotation_df2,aes(x="FL",xend="MA",y=0.09,yend=0.09))+
   geom_line(data=annotation_df3,aes(x=field.type,y=y))+
   annotate("text",
-           x = c(1.5),
+           x = c(2.5),
            y = c(0.1),
-           label = c("p = 0.0005"),
+           label = c("p = 0.01"),
            family = "Calibri", fontface = 3, size=5)
 nov_plot
+
+ggsave(nov_plot, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/nonsense_2019.png",  bg = "transparent")
 
 

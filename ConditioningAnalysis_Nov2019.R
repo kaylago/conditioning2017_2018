@@ -132,7 +132,7 @@ nov_data <- nov_data %>% mutate(freq=mean.duration/1200)
 
 #nov_data_alt <- nov_data %>% filter(turtle.id != "L192")# %>% filter(turtle.id!= "L200") 
 
-write.csv(nov_data_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/nov_data_observers_2-13-2021_updated.csv")
+write.csv(nov_data_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/nov_data_observers_2-17-2021_updated.csv")
 
 write.csv(nov_data,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/nov_data_11-9.csv")
 

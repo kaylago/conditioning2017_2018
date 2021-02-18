@@ -212,8 +212,8 @@ library(dplyr)
 data2 = data2[order(sapply(data2,ncol),decreasing = F)]
 
 
-data_15 <- data2[c(1:25)]
-data_16 <- data2[c(26:30)]
+data_15 <- data2[c(1:24)]
+data_16 <- data2[c(25:29)]
 
   
 detach(package:dplyr)
@@ -294,7 +294,7 @@ dec_data_total_obs <- dec_data_total_obs %>% arrange(turtle.id,date)
 
 
 
-write.csv(dec_data_total_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2017/2017_data_observers_2-13-2021_updated.csv")
+write.csv(dec_data_total_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2017/2017_data_observers_2-17-2021_updated.csv")
 
 library(dplyr)
 
