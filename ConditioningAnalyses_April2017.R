@@ -137,6 +137,8 @@ apr2017_data <- apr2017_data %>% mutate(freq = mean.duration/1200)
 
 wilcox.test(freq~field.type,apr2017_data,paired=TRUE)
 
+wilcox.test(freq~field.type,apr2017_data)
+
 t.test(freq~field.type,apr2017_data)
 
 red_apr17 <- apr2017_data %>% filter(group=="red")
@@ -160,13 +162,13 @@ require(scales)
 
 
 annotation_df1 <- data.frame(field.type=rep(c("conditioned","conditioned")),
-                             y=c(0.036,0.04))
+                             y=c(0.056,0.06))
 
 annotation_df2 <- data.frame(field.type=rep(c("conditioned","control")),
-                             y=c(0.04,0.04))
+                             y=c(0.06,0.06))
 
 annotation_df3 <- data.frame(field.type=rep(c("control","control")),
-                             y=c(0.04,0.036))
+                             y=c(0.056,0.06))
 
 
 plot<-ggplot(apr2017_data,aes(x=field.type,y=freq))+
@@ -195,12 +197,12 @@ plot<-ggplot(apr2017_data,aes(x=field.type,y=freq))+
         panel.grid.minor = element_blank())+
   theme(axis.title.x = element_blank(),axis.title.y=element_blank())+
   geom_line(data=annotation_df1,aes(x=field.type,y=y))+
-  geom_segment(data=annotation_df2,aes(x="conditioned",xend="control",y=0.04,yend=0.04))+
+  geom_segment(data=annotation_df2,aes(x="conditioned",xend="control",y=0.06,yend=0.06))+
   geom_line(data=annotation_df3,aes(x=field.type,y=y))+
   annotate("text",
            x = c(1.5),
-           y = c(0.043),
-           label = c("p = 0.04"),
+           y = c(0.063),
+           label = c("p = 0.07"),
            family = "Calibri", fontface = 3, size=5)
 plot
 
@@ -231,12 +233,12 @@ redplot<-ggplot(red_apr17,aes(x=field.type,y=freq))+
         panel.grid.minor = element_blank())+
   theme(axis.title.x = element_blank(),axis.title.y=element_blank())+
   geom_line(data=annotation_df1,aes(x=field.type,y=y))+
-  geom_segment(data=annotation_df2,aes(x="conditioned",xend="control",y=0.04,yend=0.04))+
+  geom_segment(data=annotation_df2,aes(x="conditioned",xend="control",y=0.06,yend=0.06))+
   geom_line(data=annotation_df3,aes(x=field.type,y=y))+
   annotate("text",
            x = c(1.5),
-           y = c(0.043),
-           label = c("p = 0.15"),
+           y = c(0.063),
+           label = c("p = 0.1"),
            family = "Calibri", fontface = 3, size=5)
 redplot
 
@@ -270,12 +272,12 @@ purplot<-ggplot(pur_apr17,aes(x=field.type,y=(freq)))+
         panel.background = element_rect(fill = "transparent"))+
   theme(axis.title.x = element_blank(),axis.title.y=element_blank())+
   geom_line(data=annotation_df1,aes(x=field.type,y=y))+
-  geom_segment(data=annotation_df2,aes(x="conditioned",xend="control",y=0.04,yend=0.04))+
+  geom_segment(data=annotation_df2,aes(x="conditioned",xend="control",y=0.06,yend=0.06))+
   geom_line(data=annotation_df3,aes(x=field.type,y=y))+
   annotate("text",
            x = c(1.5),
-           y = c(0.043),
-           label = c("p = 0.19"),
+           y = c(0.063),
+           label = c("p = 0.46"),
            family = "Calibri", fontface = 3, size=5)
 purplot
   
