@@ -14,9 +14,9 @@ groupdata <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/201
 library(dplyr)
 rf_data = rf_data[order(sapply(rf_data,ncol),decreasing = F)]
 
-rf_data_15 <- rf_data[c(17:63)]
-rf_data_14 <- rf_data[c(1:16)]
-rf_data_16 <- rf_data[c(64:72)]
+rf_data_15 <- rf_data[c(15:58)]
+rf_data_14 <- rf_data[c(1:14)]
+rf_data_16 <- rf_data[c(59:73)]
 
 detach(package:dplyr)
 library(plyr)
@@ -145,7 +145,7 @@ wilcox.test(freq~field,rf_data,paired=TRUE)
 
 t.test(freq~field,rf_data)
 
-nov_data <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/nov_data_observers_2-4-2021_updated.csv")
+nov_data <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/nov_data_observers_2-17-2021_updated.csv")
 
 nov_data_obs <- nov_data %>% select(-c(X))
 

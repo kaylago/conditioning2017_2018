@@ -20,7 +20,7 @@ groupdata <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/201
 
 
 
-columns <- c("turtle_id","obs_date","media_file","length","fps","subject","behavior","delete","modifiers","type","start","stop","duration","comment_start","comment_stop")
+columns <- c("turtle_id","obs_date","media_file","length","fps","subject","behavior","delete","modifiers","type","extra","start","stop","duration","comment_start","comment_stop")
 
 renameFunction<-function(x,columns){
   names(x) <- columns
@@ -40,7 +40,7 @@ library(dplyr)
 
 #olddata <- olddata %>% select(c("time","media.file.path","start_stop"))
 
-newdata <- newdata %>% select(-c("obs_date","media_file","length","fps","subject","behavior","delete","modifiers","type","comment_start","comment_stop"))
+newdata <- newdata %>% select(-c("obs_date","media_file","length","fps","subject","behavior","delete","modifiers","type","comment_start","comment_stop","extra"))
 
 
 
@@ -120,7 +120,7 @@ groupdata <- groupdata %>% mutate(end.trial=video.change+20)
 
 groupdata$date <- as.Date(groupdata$date,format= "%d-%b-%y")
 
-groupdata <- groupdata %>% select(c("turtle.id","date","group","field","field.type","video.change"))
+groupdata <- groupdata %>% select(c(turtle.id,date,group,field,field.type,video.change,end.trial))
 
 #combine data 
 
@@ -130,6 +130,12 @@ data <- merge(data,groupdata,by=c("turtle.id","date"))
 data <- data %>% group_by(turtle.id,date,observer,field,field.type,group) %>% filter(minutes >= video.change) %>% filter(minutes <= end.trial)
 
 data_obs <- data %>% group_by(turtle.id,date,observer,field,field.type,group) %>% summarise(total.duration=sum(duration))
+
+observer_difference <- data_obs %>% group_by(turtle.id,date) %>% summarize(difference=max(total.duration)-min(total.duration))
+
+mean(observer_difference$difference)#6 seconds
+
+write.csv(data_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2017/apr2017_dataobs_3-5-20.csv")
 
 apr2017_data <- data_obs %>% group_by(turtle.id,date,field,field.type,group) %>% summarise(mean.duration=mean(total.duration))
 
@@ -149,6 +155,33 @@ wilcox.test(freq~field.type,red_apr17,paired=TRUE)
 
 wilcox.test(freq~field.type,pur_apr17,paired=TRUE)
 
+data2017 <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/CompactObserverData_AllYears/2017_data_observers_2-17-2021_updated.csv")
+
+data2017 <- data2017 %>% group_by(turtle.id,date,field,field.type,group) %>% summarise(mean.duration=mean(total.dur))
+
+data2017 <- data2017 %>% mutate(test=rep("original"))
+
+data2017$date <- as.Date(data2017$date,format= "%Y-%m-%d")
+
+data2017 <- data2017 %>% mutate(freq=mean.duration/1200)
+
+apr2017_data <- apr2017_data %>% mutate(test=rep("4mo"))
+
+cohort17 <- rbind(apr2017_data,data2017)
+
+cohort17_cond <- cohort17 %>% filter(field.type=="conditioned")
+
+cohort17_cond <- cohort17_cond %>% arrange(turtle.id)
+
+cohort17_control <- cohort17 %>% filter(field.type=="control")
+
+wilcox.test(freq~test,cohort17_cond,paired=TRUE)
+
+t.test(freq~test,cohort17_cond)
+
+wilcox.test(freq~test,cohort17_control,paired=TRUE)
+
+t.test(freq~test,cohort17_control)
 #plots
 
 library(ggplot2)
@@ -175,7 +208,7 @@ plot<-ggplot(apr2017_data,aes(x=field.type,y=freq))+
   stat_summary(fun.y="mean",geom="bar",color="grey50",fill="grey50")+
   stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
                geom="errorbar",color="black")+
-  geom_point(position=position_jitter(width=0.1))+
+  geom_point(position=position_jitter(width=0.15))+
   theme_bw()+
   coord_trans(y="sqrt")+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
@@ -187,7 +220,8 @@ plot<-ggplot(apr2017_data,aes(x=field.type,y=freq))+
   theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face = "plain"))+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"))+
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"),
+        axis.text.x = element_text(angle=45,hjust = 1))+
   theme(panel.border = element_blank(), 
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), 
@@ -202,7 +236,7 @@ plot<-ggplot(apr2017_data,aes(x=field.type,y=freq))+
   annotate("text",
            x = c(1.5),
            y = c(0.063),
-           label = c("p = 0.07"),
+           label = c("p = 0.003"),
            family = "Calibri", fontface = 3, size=5)
 plot
 
@@ -223,7 +257,8 @@ redplot<-ggplot(red_apr17,aes(x=field.type,y=freq))+
   theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face = "plain"))+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"))+
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"),
+        axis.text.x = element_text(angle=45,hjust = 1))+
   theme(panel.border = element_blank(), 
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), 
@@ -237,8 +272,8 @@ redplot<-ggplot(red_apr17,aes(x=field.type,y=freq))+
   geom_line(data=annotation_df3,aes(x=field.type,y=y))+
   annotate("text",
            x = c(1.5),
-           y = c(0.063),
-           label = c("p = 0.1"),
+           y = c(0.05),
+           label = c("p = 0.07"),
            family = "Calibri", fontface = 3, size=5)
 redplot
 
@@ -262,7 +297,8 @@ purplot<-ggplot(pur_apr17,aes(x=field.type,y=(freq)))+
   theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face="plain"))+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"))+
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"),
+        axis.text.x = element_text(angle=45,hjust = 1))+
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), 
         axis.line = element_line(colour = "black"))+
   theme(panel.border = element_blank(), 
@@ -277,7 +313,7 @@ purplot<-ggplot(pur_apr17,aes(x=field.type,y=(freq)))+
   annotate("text",
            x = c(1.5),
            y = c(0.063),
-           label = c("p = 0.46"),
+           label = c("p = 0.04"),
            family = "Calibri", fontface = 3, size=5)
 purplot
   
@@ -295,7 +331,39 @@ figure6 <- grid.arrange(arrangeGrob(figure6,
                          bottom = text_grob("Treatment", color = "black",
                                             hjust = 0.5, size = 18,family="Calibri",face="bold"),
                          left = text_grob("Proportion of Time", color = "black",
-                                          rot=90,size=18,family="Calibri",face="bold"),padding=unit(1,"line")))
+                                          rot=90,size=18,family="Calibri",face="bold"),
+                         padding=unit(1,"line")))
 figure6
 
 ggsave(figure6, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/april2017_plot.png",  bg = "white")
+
+plota<-ggplot(cohort17_cond,aes(x=test,y=freq))+
+  stat_summary(fun.y="mean",geom="bar",color="grey50",fill="grey50")+
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+               geom="errorbar",color="black")+
+  geom_point(position=position_jitter(width=0.15))+
+  theme_bw()+
+  coord_trans(y="sqrt")+
+  #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
+  scale_y_continuous("Proportion of Time",breaks = c(0,0.01,0.02,0.04,0.08,0.16),expand=c(0,0),limits=c(0,0.1))+
+  #coord_cartesian(ylim=c(0,0.1))+
+  scale_x_discrete("Treatment")+
+  #labs(title="Canada Group") +
+  theme(text=element_text(size=18,family="calibri"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face = "plain"))+
+  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"),
+        axis.text.x = element_text(angle=45,hjust = 1))+
+  theme(panel.border = element_blank(), 
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        panel.background = element_rect(fill = "transparent"))+
+  theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())+
+  theme(axis.title.x = element_blank(),axis.title.y=element_blank())
+  
+plota
+
+
