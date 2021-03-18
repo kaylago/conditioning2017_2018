@@ -100,6 +100,13 @@ data_obs<- data_obs %>% mutate(group.total=ifelse(group=="teal" |group=="grey","
 data <- data_obs %>% group_by(turtle.id,date,field,field.type,group,group.total) %>% summarise(mean.duration=mean(total.duration))
 
 
+data <- data %>% mutate(field.type2=ifelse(field.type=="teal1"|field.type=="maroon1","sens1",
+                                           ifelse(field.type=="teal2"|field.type=="maroon2","sens2",
+                                                  ifelse(field.type=="teal3"|field.type=="maroon3","sens3",
+                                                         ifelse(field.type=="teal4"|field.type=="maroon4","sens4","conditioned")))))
+
+data<- data %>% mutate(freq=mean.duration/1200)
+
 data_kg <- data_obs %>% filter(observer=="KG") %>% group_by(turtle.id,date,field,field.type,group,group.total) %>% summarise(mean.duration=mean(total.duration))
 
 obx_kg <- data_kg  %>% filter(group.total=="teal")
@@ -108,13 +115,29 @@ obx_kg <- data_kg  %>% filter(group.total=="teal")
 
 obx <- data %>% filter(group.total=="teal")
 
-attach(obx)
-pairwise.wilcox.test(mean.duration,field,data=obx)
-detach()
+nb <- data %>% filter(group.total=="maroon")
+
+
 
 attach(obx_kg)
-pairwise.wilcox.test(mean.duration,field,data=obx_kg)
+pairwise.wilcox.test(mean.duration,field,data=obx,paired=TRUE)
 detach()
+
+attach(obx)
+pairwise.wilcox.test(mean.duration,field,data=obx,paired=TRUE)
+detach()
+
+attach(nb)
+pairwise.wilcox.test(mean.duration,field,data=nb,paired=TRUE)
+detach()
+
+attach(data)
+pairwise.wilcox.test(freq,field,data=data)
+
+pairwise.wilcox.test(freq,field.type2,data=data,paired=TRUE)
+detach()
+
+
 
 library(ggplot2)
 library(ggpubr)
@@ -126,15 +149,71 @@ require(scales)
 
 
 
-plot<-ggplot(obx,aes(x=field,y=mean.duration))+
+plot_nb<-ggplot(nb,aes(x=field,y=freq))+
   stat_summary(fun.y="mean",geom="bar",color="grey50",fill="grey50")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   geom_point(position=position_jitter(width=0.15))+
   theme_bw()+
   coord_trans(y="sqrt")+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
-  scale_y_continuous("Proportion of Time",,expand=c(0,0),limits=c(0,100))+
+  scale_y_continuous("Proportion of Time",expand=c(0,0),limits=c(0,0.1))+
+  #coord_cartesian(ylim=c(0,0.1))+
+  scale_x_discrete("Treatment")+
+  #labs(title="Canada Group") +
+  theme(text=element_text(size=18,family="calibri"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face = "plain"))+
+  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"),
+        axis.text.x = element_text(angle=45,hjust = 1))+
+  theme(panel.border = element_blank(), 
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        panel.background = element_rect(fill = "transparent"))+
+  theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())+
+  theme(axis.title.x = element_blank(),axis.title.y=element_blank())
+plot_nb
+
+plot_obx<-ggplot(obx,aes(x=field,y=freq))+
+  stat_summary(fun.y="mean",geom="bar",color="grey50",fill="grey50")+
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
+               geom="errorbar",color="black")+
+  geom_point(position=position_jitter(width=0.15))+
+  theme_bw()+
+  coord_trans(y="sqrt")+
+  #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
+  scale_y_continuous("Proportion of Time",expand=c(0,0),limits=c(0,.05))+
+  #coord_cartesian(ylim=c(0,0.1))+
+  scale_x_discrete("Treatment")+
+  #labs(title="Canada Group") +
+  theme(text=element_text(size=18,family="calibri"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face = "plain"))+
+  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"),
+        axis.text.x = element_text(angle=45,hjust = 1))+
+  theme(panel.border = element_blank(), 
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        panel.background = element_rect(fill = "transparent"))+
+  theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())+
+  theme(axis.title.x = element_blank(),axis.title.y=element_blank())
+plot_obx
+
+plot<-ggplot(data,aes(x=field.type2,y=freq))+
+  stat_summary(fun.y="mean",geom="bar",color="grey50",fill="grey50")+
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
+               geom="errorbar",color="black")+
+  geom_point(position=position_jitter(width=0.15))+
+  theme_bw()+
+  coord_trans(y="sqrt")+
+  #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
+  scale_y_continuous("Proportion of Time",expand=c(0,0),limits=c(0,.1))+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
   #labs(title="Canada Group") +
@@ -154,6 +233,33 @@ plot<-ggplot(obx,aes(x=field,y=mean.duration))+
   theme(axis.title.x = element_blank(),axis.title.y=element_blank())
 plot
 
+plot<-ggplot(data,aes(x=field,y=freq))+
+  stat_summary(fun.y="mean",geom="bar",color="grey50",fill="grey50")+
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
+               geom="errorbar",color="black")+
+  geom_point(position=position_jitter(width=0.15))+
+  theme_bw()+
+  coord_trans(y="sqrt")+
+  #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
+  scale_y_continuous("Proportion of Time",expand=c(0,0),limits=c(0,.1))+
+  #coord_cartesian(ylim=c(0,0.1))+
+  scale_x_discrete("Treatment")+
+  #labs(title="Canada Group") +
+  theme(text=element_text(size=18,family="calibri"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face = "plain"))+
+  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"),
+        axis.text.x = element_text(angle=45,hjust = 1))+
+  theme(panel.border = element_blank(), 
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        panel.background = element_rect(fill = "transparent"))+
+  theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())+
+  theme(axis.title.x = element_blank(),axis.title.y=element_blank())
+plot
 
 
 

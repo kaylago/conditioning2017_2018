@@ -350,7 +350,7 @@ annotation_df3 <- data.frame(field.type=rep(c("control","control")),
 
 orangeplot<-ggplot(orange,aes(x=field.type,y=prop))+
   stat_summary(fun.y="mean",geom="bar",color="#FF9933",fill="#FF9933")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),geom="errorbar",color="black")+
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),geom="errorbar",color="black")+
   theme_bw()+
   scale_y_continuous(breaks=c(0,0.05,0.1,0.15),expand = c(0,0),"Proportion of Time")+
   coord_cartesian(ylim=c(0,0.15))+
@@ -365,7 +365,7 @@ orangeplot
 
 or_plot_18 <- ggplot(orange,aes(x=field.type,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="#FF9933",fill="#FF9933")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.17))+
@@ -399,7 +399,7 @@ or_plot_18
 
 
 blueplot<-ggplot(blue,aes(x=field.type,y=freq))+
-  stat_summary(fun.y="mean",geom="bar",color="#99CCFF",fill="#99CCFF")+stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),geom="errorbar",color="black")+
+  stat_summary(fun.y="mean",geom="bar",color="#99CCFF",fill="#99CCFF")+stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),geom="errorbar",color="black")+
   theme_bw()+
   theme(text=element_text(size=20,family="calibri")) +
   scale_y_continuous(breaks=c(0,0.05,0.1,0.15),expand=c(0,0),name="Proportion of Time")+
@@ -427,7 +427,7 @@ annotate_figure(figure,
 
 blu_plot_18 <- ggplot(blue,aes(x=field.type,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="#99CCFF",fill="#99CCFF")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.17))+
@@ -462,7 +462,7 @@ blu_plot_18
 
 red_plot_17 <-ggplot(subset(dec_data_total,group=="red"),aes(x=field.type,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="#990000",fill="#990000")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.15))+

@@ -204,7 +204,7 @@ annotation_df3 <- data.frame(field.type=rep(c("control","control")),
 
 all_plot<-ggplot(data,aes(x=field.type,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="grey",fill="grey")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.1))+
@@ -249,7 +249,7 @@ ggsave(all_plot, dpi=300, width = 5, height=7,units="in",filename = "C:/Users/kk
 
 red <-ggplot(subset(data,group=="red"),aes(x=field.type,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="#990000",fill="#990000")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.15))+
@@ -286,7 +286,7 @@ ggsave(red, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dro
 
 pur <-ggplot(subset(data,group=="purple"),aes(x=field.type,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="#CC99FF",fill="#CC99FF")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.15))+
@@ -322,7 +322,7 @@ ggsave(pur, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dro
 
 org <-ggplot(subset(data,group=="orange"),aes(x=field.type,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="#FF9933",fill="#FF9933")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.15))+
@@ -359,7 +359,7 @@ ggsave(org, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dro
 
 blu <-ggplot(subset(data,group=="blue"),aes(x=field.type,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="royalblue4",fill="royalblue4")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.15))+
@@ -396,7 +396,7 @@ ggsave(blu, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dro
 
 grn <-ggplot(subset(data,group=="green"),aes(x=field.type,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="olivedrab",fill="olivedrab")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.15))+
@@ -432,7 +432,7 @@ ggsave(grn, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dro
 
 teal <-ggplot(subset(data,group=="teal"),aes(x=field.type,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="turquoise4",fill="turquoise4")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.15))+
@@ -468,7 +468,7 @@ ggsave(teal, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dr
 
 pink <-ggplot(subset(data,group=="maroon"),aes(x=field.type,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="lightpink3",fill="lightpink3")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.15))+
@@ -526,7 +526,7 @@ ggsave(figure6, dpi=300,width=15,height=15,units="in", filename = "C:/Users/kkmg
 
 year17 <-ggplot(subset(data,year==2017),aes(x=field.type,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="plum4",fill="plum4")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.15))+
@@ -562,7 +562,7 @@ ggsave(year17, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/
 
 year18 <-ggplot(subset(data,year==2018),aes(x=field.type,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="cadetblue4",fill="cadetblue4")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.15))+
@@ -598,7 +598,7 @@ ggsave(year18, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/
 
 year19 <-ggplot(subset(data,year==2019),aes(x=field.type,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="darkseagreen3",fill="darkseagreen3")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.15))+
@@ -634,7 +634,7 @@ ggsave(year19, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/
 
 year20 <-ggplot(subset(data,year==2020),aes(x=field.type,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="salmon2",fill="salmon2")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.15))+
@@ -697,7 +697,7 @@ ggsave(figureyear, dpi=300,width=15,height=15,units="in", filename = "C:/Users/k
 
 southgroups <-ggplot(subset(data,geography=="southern"),aes(x=field.type,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="cyan4",fill="cyan4")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.15))+
@@ -732,7 +732,7 @@ southgroups
 
 northgroups <-ggplot(subset(data,geography=="northern"),aes(x=field.type,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="maroon4",fill="maroon4")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.15))+
@@ -767,7 +767,7 @@ northgroups
 
 midgroups <-ggplot(subset(data,geography=="mid"),aes(x=field.type,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="darkorange3",fill="darkorange3")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.15))+
@@ -801,7 +801,7 @@ midgroups
 
 midnorthgroups <-ggplot(subset(data,geography=="mid-north"),aes(x=field.type,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="olivedrab4",fill="olivedrab4")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.15))+

@@ -13,8 +13,8 @@ groupdata <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/201
 library(dplyr)
 nov_data = nov_data[order(sapply(nov_data,ncol),decreasing = F)]
 
-nov_data_15 <- nov_data[c(0:63)]
-nov_data_16 <- nov_data[c(64:64)]
+nov_data_15 <- nov_data[c(0:76)]
+nov_data_16 <- nov_data[c(77:77)]
 #nov_data_14 <- nov_data[c(0:1)]
 #nov_data_5 <- nov_data[c(0:1)]
 
@@ -135,6 +135,8 @@ nov_data <- as.data.frame(nov_data)
 
 
 
+write.csv(nov_data_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/nonsense_data_obs_3-10-21.csv")
+
 class(nov_data$field)
 
 
@@ -217,7 +219,7 @@ annotation_df3 <- data.frame(field.type=rep(c("MA","MA")),
 
 nov_plot<-ggplot(nov_data,aes(x=field,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="grey",fill="grey")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.1))+

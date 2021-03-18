@@ -364,7 +364,7 @@ annotation_df3 <- data.frame(field.type=rep(c("control","control")),
 
 plot_17 <-ggplot(dec_data_total,aes(x=field.type,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="grey",fill="grey")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.18))+
@@ -400,7 +400,7 @@ ggsave(plot_17, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo
 
 red_plot_17 <-ggplot(subset(dec_data_total,group=="red"),aes(x=field.type,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="#990000",fill="#990000")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.15))+
@@ -437,7 +437,7 @@ ggsave(red_plot_17, dpi=300,width=10,height=8,units="in", filename = "C:/Users/k
 
 pur_plot_17 <-ggplot(subset(dec_data_total,group=="purple"),aes(x=field.type,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="#CC99FF",fill="#CC99FF")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.15))+

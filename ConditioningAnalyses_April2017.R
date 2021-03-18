@@ -135,7 +135,7 @@ observer_difference <- data_obs %>% group_by(turtle.id,date) %>% summarize(diffe
 
 mean(observer_difference$difference)#6 seconds
 
-write.csv(data_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2017/apr2017_dataobs_3-5-20.csv")
+write.csv(data_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2017/apr2017_dataobs_3-6-21.csv")
 
 apr2017_data <- data_obs %>% group_by(turtle.id,date,field,field.type,group) %>% summarise(mean.duration=mean(total.duration))
 
@@ -169,6 +169,8 @@ apr2017_data <- apr2017_data %>% mutate(test=rep("4mo"))
 
 cohort17 <- rbind(apr2017_data,data2017)
 
+cohort17 <- cohort17 %>% mutate(field.type2=paste(field.type,test,sep="-"))
+
 cohort17_cond <- cohort17 %>% filter(field.type=="conditioned")
 
 cohort17_cond <- cohort17_cond %>% arrange(turtle.id)
@@ -180,6 +182,10 @@ wilcox.test(freq~test,cohort17_cond,paired=TRUE)
 t.test(freq~test,cohort17_cond)
 
 wilcox.test(freq~test,cohort17_control,paired=TRUE)
+
+attach(cohort17)
+pairwise.wilcox.test(freq,field.type2,paired=TRUE,data=cohort17)
+
 
 t.test(freq~test,cohort17_control)
 #plots
@@ -206,7 +212,7 @@ annotation_df3 <- data.frame(field.type=rep(c("control","control")),
 
 plot<-ggplot(apr2017_data,aes(x=field.type,y=freq))+
   stat_summary(fun.y="mean",geom="bar",color="grey50",fill="grey50")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   geom_point(position=position_jitter(width=0.15))+
   theme_bw()+
@@ -236,14 +242,14 @@ plot<-ggplot(apr2017_data,aes(x=field.type,y=freq))+
   annotate("text",
            x = c(1.5),
            y = c(0.063),
-           label = c("p = 0.003"),
+           label = c("p = 0.013"),
            family = "Calibri", fontface = 3, size=5)
 plot
 
 
 redplot<-ggplot(red_apr17,aes(x=field.type,y=freq))+
   stat_summary(fun.y="mean",geom="bar",color="#990000",fill="#990000")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   geom_point(position=position_jitter(width=0.1))+
   theme_bw()+
@@ -272,7 +278,7 @@ redplot<-ggplot(red_apr17,aes(x=field.type,y=freq))+
   geom_line(data=annotation_df3,aes(x=field.type,y=y))+
   annotate("text",
            x = c(1.5),
-           y = c(0.05),
+           y = c(0.063),
            label = c("p = 0.07"),
            family = "Calibri", fontface = 3, size=5)
 redplot
@@ -282,7 +288,7 @@ redplot
 
 purplot<-ggplot(pur_apr17,aes(x=field.type,y=(freq)))+
   stat_summary(fun.y= mean,geom="bar",color="#CC99FF",fill="#CC99FF")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.1))+
@@ -313,7 +319,7 @@ purplot<-ggplot(pur_apr17,aes(x=field.type,y=(freq)))+
   annotate("text",
            x = c(1.5),
            y = c(0.063),
-           label = c("p = 0.04"),
+           label = c("p = 0.14"),
            family = "Calibri", fontface = 3, size=5)
 purplot
   
@@ -337,11 +343,12 @@ figure6
 
 ggsave(figure6, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/april2017_plot.png",  bg = "white")
 
-plota<-ggplot(cohort17_cond,aes(x=test,y=freq))+
-  stat_summary(fun.y="mean",geom="bar",color="grey50",fill="grey50")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
-               geom="errorbar",color="black")+
-  geom_point(position=position_jitter(width=0.15))+
+plota<-ggplot(cohort17,aes(x=field.type2,y=freq,group=field.type2))+
+  stat_summary(fun.y="mean",geom="bar",color="grey50",fill=c("red","grey50","red","grey50"),position="dodge")+
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
+               geom="errorbar",color="black",position="dodge")+
+  geom_point(aes(group=field.type2,color=test),position=position_jitter(width=0.2))+
+  scale_color_manual(values=c("black","blue"))+
   theme_bw()+
   coord_trans(y="sqrt")+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+

@@ -182,7 +182,7 @@ annotation_df3 <- data.frame(field.type=rep(c("control","control")),
 
 jul_plot<-ggplot(finaldata,aes(x=field.type,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="grey",fill="grey")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.1))+
@@ -227,7 +227,7 @@ ggsave(jul_plot, width = 5, height=7,units="in",filename = "C:/Users/kkmgo/Dropb
 
 obx_plot_20 <-ggplot(obx,aes(x=field.type,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="aquamarine4",fill="aquamarine4")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.15))+
@@ -261,7 +261,7 @@ obx_plot_20
 
 nb_plot_20 <-ggplot(nb,aes(x=field.type,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="lightpink4",fill="lightpink4")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.15))+

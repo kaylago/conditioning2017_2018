@@ -16,7 +16,7 @@ rf_data = rf_data[order(sapply(rf_data,ncol),decreasing = F)]
 
 rf_data_15 <- rf_data[c(15:58)]
 rf_data_14 <- rf_data[c(1:14)]
-rf_data_16 <- rf_data[c(59:73)]
+rf_data_16 <- rf_data[c(59:74)]
 
 detach(package:dplyr)
 library(plyr)
@@ -131,7 +131,7 @@ observer_difference <- rf_data_obs %>% group_by(turtle.id,date) %>% summarize(di
 
 mean(observer_difference$difference)
 
-write.csv(rf_data_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/rf_data_observers_2-5-21.csv")
+write.csv(rf_data_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/rf_data_observers_3-9-21.csv")
 
 #write.csv(rf_data,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/rf_data_6-28.csv")
 
@@ -155,7 +155,7 @@ nov_data <- nov_data %>% mutate(exper=rep("2mo"))
 
 nov_data <- nov_data %>% mutate(freq=mean.duration/1200)
 
-nov_data$date <- as.Date(nov_data$date,format= "%m/%d/%y")
+nov_data$date <- as.Date(nov_data$date,format= "%Y-%M-%d")
 
 #nov_data <- nov_data %>% select(-c("X"))
 
@@ -206,7 +206,7 @@ annotation_df3 <- data.frame(field.type=rep(c("MA/RF","MA/RF")),y=c(0.08,0.076))
 
 rfplot<-ggplot(rf_data,aes(x=field,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="grey",fill="grey")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.1))+
@@ -250,7 +250,7 @@ annotation_df3 <- data.frame(field.type=rep(c("MA","MA")),
 
 nov_plot<-ggplot(nov_data,aes(x=field,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="grey",fill="grey")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.1))+
@@ -293,7 +293,7 @@ anno<- data.frame(field=c("FL","MA-1","MA-2","MA-RF"),
 
 all_plot<-ggplot(alldata,aes(x=field,y=freq),group=exper)+
   stat_summary(fun.y= mean,geom="bar",color="grey")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/length(x),fun.ymax = function(x) mean(x) + sd(x)/length(x),
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.15))+
@@ -327,17 +327,17 @@ all_plot<-ggplot(alldata,aes(x=field,y=freq),group=exper)+
   annotate("text",
            x = c(1.5),
            y = c(0.09),
-           label = c("p = 0.002*"),
+           label = c("p = 0.0005*"),
            family = "Calibri", fontface = 3, size=5)+
   annotate("text",
          x = c(2.5),
          y = c(0.14),
-         label = c("p = 0.78"),
+         label = c("p = 0.9"),
          family = "Calibri", fontface = 3, size=5)+
   annotate("text",
            x = c(3.5),
            y = c(0.175),
-           label = c("p = 0.99"),
+           label = c("p = 0.94"),
            family = "Calibri", fontface = 3, size=5)
 all_plot
 
