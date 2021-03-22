@@ -147,17 +147,20 @@ library(grid)
 library(gridExtra)
 require(scales)
 
+nb$field.type2 <- factor(nb$field.type2,levels=c("conditioned","sens1","sens2","sens3","sens4"))
+
+obx$field.type2 <- factor(obx$field.type2,levels=c("conditioned","sens1","sens2","sens3","sens4"))
 
 
-plot_nb<-ggplot(nb,aes(x=field,y=freq))+
-  stat_summary(fun.y="mean",geom="bar",color="grey50",fill="grey50")+
+plot_nb<-ggplot(nb,aes(x=field.type2,y=freq))+
+  stat_summary(fun.y="mean",geom="bar",fill=c("mediumvioletred","hotpink3","palevioletred3","lightpink2","mistyrose3"))+
   stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   geom_point(position=position_jitter(width=0.15))+
   theme_bw()+
   coord_trans(y="sqrt")+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
-  scale_y_continuous("Proportion of Time",expand=c(0,0),limits=c(0,0.1))+
+  scale_y_continuous("Proportion of Time",expand=c(0,0),limits=c(0,0.08))+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
   #labs(title="Canada Group") +
@@ -173,19 +176,22 @@ plot_nb<-ggplot(nb,aes(x=field,y=freq))+
         axis.line = element_line(colour = "black"),
         panel.background = element_rect(fill = "transparent"))+
   theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank())+
-  theme(axis.title.x = element_blank(),axis.title.y=element_blank())
+        panel.grid.minor = element_blank())
+  #theme(axis.title.x = element_blank(),axis.title.y=element_blank())
 plot_nb
 
-plot_obx<-ggplot(obx,aes(x=field,y=freq))+
-  stat_summary(fun.y="mean",geom="bar",color="grey50",fill="grey50")+
+ggsave(plot_nb, width = 10, height=8,units="in",filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2020_Spring/Figures/nb_sens.png",  bg = "transparent")
+
+
+plot_obx<-ggplot(obx,aes(x=field.type2,y=freq))+
+  stat_summary(fun.y="mean",geom="bar",fill= c("darkgreen","springgreen4","darkolivegreen3","darkseagreen3","palegreen3"))+
   stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   geom_point(position=position_jitter(width=0.15))+
   theme_bw()+
   coord_trans(y="sqrt")+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
-  scale_y_continuous("Proportion of Time",expand=c(0,0),limits=c(0,.05))+
+  scale_y_continuous("Proportion of Time",expand=c(0,0),limits=c(0,.08))+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
   #labs(title="Canada Group") +
@@ -201,9 +207,12 @@ plot_obx<-ggplot(obx,aes(x=field,y=freq))+
         axis.line = element_line(colour = "black"),
         panel.background = element_rect(fill = "transparent"))+
   theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank())+
-  theme(axis.title.x = element_blank(),axis.title.y=element_blank())
+        panel.grid.minor = element_blank())
+ # theme(axis.title.x = element_blank(),axis.title.y=element_blank())
 plot_obx
+
+ggsave(plot_obx, width = 10, height=8,units="in",filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2020_Spring/Figures/obx_sens.png",  bg = "transparent")
+
 
 plot<-ggplot(data,aes(x=field.type2,y=freq))+
   stat_summary(fun.y="mean",geom="bar",color="grey50",fill="grey50")+
