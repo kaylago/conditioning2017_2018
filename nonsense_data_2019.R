@@ -13,8 +13,8 @@ groupdata <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/201
 library(dplyr)
 nov_data = nov_data[order(sapply(nov_data,ncol),decreasing = F)]
 
-nov_data_15 <- nov_data[c(0:76)]
-nov_data_16 <- nov_data[c(77:77)]
+nov_data_15 <- nov_data[c(0:71)]
+nov_data_16 <- nov_data[c(72:104)]
 #nov_data_14 <- nov_data[c(0:1)]
 #nov_data_5 <- nov_data[c(0:1)]
 
@@ -114,6 +114,7 @@ groupdata <- groupdata %>% select(c("turtle.id","date","group","field","experime
 #combine data sheets
 
 detach(package:plyr)
+library(dplyr)
 nov_data <- merge(nov_data,groupdata,by=c("turtle.id","date"))
 nov_data <- nov_data %>% mutate(field=ifelse(field=="MA ","MA",as.character(field)))
 
@@ -125,6 +126,10 @@ nov_data_obs <- nov_data %>% group_by(turtle.id,date,observer,field,group) %>% s
 
 nov_data_obs <- nov_data_obs %>% arrange(turtle.id,date)
 
+observer_difference <- nov_data_obs %>% group_by(turtle.id,date) %>% summarize(difference=max(total.duration)-min(total.duration))
+
+mean(observer_difference$difference)#12 seconds
+
 nov_data <- nov_data_obs %>% group_by(turtle.id,date,field,group) %>% summarise(mean.duration=mean(total.duration))
 
 nov_data <- nov_data %>% arrange(turtle.id,date)
@@ -135,7 +140,7 @@ nov_data <- as.data.frame(nov_data)
 
 
 
-write.csv(nov_data_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/nonsense_data_obs_3-10-21.csv")
+write.csv(nov_data_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/nonsense_data_obs_final_5-3-21.csv")
 
 class(nov_data$field)
 
@@ -246,10 +251,10 @@ nov_plot<-ggplot(nov_data,aes(x=field,y=freq))+
   annotate("text",
            x = c(2.5),
            y = c(0.1),
-           label = c("p = 0.01"),
+           label = c("p = 0.001"),
            family = "Calibri", fontface = 3, size=5)
 nov_plot
 
-ggsave(nov_plot, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/nonsense_2019.png",  bg = "transparent")
+ggsave(nov_plot, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/nonsense_final_2019.png",  bg = "transparent")
 
 

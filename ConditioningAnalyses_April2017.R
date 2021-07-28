@@ -133,7 +133,7 @@ data_obs <- data %>% group_by(turtle.id,date,observer,field,field.type,group) %>
 
 observer_difference <- data_obs %>% group_by(turtle.id,date) %>% summarize(difference=max(total.duration)-min(total.duration))
 
-mean(observer_difference$difference)#6 seconds
+mean(observer_difference$difference)#9 seconds
 
 write.csv(data_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2017/apr2017_dataobs_3-6-21.csv")
 

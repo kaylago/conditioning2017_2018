@@ -119,7 +119,7 @@ nb <- data %>% filter(group.total=="maroon")
 
 
 
-attach(data_kg)
+attach(obx_kg)
 pairwise.wilcox.test(mean.duration,field,data=obx,paired=TRUE)
 detach()
 
