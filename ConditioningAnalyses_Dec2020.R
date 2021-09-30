@@ -98,14 +98,14 @@ data<- data %>% mutate(freq=mean.duration/1200)
 
 data_kg <- data_obs %>% filter(observer=="KG") %>% group_by(turtle.id,date,field,field.type,group,group.total) %>% summarise(mean.duration=mean(total.duration))
 
-pink <- data_kg %>% filter(group == "pink")
-grey <- data_kg %>% filter(group == "grey")
+pink <- data %>% filter(group == "pink")
+grey <- data %>% filter(group == "grey")
 
-attach(data_kg)
+#attach(data_kg)
 #pairwise.wilcox.test(freq,field.type,data=data)
 
-pairwise.wilcox.test(freq,field.type,data=data_kg,paired=TRUE)
-detach()
+#pairwise.wilcox.test(freq,field.type,data=data_kg,paired=TRUE)
+#detach()
 
 attach(pink)
 pairwise.wilcox.test(freq,field.type,data=pink,paired=TRUE)
@@ -141,8 +141,8 @@ annotation_df3 <- data.frame(field.type=rep(c("control","control")),
 
 
 plot<-ggplot(data,aes(x=field.type,y=freq))+
-  stat_summary(fun.y="mean",geom="bar",color="grey50",fill="grey50")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
+  stat_summary(fun="mean",geom="bar",color="grey50",fill="grey50")+
+  stat_summary(fun=mean,fun.min = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.max = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   geom_point(position=position_jitter(width=0.15))+
   theme_bw()+
@@ -172,7 +172,7 @@ plot<-ggplot(data,aes(x=field.type,y=freq))+
   annotate("text",
            x = c(1.5),
            y = c(0.19),
-           label = c("p = 0.003"),
+           label = c("p = 0.004"),
            family = "Calibri", fontface = 3, size=5)
 plot
 
