@@ -153,7 +153,7 @@ nov_data <- nov_data%>% mutate(treatment2=ifelse(field=="MA","conditioned",ifels
 class(nov_data$treatment)
 nov_data$treatment <- as.factor(as.character(nov_data$treatment))
 
-pairwise.wilcox.test(nov_data$freq,nov_data$treatment2,paired=TRUE)
+pairwise.wilcox.test(nov_data$freq,nov_data$treatment2,paired=TRUE,p.adjust.method = "none")
 
 nov_data_og <- nov_data %>% filter(field!="FLint/Minc") %>% filter(field!="FLinc/Mint")
 
@@ -189,9 +189,9 @@ nonsense2_alt <- nonsense2 %>% filter(field!="FL")
 
 wilcox.test(freq~treatment,nonsense2_alt,paired=TRUE)
 
-pairwise.wilcox.test(nonsense1$freq,nonsense1$treatment,paired=TRUE)
+pairwise.wilcox.test(nonsense1$freq,nonsense1$treatment,paired=TRUE,p.adjust.method = "none")
 
-pairwise.wilcox.test(nonsense2$freq,nonsense2$treatment,paired=TRUE)
+pairwise.wilcox.test(nonsense2$freq,nonsense2$treatment,paired=TRUE,p.adjust.method = "none")
 
 wilcox.test(freq~field,nov_data_og,paired=TRUE)
 

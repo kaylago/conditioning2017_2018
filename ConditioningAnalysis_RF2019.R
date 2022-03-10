@@ -131,8 +131,10 @@ observer_difference <- rf_data_obs %>% group_by(turtle.id,date) %>% summarize(di
 
 mean(observer_difference$difference)
 
-write.csv(rf_data_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/rf_data_observers_3-9-21.csv")
 
+#######
+#write.csv(rf_data_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/rf_data_observers_3-9-21.csv")
+################
 #write.csv(rf_data,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/rf_data_6-28.csv")
 
 #one_monthdata_alt <- one_monthdata %>% filter(id != "L190") #%>% filter(id != "L191")
@@ -147,7 +149,7 @@ t.test(freq~field,rf_data)
 
 nov_data <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2019/DataSheets/nov_data_observers_2-17-2021_updated.csv")
 
-nov_data_obs <- nov_data %>% select(-c(X))
+nov_data <- nov_data %>% select(-c(X))
 
 nov_data <- nov_data %>% group_by(turtle.id,date,field,group) %>% summarise(mean.duration=mean(total.duration))
 
@@ -155,7 +157,7 @@ nov_data <- nov_data %>% mutate(exper=rep("2mo"))
 
 nov_data <- nov_data %>% mutate(freq=mean.duration/1200)
 
-nov_data$date <- as.Date(nov_data$date,format= "%Y-%M-%d")
+nov_data$date <- as.Date(nov_data$date,format= "%m/%d/%Y")
 
 #nov_data <- nov_data %>% select(-c("X"))
 
@@ -185,8 +187,18 @@ wilcox.test(freq~exper,subset(alldata,field=="MA"),paired=TRUE)
 wilcox.test(freq~exper,subset(alldata,field=="MA"),paired=TRUE)
 t.test(freq~exper,subset(alldata,field=="MA"))
 
+alldata$field <- as.character(alldata$field)
+
+alldata <- alldata %>% mutate(field=ifelse(exper=="2mo"&field=="MA","MA1",ifelse(exper=="rf" & field=="MA","MA2",field)))
+
+alldata$field <- factor(alldata$field, levels=c("FL","MA1","MA2","MA/RF"),labels = c("FL","MA-1","MA-2","MA-RF"))
+
+
 wilcox.test(freq~field,nov_data,paired=TRUE)
 
+attach(alldata)
+pairwise.wilcox.test(freq,field,data=alldata,paired=TRUE,p.adjust.method = "BH")
+detach(alldata)
 
 library(ggplot2)
 library(ggpubr)
@@ -205,8 +217,8 @@ annotation_df2 <- data.frame(field.type=rep(c("MA","MA/RF")),y=c(0.08,0.08))
 annotation_df3 <- data.frame(field.type=rep(c("MA/RF","MA/RF")),y=c(0.08,0.076))
 
 rfplot<-ggplot(rf_data,aes(x=field,y=freq))+
-  stat_summary(fun.y= mean,geom="bar",color="grey",fill="grey")+
-  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)sqrt(length(x)),
+  stat_summary(fun.y= mean,geom="bar",color="black",fill=c("olivedrab","palegreen3"))+
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
   geom_point(position=position_jitter(width=0.1))+
@@ -215,7 +227,7 @@ rfplot<-ggplot(rf_data,aes(x=field,y=freq))+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
   scale_y_continuous("Proportion of Time",breaks = c(0,0.01,0.02,0.04,0.08,0.16),expand=c(0,0),limits=c(0,0.16))+
   #coord_cartesian(ylim=c(0,0.1))+
-  scale_x_discrete("Treatment")+
+  scale_x_discrete("Treatment",labels=c("MA"="Massachusetts","MA/RF"="Massachusetts-RF"))+
   #ggtitle("Radiofrequency") +
   theme(text=element_text(size=18,family="calibri"))+
   theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face="plain"))+
@@ -233,9 +245,12 @@ rfplot<-ggplot(rf_data,aes(x=field,y=freq))+
   annotate("text",
            x = c(1.5),
            y = c(0.09),
-           label = c("p = 0.99"),
+           label = c("p = 0.9"),
            family = "Calibri", fontface = 3, size=5)
 rfplot
+
+ggsave(rfplot, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/rf_ma_only_12-15-21.png",  bg = "transparent")
+
 
 annotation_df1 <- data.frame(field.type=rep(c("FL","FL")),
                              y=c(0.086,0.09))
@@ -249,7 +264,7 @@ annotation_df3 <- data.frame(field.type=rep(c("MA","MA")),
 
 
 nov_plot<-ggplot(nov_data,aes(x=field,y=freq))+
-  stat_summary(fun.y= mean,geom="bar",color="grey",fill="grey")+
+  stat_summary(fun.y= mean,geom="bar",color="black",fill=c("goldenrod","springgreen4"))+
   stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
@@ -259,7 +274,7 @@ nov_plot<-ggplot(nov_data,aes(x=field,y=freq))+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
   scale_y_continuous("Proportion of Time",breaks = c(0,0.01,0.02,0.04,0.08,0.16),expand=c(0,0),limits=c(0,0.16))+
   #coord_cartesian(ylim=c(0,0.1))+
-  scale_x_discrete("Treatment")+
+  scale_x_discrete("Treatment",labels=c("FL"="Florida \n(control)","MA"="Massachusetts \n(conditioned)"))+
   ggtitle("") +
   theme(text=element_text(size=22,family="calibri"))+
   theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face="plain"))+
@@ -277,22 +292,19 @@ nov_plot<-ggplot(nov_data,aes(x=field,y=freq))+
   annotate("text",
            x = c(1.5),
            y = c(0.1),
-           label = c("p = 0.0028"),
+           label = c("p = 0.002*"),
            family = "Calibri", fontface = 3, size=5)
 nov_plot
 
-alldata$field <- as.character(alldata$field)
+ggsave(nov_plot, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/novplot_2019_12-15-21.png",  bg = "transparent")
 
-alldata <- alldata %>% mutate(field=ifelse(exper=="2mo"&field=="MA","MA1",ifelse(exper=="rf" & field=="MA","MA2",field)))
-
-alldata$field <- factor(alldata$field, levels=c("FL","MA1","MA2","MA/RF"),labels = c("FL","MA-1","MA-2","MA-RF"))
 
 anno<- data.frame(field=c("FL","MA-1","MA-2","MA-RF"),
                              y=c(0.086,0.09,0.1,0))
 
 
 all_plot<-ggplot(alldata,aes(x=field,y=freq),group=exper)+
-  stat_summary(fun.y= mean,geom="bar",color="grey")+
+  stat_summary(fun.y= mean,geom="bar",color="black",fill=c("goldenrod","springgreen4","olivedrab","palegreen3"))+
   stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
@@ -302,7 +314,7 @@ all_plot<-ggplot(alldata,aes(x=field,y=freq),group=exper)+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
   scale_y_continuous("Proportion of Time",breaks = c(0,0.01,0.02,0.04,0.08,0.16),expand=c(0,0),limits=c(0,0.2))+
   #coord_cartesian(ylim=c(0,0.1))+
-  scale_x_discrete("Treatment")+
+  scale_x_discrete("Treatment",labels=c("FL"="Florida \n(control)","MA-1"="Massachusetts-1","MA-2"="Massachusetts-2","MA-RF"="Massachusetts-RF"))+
   ggtitle("") +
   theme(text=element_text(size=22,family="calibri"))+
   theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face="plain"))+
@@ -327,7 +339,7 @@ all_plot<-ggplot(alldata,aes(x=field,y=freq),group=exper)+
   annotate("text",
            x = c(1.5),
            y = c(0.09),
-           label = c("p = 0.0005*"),
+           label = c("p = 0.002*"),
            family = "Calibri", fontface = 3, size=5)+
   annotate("text",
          x = c(2.5),
@@ -337,8 +349,10 @@ all_plot<-ggplot(alldata,aes(x=field,y=freq),group=exper)+
   annotate("text",
            x = c(3.5),
            y = c(0.175),
-           label = c("p = 0.94"),
+           label = c("p = 0.9"),
            family = "Calibri", fontface = 3, size=5)
+
+
 all_plot
 
-ggsave(all_plot, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/rf_all_2019_new.png",  bg = "transparent")
+ggsave(all_plot, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/rf_all_2019_12-15-21.png",  bg = "transparent")

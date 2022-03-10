@@ -119,11 +119,14 @@ finaldata <- merge(data,groupdata,by=c("turtle.id","date"))
 
 finaldata <- finaldata %>% group_by(turtle.id,date,observer,field,group,field.type) %>% filter(minutes >= video.change) %>% filter(minutes <= end.trial)
 
+write.csv(finaldata,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Post-Hoc Analyses/data_all_byobs_2020Spr.csv")
+
 data_obs <- finaldata %>% group_by(turtle.id,date,observer,field,group,field.type) %>% summarise(total.duration=sum(duration))
 
 data_obs <- data_obs %>% arrange(turtle.id,date)
 
 write.csv(data_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2020_Spring/DataSheets/Spring2020_observerdata_2-17-2021_updated.csv")
+
 
 finaldata <- data_obs %>% group_by(turtle.id,date,field,group,field.type) %>% summarise(mean.duration=mean(total.duration))
 
@@ -138,6 +141,9 @@ mean(observer_difference$difference) #8.1
 wilcox.test(freq~field.type,data=finaldata,paired=TRUE)
 wilcox.test(freq~field.type,data=finaldata)
 
+attach(finaldata)
+pairwise.wilcox.test(freq,field.type,data=finaldata,paired=TRUE,p.adjust.method = "none")
+
 t.test(freq~field.type,data=finaldata)
 
 #finaldata2 <- finaldata %>% filter(turtle.id != "L188") %>% filter(turtle.id !="L197")
@@ -150,10 +156,11 @@ nb2 <- nb %>% filter (turtle.id != "L190") #%>% filter(turtle.id != "L188")
 
 #obx2 <- obx %>% filter(turtle.id != "L197")
 
-wilcox.test(freq~field.type,data=nb2,paired=TRUE)
+wilcox.test(freq~field.type,data=nb,paired=TRUE)
 
 wilcox.test(freq~field.type,data=obx,paired=TRUE)
 
+write.csv(finaldata,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2020_Spring/DataSheets/Spring2020_complete_finaldata_12-15-2021.csv")
 
 
 t.test(freq~field.type,data=nb)
@@ -222,7 +229,7 @@ jul_plot<-ggplot(finaldata,aes(x=field.type,y=freq))+
   )
 jul_plot
 
-ggsave(jul_plot, width = 5, height=7,units="in",filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2020_Spring/Figures/jul_plot.png",  bg = "transparent")
+ggsave(jul_plot, width = 5, height=7,units="in",filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/jul_plot_12-15-21.png",  bg = "transparent")
 
 
 obx_plot_20 <-ggplot(obx,aes(x=field.type,y=freq))+

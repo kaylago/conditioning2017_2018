@@ -120,9 +120,12 @@ nov_data <- nov_data %>% group_by(turtle.id,date,observer,field,group) %>% filte
 
 nov_data <- nov_data %>% mutate(end.trial=video.change+20) %>% filter(minutes <= end.trial)
 
+write.csv(nov_data,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Post-Hoc Analyses/data_all_byobs_2019.csv")
+
 nov_data_obs <- nov_data %>% group_by(turtle.id,date,observer,field,group) %>% summarise(total.duration=sum(duration))
 
 nov_data_obs <- nov_data_obs %>% arrange(turtle.id,date)
+
 
 nov_data <- nov_data_obs %>% group_by(turtle.id,date,field,group) %>% summarise(mean.duration=mean(total.duration))
 

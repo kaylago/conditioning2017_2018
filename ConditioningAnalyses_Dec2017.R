@@ -91,8 +91,14 @@ names(dec_data)<- c("start","observer","turtle.id","behavior","start_stop","date
 
 dec_data <- dec_data %>% select(-c("del1","del2","del3","del4","del5"))
 
-dec_data <- dec_data %>% mutate(duration=stop-start)
+detach(package:plyr)
+library(dplyr)
 
+
+dec_data$start <- as.numeric(dec_data$start)
+dec_data$stop <- as.numeric(dec_data$stop)
+
+dec_data <- dec_data %>% mutate(duration=stop-start)
 dec_data <- dec_data %>% mutate(minutes=start/60)
 
 
@@ -117,6 +123,8 @@ dec_data <- dec_data %>% arrange(turtle.id,date,observer,minutes)
 dec_data <- dec_data %>% mutate(trial.end=video.change+20)
 
 dec_data <- dec_data %>% filter(minutes>=video.change) %>% filter(minutes<=trial.end)
+
+dec_data_byobs <- dec_data %>% arrange(turtle.id,date,minutes,observer)
 
 dec_data_obs <- dec_data %>% group_by(turtle.id,date,observer,field,field.type)%>% summarize(total.dur=sum(duration))
 
@@ -200,6 +208,8 @@ data <- data %>% mutate(trial.end=video.change+20)
 
 data <- data %>% filter(minutes>=video.change) %>% filter(minutes<=trial.end)
 
+data_2_byobs <- data %>% arrange(turtle.id,date,minutes,observer)
+
 data <- data %>% group_by(turtle.id,date,observer,field,field.type)%>% summarize(total.dur=sum(duration))
 
 ######NEW DATA
@@ -270,11 +280,25 @@ data2 <- data2 %>% mutate(trial.end=video.change+20)
 
 data2 <- data2 %>% filter(minutes>=video.change) %>% filter(minutes<=trial.end)
 
+data_3_byobs <- data2 %>% arrange(turtle.id,date,minutes,observer)
+
 data2_obs <- data2 %>% group_by(turtle.id,date,observer,field,field.type)%>% summarize(total.dur=sum(duration))
 
 dec_data_obs <- rbind(dec_data_obs,data2_obs)
 
 dec_data_obs <- rbind(dec_data_obs,data)
+
+dec_data_byobs <- dec_data_byobs %>% select(turtle.id,date,observer,minutes,start,stop,duration,group,field,field.type,video.change)
+
+data_2_byobs <- data_2_byobs %>% select(turtle.id,date,observer,minutes,start,stop,duration,group,field,field.type,video.change)
+
+data_3_byobs <- data_3_byobs %>% select(turtle.id,date,observer,minutes,start,stop,duration,group,field,field.type,video.change)
+
+data_all_byobs <- rbind(dec_data_byobs,data_2_byobs)
+
+data_all_byobs<- rbind(data_all_byobs,data_3_byobs)
+
+write.csv(data_all_byobs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Post-Hoc Analyses/data_all_byobs_2017.csv")
 
 dec_data_obs <- dec_data_obs %>% arrange(turtle.id,date)
 

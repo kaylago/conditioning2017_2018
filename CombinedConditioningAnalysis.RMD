@@ -18,7 +18,18 @@ data2019<- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Compa
 
 data2020 <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/CompactObserverData_AllYears/2020sp_data_observers_2-17-2021_updated.csv")
 
+data2020_fa <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/CompactObserverData_AllYears/2020fall_data_observers_FINAL_12-2-21.csv")
+
+apr2017_data<-read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2017/apr2017_dataobs_final_3-6-21.csv",header=T)
+
 library(dplyr)
+apr2017_data <- apr2017_data %>% group_by(turtle.id,date,field,field.type,group) %>% summarise(mean.duration=mean(total.duration))
+
+apr2017_data <- apr2017_data %>% mutate(freq=mean.duration/1200)
+
+apr2017_data <- apr2017_data %>% mutate(year="2017_aprtest")
+
+
 
 data2020<- data2020 %>% mutate(group=ifelse(group=="orange","maroon",ifelse(group=="purple","maroon","teal")))
 
@@ -26,12 +37,14 @@ data2019 <- data2019 %>% mutate(field.type=ifelse(field=="MA","conditioned","con
 
 data2019 <- data2019 %>% mutate(group=rep("green"))
 
+data2020_fa <- data2020_fa %>% select(-c(group.total))
+
 columns17 <- c("x","turtle.id","date","observer","field","field.type","mean.duration","group")
 columns18 <- c("x","date","turtle.id","observer","group","field","field.type","mean.duration")
 columns19 <- c("x","turtle.id","date","observer","field","group","mean.duration","field.type")
 columns20 <- c("x","turtle.id","date","observer","field","group","field.type","mean.duration")
 
-
+columns20_2 <- c("x","turtle.id","date","observer","field","field.type","group","mean.duration")
 
 renameFunction<-function(x,columns){
   names(x) <- columns
@@ -42,16 +55,20 @@ data2017 <- renameFunction(data2017,columns17)
 data2018 <- renameFunction(data2018,columns18)
 data2019 <- renameFunction(data2019,columns19)
 data2020 <- renameFunction(data2020,columns20)
+data2020_fa <- renameFunction(data2020_fa,columns20_2)
 
-data2017 <- data2017 %>% mutate(year=rep(2017))
+data2017 <- data2017 %>% mutate(year=rep(2017)) 
 data2018 <- data2018 %>% mutate(year=rep(2018))
 data2019 <- data2019 %>% mutate(year=rep(2019))
-data2020 <- data2020 %>% mutate(year=rep(2020))
+data2020 <- data2020 %>% mutate(year=rep("2020_spr"))
+data2020_fa <- data2020_fa %>% mutate(year=rep("2020_fall"))
+
+
 
 data <- rbind(data2017,data2018)
 data <- rbind(data,data2019)
 data<- rbind(data,data2020)
-
+data <- rbind(data,data2020_fa)
 
 
 ```
@@ -59,7 +76,7 @@ data<- rbind(data,data2020)
 ```{r total observer difference}
 observer_difference <- data %>% group_by(turtle.id,date) %>% summarize(difference=max(mean.duration)-min(mean.duration))
 
-mean(observer_difference$difference)#12.9 for ALL years
+mean(observer_difference$difference)#14.9 for ALL years
 
 data<- data %>% group_by(turtle.id,date,field,field.type,group,year) %>% summarise(mean.duration=mean(mean.duration))
 
@@ -70,10 +87,12 @@ leveneTest(freq~field,data = data)
 leveneTest(freq~field, data=subset(data,year==2017))
 leveneTest(freq~field, data=subset(data,year==2018))
 leveneTest(freq~field, data=subset(data,year==2019))
-leveneTest(freq~field, data=subset(data,year==2020))
+leveneTest(freq~field, data=subset(data,year=="2020_spr"))
+leveneTest(freq~field,data=subset(data,year="2020_fall"))
 
-data <- data %>% mutate(geography=ifelse(group=="purple","southern",ifelse(group=="blue","southern",ifelse(group=="red","northern",ifelse(group=="maroon","northern",ifelse(group=="green","mid-north","mid"))))))
+data <- data %>% mutate(geography=ifelse(group=="purple","southern",ifelse(group=="blue","southern",ifelse(group=="red","northern",ifelse(group=="maroon","northern",ifelse(group=="green","mid-north",ifelse(group=="grey","southern",ifelse(group=="pink","southern","mid"))))))))
 
+                                                                          
 ```
 
 ```{r statistical tests and models, echo=TRUE}
@@ -89,9 +108,11 @@ wilcox.test(freq~field.type,subset(data,year==2017),paired=TRUE)#0.0002
 
 wilcox.test(freq~field.type,subset(data,year==2017))
 
-wilcox.test(freq~field.type,subset(data,year==2020),paired=TRUE)#0.002
+wilcox.test(freq~field.type,subset(data,year=="2020_spr"),paired=TRUE)#0.002
 
-wilcox.test(freq~field.type,subset(data,year==2020))
+wilcox.test(freq~field.type,subset(data,year=="2020_fall"),paired=TRUE) #p=0.003
+
+t.test(freq~field.type,subset(data,year=="2020_fall"))
 
 wilcox.test(freq~field.type,subset(data,group=="purple"),paired=TRUE)#.0078
 
@@ -115,9 +136,13 @@ wilcox.test(freq~field.type,subset(data,group=="green"),paired=TRUE)#.00057
 
 wilcox.test(freq~field.type,subset(data,group=="teal"),paired=TRUE)#0.015
 
-wilcox.test(freq~field.type,subset(data,group=="maroon"),paired=TRUE)#0.19 remove L190 and is sig
+wilcox.test(freq~field.type,subset(data,group=="maroon"),paired=TRUE)#0.15 remove L190 and is sig
 
-wilcox.test(freq~field.type,data,paired=TRUE)#1.58e-10
+wilcox.test(freq~field.type,subset(data,group=="grey"),paired=TRUE) #0.0078
+
+wilcox.test(freq~field.type,subset(data,group=="pink"),paired=TRUE)#0.156
+
+wilcox.test(freq~field.type,data,paired=TRUE)#5e-12
 
 wilcox.test(freq~field.type,subset(data,geography=="southern"),paired=TRUE)#3.052e-5
 
@@ -125,7 +150,9 @@ wilcox.test(freq~field.type,subset(data,geography=="northern"),paired=TRUE) #0.0
 
 wilcox.test(freq~field.type,subset(data,geography=="mid"),paired=TRUE)#0.00015
 
-wilcox.test(freq~field.type,subset(data,geography=="mid-north"),paired=TRUE)#0.0005
+wilcox.test(freq~field.type,subset(data,geography=="mid-north"),paired=TRUE)#0.0005\
+
+wilcox.test(freq~field.type,apr2017_data,paired=TRUE)
 
 t.test(freq~field.type,data)
 
@@ -157,15 +184,15 @@ detach()
 
 data_summarize <- data %>% group_by(group,year,field,field.type) %>% summarize(mean.duration=mean(mean.duration),mean.freq=mean(freq))
 
-write.csv(data_summarize,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/FinalData/Summarized_Data_AllYears.csv")
+write.csv(data,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/FinalData/Summarized_Data_AllYears_1-20-22.csv")
 
 
 library(nlme)
-lm1<- lm(prop~field*group+id,data=data)
+lm1<- lm(freq~field.type*turtle.id,data=data)
 summary(lm1)
 anova(lm1)
 
-lme1 <- lme(mean.time~field.type,random=~1|id/group/date,data=data)
+lme1 <- lme(freq~field.type,random=~1|id/group/date,data=data)
 summary(lme1)
 
 lme2 <- lme(mean.time~field.type,random=~1|id/group,data=data)
@@ -179,9 +206,77 @@ summary(lme3)
 
 anova(lme2,lme1,lme3)
 
+turtle.room <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/TurtleRoomMagField_ByTurtle.csv",header=T)
+
+turtle.room2 <- turtle.room %>% dplyr::select(-c(field))
+
+mag.fields<- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/MagFieldInformation_ExperimentalFields.csv")
+
+data2 <- data %>% filter(field.type=="conditioned")
+
+data2 <- merge(data2,turtle.room,by=c("turtle.id","year","field"))
+
+data2 <- data2 %>% mutate(inc.diff.acc=abs(FieldInc-AccInc)) %>% mutate(int.diff.acc=abs(FieldInt-AccInt))
+
+
+data3 <- merge(data,turtle.room2,by=c("turtle.id","year"))
+
+data3 <- merge(data3,mag.fields,by=c("field","year"))
+
+data3 <- data3 %>% mutate(inc.diff=Finc-TRInc) %>% mutate(int.diff=Fint-TRInt)
+
+data3 <- data3 %>% mutate(inc.diff.acc=Finc-AccInc) %>% mutate(int.diff.acc=Fint-AccInt)
+
+data3 <- data3 %>% arrange(turtle.id,year)
+
+data4 <- data3 %>% filter(field.type=="conditioned")
+
+data4 <- data4 %>% mutate(FieldInc=ifelse(FieldInc==0,Finc,FieldInc)) %>% mutate(FieldInt=ifelse(FieldInt==0,Fint,FieldInt))
+
+data4 <- data4 %>% mutate(inc.diff.acc=abs(FieldInc-AccInc)) %>% mutate(int.diff.acc=abs(FieldInt-AccInt))
+
+
+lme_a <- lme(freq~(inc.diff.acc),random=~1|turtle.id,data=subset(data2,field.type=="conditioned"))
+summary(lme_a)
+anova(lme_a)
+
+lme_a2 <- lme(freq~abs(inc.diff.acc),random=~1|turtle.id,data=subset(data4,field.type=="conditioned"))
+summary(lme_a2)
+anova(lme_a2)
+
+#random=~1|turtle.id
+
+lme_b <- lme(freq~(int.diff.acc),random=~1|turtle.id,data=subset(data2,field.type=="conditioned"))
+summary(lme_b)
+anova(lme_b)
+
+lme_b2 <- lme(freq~(int.diff.acc),random=~1|turtle.id,data=subset(data4,field.type=="conditioned"))
+summary(lme_b2)
+anova(lme_b2)
+
+lme_c <- lme(freq~(int.diff.acc)*(inc.diff.acc),random=~1|turtle.id,data=subset(data2,field.type=="conditioned"))
+summary(lme_c)
+anova(lme_c)
+
+library(dplyr)
+data4 <- data4 %>% mutate(field=ifelse(year=="2017" & field=="NB","NS",field))
+data4 <- data4 %>% mutate(field=ifelse(field=="Cuba","CB",
+                                       ifelse(field=="New England","LI",field)))
+
+data2_plot <- data2 %>% arrange(year,turtle.id,field.type)
+
+data2_plot$field <- factor(data2_plot$field,levels=c("MA","NB","OBX","HT","TC"),labels=c("Massachusetts","New Brunswick","North Carolina","Haiti","Turks & Caicos"))
+
+data4_plot <- data4 %>% arrange(year,turtle.id,field.type)
+
+data4_plot$field <- factor(data4_plot$field,levels=c("NS","BH","CB","LI","MA","NB","OBX","HT","TC"),labels=c("Nova Scotia","Bahamas","Cuba","New York","Massachusetts","New Brunswick","North Carolina","Haiti","Turks & Caicos"))
+
+data2$inc_pre <- predict(lme_a)
+
 ```
 
 ```{r ggplots, echo=TRUE}
+
 library(ggplot2)
 library(cowplot)
 library(grid)
@@ -189,6 +284,112 @@ library(gridExtra)
 library(ggpubr)
 library(extrafont)
 library(ggsignif)
+library(viridis)
+
+inc_plot<-ggplot(data2_plot,aes(x=(inc.diff.acc),y=freq,color=field))+
+  #coord_trans(y="sqrt")+
+  geom_point(size=6)+
+  scale_color_manual(values=c("darkseagreen4","lightgoldenrod3","coral2","pink3","maroon"))+
+  geom_smooth(method=lm,se=F,color="black")+
+  scale_y_continuous("Proportion of time",limits=c(0,0.45))+
+  scale_x_continuous("Absolute inclination difference (deg)")+
+  #scale_color_viridis(discrete = T,name="Field",option = "turbo")+
+  theme_bw()+
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"))+
+  theme(legend.position = "none")+
+  theme(axis.text = element_text(size=11,family = "Helvetica"),
+        axis.title = element_text(size=12,family = "Helvetica"),
+        legend.text = element_text(size=10,family="Helvetica"),
+        legend.title = element_text(size=12,family = "Helvetica"))
+inc_plot
+
+inc_plot2<-ggplot(subset(data4_plot,field.type=="conditioned"),aes(x=(inc.diff.acc),y=freq))+
+  #coord_trans(y="sqrt")+
+  geom_point(size=6,aes(color=field))+
+  scale_color_manual(values=c("plum4","plum4","turquoise3","turquoise3","darkseagreen4","darkseagreen4","coral2","coral2","pink2","pink2"))+
+  geom_smooth(method=lm,se=F,color="black")+
+  scale_y_continuous("Proportion of time",limits=c(0,0.45))+
+  scale_x_continuous("Absolute inclination difference (deg)")+
+  #scale_color_viridis(discrete = T,name="Field",option = "turbo")+
+  theme_bw()+
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"))+
+  theme(legend.position = "none")+
+  theme(axis.text = element_text(size=11,family = "Helvetica"),
+        axis.title = element_text(size=12,family = "Helvetica"),
+        legend.text = element_text(size=10,family="Helvetica"),
+        legend.title = element_text(size=12,family = "Helvetica"))
+inc_plot2
+
+
+
+
+int_plot<-ggplot(data2_plot,aes(x=(int.diff.acc),y=freq))+
+  geom_point(aes(color=field),size=6)+
+  scale_color_manual(values=c("darkseagreen4","lightgoldenrod3","coral2","pink3","maroon"))+
+  geom_smooth(method="lm",color="black",se=F)+
+  #coord_trans(y="sqrt")+
+  scale_y_continuous("Proportion of time",limits=c(0,0.45))+
+  scale_x_continuous("Absolute intensity difference (\u03BCT)")+
+  #scale_color_viridis(discrete = T,name="Field",option = "turbo")+
+  theme_bw()+
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"))+
+  theme(legend.position = "none")+
+  theme(axis.text = element_text(size=11,family = "Helvetica"),
+        axis.title = element_text(size=12,family = "Helvetica"),
+        legend.text = element_text(size=10,family="Helvetica"),
+        legend.title = element_text(size=12,family = "Helvetica"))
+int_plot
+
+int_plot2<-ggplot(subset(data4_plot,field.type=="conditioned"),aes(x=(int.diff.acc),y=freq))+
+  geom_point(aes(color=field),size=6)+
+  scale_color_manual(values=c("plum4","plum4","turquoise4","turquoise4","darkseagreen4","darkseagreen4","lightgoldenrod3","lightgoldenrod3","pink3","pink3"))+
+  geom_smooth(method="lm",color="black",se=F)+
+  #coord_trans(y="sqrt")+
+  scale_y_continuous("Proportion of time",limits=c(0,0.45))+
+  scale_x_continuous("Absolute intensity difference (\u03BCT)")+
+  #scale_color_viridis(discrete = T,name="Field",option = "turbo")+
+  theme_bw()+
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"))+
+  theme(legend.position = "none")+
+  theme(axis.text = element_text(size=11,family = "Helvetica"),
+        axis.title = element_text(size=12,family = "Helvetica"),
+        legend.text = element_text(size=10,family="Helvetica"),
+        legend.title = element_text(size=12,family = "Helvetica"))
+int_plot2
+
+comp_plot<-plot_grid(inc_plot,int_plot,rel_widths = c(1,1),rel_heights = c(1,1),ncol = 2,labels="AUTO",label_size = 9,label_fontfamily = "Helvetica")
+#comp_plot
+
+legend_c <- get_legend(inc_plot + theme(legend.position="right"))
+
+p <- plot_grid(comp_plot,legend_c,ncol=2,rel_widths = c(1.4,0.2))
+p
+ggsave(p, dpi=300, width = 8, height=5,units="in",filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/comp_plot_incint_only2019-2020_2-1-22.tiff",  bg = "transparent")
+
+
+comp_plot2<-plot_grid(inc_plot2,int_plot2,rel_widths = c(1,1),rel_heights = c(1,1),ncol = 2,labels="AUTO",label_size = 9,label_fontfamily = "Helvetica")
+#comp_plot
+
+legend_c2 <- get_legend(inc_plot2 + theme(legend.position="right"))
+
+p2 <- plot_grid(comp_plot2,legend_c2,ncol=2,rel_widths = c(1.4,0.2))
+p2
+
+ggsave(p2, dpi=300, width = 8, height=5,units="in",filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/comp_plot2_accdiff_allyears_2-1-22.tiff",  bg = "transparent")
+
+
 
 my_comparisons<- list(c("conditioned","control"))
 
@@ -201,9 +402,16 @@ annotation_df2 <- data.frame(field.type=rep(c("conditioned","control")),
 annotation_df3 <- data.frame(field.type=rep(c("control","control")),
                             y=c(0.47,0.45))
 
+data_plot <- data
 
-all_plot<-ggplot(data,aes(x=field.type,y=freq))+
-  stat_summary(fun.y= mean,geom="bar",color="grey",fill="grey")+
+data_plot$field.type <- factor(data_plot$field.type,levels=c("conditioned","control"), labels=c("magnetic field\nwith food","magnetic field\nwithout food"))
+
+apr2017_data_plot <- apr2017_data
+
+apr2017_data_plot$field.type <- factor(apr2017_data_plot$field.type,levels=c("conditioned","control"), labels=c("magnetic field\nwith food","magnetic field\nwithout food"))
+
+all_plot<-ggplot(data_plot,aes(x=field.type,y=freq))+
+  stat_summary(fun.y= mean,geom="bar",color="steelblue3",fill="steelblue3",alpha=0.7)+
   stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
@@ -211,28 +419,28 @@ all_plot<-ggplot(data,aes(x=field.type,y=freq))+
   theme_bw()+
   coord_trans(y="sqrt")+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
-  scale_y_continuous("Proportion of Time",breaks = c(0,0.01,0.05,0.15,0.3,0.5),expand=c(0,0),limits=c(0,0.55))+
+  scale_y_continuous("Proportion of time\nexhibiting turtle dance",breaks = c(0,0.01,0.05,0.15,0.3,0.5),expand=c(0,0),limits=c(0,0.55))+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
   ggtitle("") +
-  theme(text=element_text(size=18,family="calibri"))+
-  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face="plain"))+
+  theme(text=element_text(size=12,family="Helvetica"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Helvetica",size=12,face="plain"))+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
-  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Helvetica"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Helvetica"))+
   theme(panel.border = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), 
         axis.line = element_line(colour = "black"))+
   #theme(axis.title.x = element_blank(),axis.title.y=element_blank())+
-  geom_segment(aes(x="conditioned",xend="conditioned"),y=.45,yend=.47)+
-  geom_segment(aes(x="conditioned",xend="control"),y=0.47,yend=0.47)+
-  geom_segment(aes(x="control",xend="control"),y=.45,yend=.47)+
+  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwith food"),y=.45,yend=.47)+
+  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwithout food"),y=0.47,yend=0.47)+
+  geom_segment(aes(x="magnetic field\nwithout food",xend="magnetic field\nwithout food"),y=.45,yend=.47)+
   annotate("text",
            x = c(1.5),
-           y = c(0.49),
-           label = c("p = 1.52e-10"),
-           family = "Calibri", fontface = 3, size=5)+
+           y = c(0.52),
+           label = c("p = 5e-12"),
+           family = "Helvetica", fontface = 3, size=4)+
   theme(
     rect = element_rect(fill = "transparent") # all rectangles
   )+
@@ -244,7 +452,7 @@ all_plot<-ggplot(data,aes(x=field.type,y=freq))+
   )
 all_plot
 
-ggsave(all_plot, dpi=300, width = 5, height=7,units="in",filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/all_plot.png",  bg = "transparent")
+ggsave(all_plot, dpi=300, width = 5, height=5,units="in",filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/all_plot_2-1-22.tiff",  bg = "white")
 
 
 red <-ggplot(subset(data,group=="red"),aes(x=field.type,y=freq))+
@@ -276,7 +484,7 @@ red <-ggplot(subset(data,group=="red"),aes(x=field.type,y=freq))+
   geom_segment(aes(x="control",xend="control"),y=.2,yend=.22)+
   annotate("text",
            x = c(1.5),
-           y = c(0.25),
+           y = c(0.3),
            label = c("p = 0.03"),
            family = "Calibri", fontface = 3, size=5)
 red
@@ -466,8 +674,8 @@ teal
 
 ggsave(teal, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/obx_2020_plot.png",  bg = "transparent")
 
-pink <-ggplot(subset(data,group=="maroon"),aes(x=field.type,y=freq))+
-  stat_summary(fun.y= mean,geom="bar",color="lightpink3",fill="lightpink3")+
+maroon <-ggplot(subset(data,group=="maroon"),aes(x=field.type,y=freq))+
+  stat_summary(fun.y= mean,geom="bar",color="maroon",fill="maroon")+
   stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
@@ -498,19 +706,89 @@ pink <-ggplot(subset(data,group=="maroon"),aes(x=field.type,y=freq))+
            y = c(0.25),
            label = c("p = 0.1"),
            family = "Calibri", fontface = 3, size=5)
+maroon
+
+ggsave(maroon, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/newbruns_2020_plot.png",  bg = "transparent")
+
+pink <-ggplot(subset(data,group=="pink"),aes(x=field.type,y=freq))+
+  stat_summary(fun.y= mean,geom="bar",color="lightpink3",fill="lightpink3")+
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
+               geom="errorbar",color="black")+
+  #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
+  geom_point(position=position_jitter(width=0.15))+
+  theme_bw()+
+  coord_trans(y="sqrt")+
+  #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
+  scale_y_continuous("Proportion of Time",breaks=c(0,0.01,0.05,0.15,0.3,0.5),expand=c(0,0),limits=c(0,0.55))+
+  #coord_cartesian(ylim=c(0,0.1))+
+  scale_x_discrete("Treatment")+
+  ggtitle("") +
+  theme(text=element_text(size=18,family="calibri"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face="plain"))+
+  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"))+
+  theme(panel.border = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"))+
+  theme(axis.title.y = element_blank(),axis.title.x = element_blank())+
+  geom_segment(aes(x="conditioned",xend="conditioned"),y=.2,yend=.22)+
+  geom_segment(aes(x="conditioned",xend="control"),y=0.22,yend=0.22)+
+  geom_segment(aes(x="control",xend="control"),y=.2,yend=.22)+
+  annotate("text",
+           x = c(1.5),
+           y = c(0.25),
+           label = c("p = 0.16"),
+           family = "Calibri", fontface = 3, size=5)
 pink
 
-ggsave(pink, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/newbruns_2020_plot.png",  bg = "transparent")
+grey <-ggplot(subset(data,group=="grey"),aes(x=field.type,y=freq))+
+  stat_summary(fun.y= mean,geom="bar",color="grey56",fill="grey56")+
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
+               geom="errorbar",color="black")+
+  #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
+  geom_point(position=position_jitter(width=0.15))+
+  theme_bw()+
+  coord_trans(y="sqrt")+
+  #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
+  scale_y_continuous("Proportion of Time",breaks=c(0,0.01,0.05,0.15,0.3,0.5),expand=c(0,0),limits=c(0,0.55))+
+  #coord_cartesian(ylim=c(0,0.1))+
+  scale_x_discrete("Treatment")+
+  ggtitle("") +
+  theme(text=element_text(size=18,family="calibri"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face="plain"))+
+  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"))+
+  theme(panel.border = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"))+
+  theme(axis.title.y = element_blank(),axis.title.x = element_blank())+
+  geom_segment(aes(x="conditioned",xend="conditioned"),y=.2,yend=.22)+
+  geom_segment(aes(x="conditioned",xend="control"),y=0.22,yend=0.22)+
+  geom_segment(aes(x="control",xend="control"),y=.2,yend=.22)+
+  annotate("text",
+           x = c(1.5),
+           y = c(0.25),
+           label = c("p = 0.007"),
+           family = "Calibri", fontface = 3, size=5)
+grey
 
-
-figure6<-plot_grid(red,pur,org,blu,grn,teal,pink,rel_widths = c(1,1),rel_heights = c(1,1))+
+figure6<-plot_grid(red,pur,org,blu,grn,teal,maroon,pink,grey,rel_widths = c(1,1),rel_heights = c(1,1))+
   draw_label("A",fontfamily = "Calibri Light", x = 0.01, y = .983, hjust = -0.5, vjust = 1.5)+
   draw_label("B",fontfamily = "Calibri Light",x=0.345,y=.983,hjust=0.5,vjust=1.5)+
   draw_label("C",fontfamily = "Calibri Light",x=0.68,y=.983,hjust=0.5,vjust=1.5)+
   draw_label("D",fontfamily = "Calibri Light",x=0.01,y=0.65,hjust=-0.5,vjust=1.5)+
   draw_label("E",fontfamily = "Calibri Light",x=0.345,y=0.65,hjust=-0.5,vjust=1.5)+
   draw_label("F",fontfamily = "Calibri Light",x=0.68,y=0.65,hjust=-0.5,vjust=1.5)+
-  draw_label("G",fontfamily = "Calibri Light",x=0.01,y=0.32,hjust=-0.75,vjust=1.5)
+  draw_label("G",fontfamily = "Calibri Light",x=0.01,y=0.32,hjust=-0.75,vjust=1.5)+
+  draw_label("H",fontfamily = "Calibri Light",x=0.345,y=0.32,hjust=-0.75,vjust=1.5)+
+  draw_label("I",fontfamily = "Calibri Light",x=0.68,y=0.32,hjust=-0.75,vjust=1.5)
+
 
 figure6<-grid.arrange(arrangeGrob(figure6,
                          bottom = text_grob("Treatment", color = "black",face = "bold",
@@ -520,12 +798,12 @@ figure6<-grid.arrange(arrangeGrob(figure6,
              top = text_grob("",size=18),padding=unit(3,"line")))
 
 
-ggsave(figure6, dpi=300,width=15,height=15,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/joined_fig.png",  bg = "white")
+ggsave(figure6, dpi=300,width=15,height=15,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/joined_fig_10-3-21.png",  bg = "white")
 
 
 
-year17 <-ggplot(subset(data,year==2017),aes(x=field.type,y=freq))+
-  stat_summary(fun.y= mean,geom="bar",color="plum4",fill="plum4")+
+year17 <-ggplot(subset(data_plot,year==2017),aes(x=field.type,y=freq))+
+  stat_summary(fun.y= mean,geom="bar",color="plum4",fill="plum4",alpha=0.8)+
   stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
@@ -533,35 +811,39 @@ year17 <-ggplot(subset(data,year==2017),aes(x=field.type,y=freq))+
   theme_bw()+
   coord_trans(y="sqrt")+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
-  scale_y_continuous("Proportion of Time",breaks=c(0,0.01,0.05,0.15,0.3,0.5),expand=c(0,0),limits=c(0,0.55))+
+  scale_y_continuous("Proportion of Time",breaks=c(0,0.05,0.25,0.5),expand=c(0,0),limits=c(0,0.5))+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
   ggtitle("") +
-  theme(text=element_text(size=18,family="calibri"))+
-  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face="plain"))+
+  theme(text=element_text(size=12,family="Helvetica"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Helvetica",size=12,face="plain"))+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
-  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Helvetica"),
+        axis.text = element_text(size=12,family="Helvetica"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Helvetica",angle=0),
+        axis.text.x = element_text(angle=0,vjust = -.5,size=12,family="Helvetica"))+
   theme(panel.border = element_blank(), 
         axis.line = element_line(colour = "black"),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.background = element_rect(fill = "transparent"))+
   theme(axis.title.y = element_blank(),axis.title.x = element_blank())+
-  geom_segment(aes(x="conditioned",xend="conditioned"),y=.2,yend=.22)+
-  geom_segment(aes(x="conditioned",xend="control"),y=0.22,yend=0.22)+
-  geom_segment(aes(x="control",xend="control"),y=.2,yend=.22)+
+  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwith food"),y=.22,yend=.25)+
+  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwithout food"),y=0.25,yend=0.25)+
+  geom_segment(aes(x="magnetic field\nwithout food",xend="magnetic field\nwithout food"),y=.22,yend=.25)+
   annotate("text",
            x = c(1.5),
-           y = c(0.25),
+           y = c(0.3),
            label = c("p = 0.0002"),
-           family = "Calibri", fontface = 3, size=5)
+           family = "Helvetica", fontface = 3, size=3.5)+
+  ggtitle("Nova Scotia vs Bahamas\nOriginal")+
+  theme(plot.margin = unit(c(1,1,1,1), "lines"))
 year17
 
-ggsave(year17, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/2017_plot.png",  bg = "transparent")
 
-year18 <-ggplot(subset(data,year==2018),aes(x=field.type,y=freq))+
-  stat_summary(fun.y= mean,geom="bar",color="cadetblue4",fill="cadetblue4")+
+
+year17apr <-ggplot(apr2017_data_plot,aes(x=field.type,y=freq))+
+  stat_summary(fun.y= mean,geom="bar",color="plum3",fill="plum3",alpha=0.8)+
   stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
@@ -569,35 +851,95 @@ year18 <-ggplot(subset(data,year==2018),aes(x=field.type,y=freq))+
   theme_bw()+
   coord_trans(y="sqrt")+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
-  scale_y_continuous("Proportion of Time",breaks=c(0,0.01,0.05,0.15,0.3,0.5),expand=c(0,0),limits=c(0,0.55))+
+  scale_y_continuous("Proportion of Time",breaks=c(0,0.05,0.25,0.5),expand=c(0,0),limits=c(0,0.5))+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
   ggtitle("") +
-  theme(text=element_text(size=18,family="calibri"))+
-  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face="plain"))+
+  theme(text=element_text(size=12,family="Helvetica"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Helvetica",size=12,face="plain"))+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
-  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Helvetica"),
+        axis.text = element_text(size=12,family="Helvetica"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Helvetica",angle=0),
+        axis.text.x = element_text(angle=0,vjust = -.5,size=12,family="Helvetica"))+
   theme(panel.border = element_blank(), 
         axis.line = element_line(colour = "black"),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.background = element_rect(fill = "transparent"))+
   theme(axis.title.y = element_blank(),axis.title.x = element_blank())+
-  geom_segment(aes(x="conditioned",xend="conditioned"),y=.2,yend=.22)+
-  geom_segment(aes(x="conditioned",xend="control"),y=0.22,yend=0.22)+
-  geom_segment(aes(x="control",xend="control"),y=.2,yend=.22)+
+  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwith food"),y=.22,yend=.25)+
+  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwithout food"),y=0.25,yend=0.25)+
+  geom_segment(aes(x="magnetic field\nwithout food",xend="magnetic field\nwithout food"),y=.22,yend=.25)+
   annotate("text",
            x = c(1.5),
-           y = c(0.25),
-           label = c("p = 6.1e-5"),
-           family = "Calibri", fontface = 3, size=5)
+           y = c(0.3),
+           label = c("p = 0.01"),
+           family = "Helvetica", fontface = 3, size=3.5)+
+  ggtitle("Nova Scotia vs Bahamas\n4 months")+
+  theme(plot.margin = unit(c(1,1,1,1), "lines"))
+year17apr
+
+figure17<-plot_grid(year17,year17apr,rel_widths = c(1,1),rel_heights = c(1,1),ncol=2,labels="AUTO",label_size = 9,label_fontfamily = "Helvetica")
+  
+#draw_label("A",fontfamily ="Helvetica",fontface="bold",size=9,x = 0.01,y = .983,hjust = 0.5, vjust = 1.5)+
+ # draw_label("B",fontfamily = "Helvetica",fontface="bold",size=9,x=0.54,y=.983,hjust=0.5,vjust=1.5)
+  
+
+
+figure17<-grid.arrange(arrangeGrob(figure17,
+                                     bottom = text_grob("Treatment", color = "black",
+                                                        hjust = 0.5, size = 12,family="Helvetica"),
+                                     left = text_grob("Proportion of time\nexhibiting turlte dance", color = "black",
+                                                      rot=90,size=12,family="Helvetica"),
+                                     top = text_grob("",size=12),padding=unit(2,"line")))
+
+figure17
+
+ggsave(figure17, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/2017_all_plot_2-1-22.tiff",  bg = "transparent")
+
+year18 <-ggplot(subset(data_plot,year==2018),aes(x=field.type,y=freq))+
+  stat_summary(fun.y= mean,geom="bar",color="turquoise4",fill="turquoise4",alpha=0.8)+
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
+               geom="errorbar",color="black")+
+  #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
+  geom_point(position=position_jitter(width=0.15))+
+  theme_bw()+
+  coord_trans(y="sqrt")+
+  #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
+  scale_y_continuous("Proportion of Time",breaks=c(0,0.05,0.25,0.5),expand=c(0,0),limits=c(0,0.5))+
+  #coord_cartesian(ylim=c(0,0.1))+
+  scale_x_discrete("Treatment")+
+  ggtitle("") +
+  theme(text=element_text(size=12,family="Helvetica"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Helvetica",size=12,face="plain"))+
+  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Helvetica"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Helvetica"),
+        axis.text.x = element_text(angle=0,vjust = -.5,size = 12,family="Helvetica"),
+        axis.text = element_text(size=12,family="Helvetica"))+
+  theme(panel.border = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"))+
+  theme(axis.title.y = element_blank(),axis.title.x = element_blank())+
+  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwith food"),y=.22,yend=.25)+
+  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwithout food"),y=0.25,yend=0.25)+
+  geom_segment(aes(x="magnetic field\nwithout food",xend="magnetic field\nwithout food"),y=.22,yend=.25)+
+  annotate("text",
+           x = c(1.5),
+           y = c(0.3),
+           label = c("p = 6e-5"),
+           family = "Helvetica", fontface = 3, size=3.5)+
+  ggtitle("Cuba vs New York")+
+  theme(plot.margin = unit(c(2,2,2,2), "lines"))
 year18
 
 ggsave(year18, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/2018_plot.png",  bg = "transparent")
 
-year19 <-ggplot(subset(data,year==2019),aes(x=field.type,y=freq))+
-  stat_summary(fun.y= mean,geom="bar",color="darkseagreen3",fill="darkseagreen3")+
+year19 <-ggplot(subset(data_plot,year==2019),aes(x=field.type,y=freq))+
+  stat_summary(fun.y= mean,geom="bar",color="darkseagreen4",fill="darkseagreen4",alpha=0.8)+
   stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
@@ -605,35 +947,39 @@ year19 <-ggplot(subset(data,year==2019),aes(x=field.type,y=freq))+
   theme_bw()+
   coord_trans(y="sqrt")+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
-  scale_y_continuous("Proportion of Time",breaks=c(0,0.01,0.05,0.15,0.3,0.5),expand=c(0,0),limits=c(0,0.55))+
+  scale_y_continuous("Proportion of Time",breaks=c(0,0.05,0.25,0.5),expand=c(0,0),limits=c(0,0.5))+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
   ggtitle("") +
-  theme(text=element_text(size=18,family="calibri"))+
-  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face="plain"))+
+  theme(text=element_text(size=12,family="Helvetica"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Helvetica",size=12,face="plain"))+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
-  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Helvetica"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Helvetica",angle=0),
+        axis.text.x = element_text(angle=0,vjust = -.5),
+        axis.text = element_text(size=12,family="Helvetica"))+
   theme(panel.border = element_blank(), 
         axis.line = element_line(colour = "black"),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.background = element_rect(fill = "transparent"))+
   theme(axis.title.y = element_blank(),axis.title.x = element_blank())+
-  geom_segment(aes(x="conditioned",xend="conditioned"),y=.2,yend=.22)+
-  geom_segment(aes(x="conditioned",xend="control"),y=0.22,yend=0.22)+
-  geom_segment(aes(x="control",xend="control"),y=.2,yend=.22)+
+  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwith food"),y=.22,yend=.25)+
+  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwithout food"),y=0.25,yend=0.25)+
+  geom_segment(aes(x="magnetic field\nwithout food",xend="magnetic field\nwithout food"),y=.22,yend=.25)+
   annotate("text",
            x = c(1.5),
-           y = c(0.25),
-           label = c("p = 0.0005"),
-           family = "Calibri", fontface = 3, size=5)
+           y = c(0.3),
+           label = c("p = 0.0006"),
+           family = "Helvetica", fontface = 3, size=3.5)+
+  ggtitle("Massachusetts vs Florida")+
+  theme(plot.margin = unit(c(2,2,2,2), "lines"))
 year19
 
 ggsave(year19, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/2019_plot.png",  bg = "transparent")
 
-year20 <-ggplot(subset(data,year==2020),aes(x=field.type,y=freq))+
-  stat_summary(fun.y= mean,geom="bar",color="salmon2",fill="salmon2")+
+year20 <-ggplot(subset(data_plot,year=="2020_spr"),aes(x=field.type,y=freq))+
+  stat_summary(fun.y= mean,geom="bar",color="lightgoldenrod3",fill="lightgoldenrod3",alpha=0.8)+
   stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
@@ -641,52 +987,106 @@ year20 <-ggplot(subset(data,year==2020),aes(x=field.type,y=freq))+
   theme_bw()+
   coord_trans(y="sqrt")+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
-  scale_y_continuous("Proportion of Time",breaks=c(0,0.01,0.05,0.15,0.3,0.5),expand=c(0,0),limits=c(0,0.55))+
+  scale_y_continuous("Proportion of Time",breaks=c(0,0.05,0.25,0.5),expand=c(0,0),limits=c(0,0.5))+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
   ggtitle("") +
-  theme(text=element_text(size=18,family="calibri"))+
-  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face="plain"))+
+  theme(text=element_text(size=12,family="Helvetica"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Helvetica",size=12,face="plain"))+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
-  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Helvetica"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Helvetica",angle=0),
+        axis.text.x = element_text(angle=0,vjust = -.5),
+        axis.text = element_text(size=12,family="Helvetica"))+
   theme(panel.border = element_blank(), 
         axis.line = element_line(colour = "black"),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.background = element_rect(fill = "transparent"))+
   theme(axis.title.y = element_blank(),axis.title.x = element_blank())+
-  geom_segment(aes(x="conditioned",xend="conditioned"),y=.2,yend=.22)+
-  geom_segment(aes(x="conditioned",xend="control"),y=0.22,yend=0.22)+
-  geom_segment(aes(x="control",xend="control"),y=.2,yend=.22)+
+ geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwith food"),y=.22,yend=.25)+
+  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwithout food"),y=0.25,yend=0.25)+
+  geom_segment(aes(x="magnetic field\nwithout food",xend="magnetic field\nwithout food"),y=.22,yend=.25)+
   annotate("text",
            x = c(1.5),
-           y = c(0.25),
+           y = c(0.3),
            label = c("p = 0.002"),
-           family = "Calibri", fontface = 3, size=5)
+           family = "Helvetica", fontface = 3, size=3.5)+
+  ggtitle("North Carolina vs New Brunswick")+
+  theme(plot.margin = unit(c(2,2,2,2), "lines"))
 year20
 
 ggsave(year20, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/2020_plot.png",  bg = "transparent")
 
+year20_fa <-ggplot(subset(data_plot,year=="2020_fall"),aes(x=field.type,y=freq))+
+  stat_summary(fun.y= mean,geom="bar",color="lightpink3",fill="lightpink3",alpha=0.8)+
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
+               geom="errorbar",color="black")+
+  #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
+  geom_point(position=position_jitter(width=0.15))+
+  theme_bw()+
+  coord_trans(y="sqrt")+
+  #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
+  scale_y_continuous("Proportion of Time",breaks=c(0,0.05,0.25,0.5),expand=c(0,0),limits=c(0,0.5))+
+  #coord_cartesian(ylim=c(0,0.1))+
+  scale_x_discrete("Treatment") +
+  theme(text=element_text(size=12,family="Helvetica"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Helvetica",size=12,face="plain"))+
+  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Helvetica"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Helvetica",angle = 0),
+        axis.text.x = element_text(angle=0,vjust = -.5),
+        axis.text = element_text(size=12,family="Helvetica"))+
+  theme(panel.border = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"))+
+  theme(axis.title.y = element_blank(),axis.title.x = element_blank())+
+ geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwith food"),y=.22,yend=.25)+
+  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwithout food"),y=0.25,yend=0.25)+
+  geom_segment(aes(x="magnetic field\nwithout food",xend="magnetic field\nwithout food"),y=.22,yend=.25)+
+  annotate("text",
+           x = c(1.5),
+           y = c(0.3),
+           label = c("p = 0.003"),
+           family = "Helvetica", fontface = 3, size=3.5)+
+  ggtitle("Turks & Caicos vs Haiti")+
+  theme(plot.margin = unit(c(2,2,2,2), "lines"))
+year20_fa
 
-figureyear<-plot_grid(year17,year18,year19,year20,rel_widths = c(1,1),rel_heights = c(1,1))+
-  draw_label("A",fontfamily ="Calibri Light",size=18,x = 0.01,y = .983,hjust = -0.5, vjust = 1.5)+
-  draw_label("B",fontfamily = "Calibri Light",size=18,x=0.51,y=.983,hjust=0.5,vjust=1.5)+
-  draw_label("C",fontfamily = "Calibri Light",size=18,x=0.01,y=.49,hjust=0.5,vjust=1.5)+
-  draw_label("D",fontfamily = "Calibri Light",size=18,x=0.51,y=0.49,hjust=-0.5,vjust=1.5)
+figureyear2<-plot_grid(year18,year19,year20,year20_fa,rel_widths = c(1,1),rel_heights = c(1,1),ncol = 2,labels="AUTO",label_size = 9,label_fontfamily = "Helvetica")
+figureyear2
+
+ # draw_label("A",fontfamily ="Helvetica",fontface="bold",size=9,x = 0.01,y = .983,hjust = 0.5, vjust = 1.5)+
+  #draw_label("B",fontfamily = "Helvetica",fontface="bold",size=9,x=0.34,y=.983,hjust=0.5,vjust=1.5)+
+  #draw_label("C",fontfamily = "Helvetica",fontface="bold",size=9,x=0.01,y=.49,hjust=-0.5,vjust=1.5)+
+  #draw_label("D",fontfamily = "Helvetica",fontface="bold",size=9,x=0.34,y=0.49,hjust=-0.5,vjust=1.5)+
+#draw_label("E",fontfamily = "Helvetica",fontface="bold",size=9,x=0.01,y=0.245,hjust=-1,vjust=1.5)
   
+#layout <- rbind(c(1,1),
+               # c(2, 2),
+                #c(3,NA))
 
-figureyear<-grid.arrange(arrangeGrob(figureyear,
-                         bottom = text_grob("Treatment", color = "black",face = "bold",
-                                            hjust = 0.5, size = 18,family="Calibri"),
-                         left = text_grob("Proportion of Time", color = "black",face="bold",
-                                          rot=90,size=18,family="Calibri"),
-             top = text_grob("",size=18),padding=unit(3,"line")))
+#figurec<-grid.arrange(arrangeGrob(year17,year18,year19,year20,year20_fa,nrow=3,ncol = 2)) 
+#figurec
+
+figureyear<-grid.arrange(arrangeGrob(figureyear2,
+                         bottom = text_grob("Treatment", color = "black",
+                                            hjust = 0.5, size = 12,family="Helvetica"),
+                         left = text_grob("Proportion of time exhibiting turtle dance", color = "black",
+                                          rot=90,size=12,family="Helvetica"),
+             top = text_grob("",size=12),padding=unit(2,"line")))
+
+figureyear
 
 
-ggsave(figureyear, dpi=300,width=15,height=15,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/joined_year_fig.png",  bg = "white")
+ggsave(figureyear, dpi=300,width=8,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/joined_year_fig_2-1-22.tiff",  bg = "white")
 
 
+allfigure <- plot_grid(all_plot,figureyear,ncol=2)
+
+allfigure
 #wilcox.test(freq~field.type,subset(data,geography=="southern"),paired=TRUE)#3.052e-5
 
 #wilcox.test(freq~field.type,subset(data,geography=="northern"),paired=TRUE) #0.009
@@ -872,23 +1272,23 @@ library(dplyr)
 library(tidyr)
 #turtgroup <- data %>% select(c(turtle.id,field.type,field))
 
-data <- merge(data,turtleroom,by=c("turtle.id","year"))
+data2 <- merge(data,turtleroom,by=c("turtle.id","year"))
 
-data <- merge(data,experfields,by=c("group","year"))
+data2 <- merge(data2,experfields,by=c("group","year"))
 
-data <- data %>% mutate(int.diff=abs(int-tr.int)) %>% mutate(inc.diff = abs(inc-tr.inc))
+data2 <- data2 %>% mutate(int.diff=abs(int-tr.int)) %>% mutate(inc.diff = abs(inc-tr.inc))
 
-data <- data %>% mutate(acc.inc=rep(60.2),acc.int=rep(48))
+data2 <- data2 %>% mutate(acc.inc=rep(60.2),acc.int=rep(48))
 
-data <- data %>% mutate(accint.diff=abs(int-acc.int)) %>% mutate(accinc.diff = abs(inc-acc.inc))
+data2 <- data2 %>% mutate(accint.diff=abs(int-acc.int)) %>% mutate(accinc.diff = abs(inc-acc.inc))
 
 
 
-lm_int <- lm(freq~int.diff,data = data)
+lm_int <- lm(freq~int.diff,data = data2)
 summary(lm_int)
 anova(lm_int)
 
-lm_inc <- lm(freq~inc.diff,data = data)
+lm_inc <- lm(freq~inc.diff*int.diff,data = data2)
 summary(lm_inc)
 anova(lm_inc)
 

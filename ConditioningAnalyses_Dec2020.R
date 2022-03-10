@@ -86,6 +86,8 @@ data <- merge(data,groupdata,by=c("turtle.id","date"))
 
 data <- data %>% group_by(turtle.id,date,observer,field,field.type,group) %>% filter(minutes >= video.change) %>% filter(minutes <= end.trial)
 
+write.csv(data,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Post-Hoc Analyses/data_all_byobs_2020Fall.csv")
+
 data_obs <- data %>% group_by(turtle.id,date,observer,field,field.type,group) %>% summarise(total.duration=sum(duration))
 
 data_obs<- data_obs %>% mutate(group.total=ifelse(group=="teal" |group=="grey","teal","maroon"))
@@ -112,13 +114,15 @@ pairwise.wilcox.test(freq,field.type,data=pink,paired=TRUE)
 detach()
 
 attach(data)
-pairwise.wilcox.test(freq,field.type,data=data,paired=TRUE)
+pairwise.wilcox.test(freq,field.type,data=data,paired=TRUE,p.adjust.method = "none")
 detach()
 
 
 attach(grey)
 pairwise.wilcox.test(freq,field.type,data=grey,paired=TRUE)
 detach()
+
+write.csv(data_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/CompactObserverData_AllYears/2020fall_data_observers.csv")
 
 library(ggplot2)
 library(ggpubr)
@@ -141,23 +145,24 @@ annotation_df3 <- data.frame(field.type=rep(c("control","control")),
 
 
 plot<-ggplot(data,aes(x=field.type,y=freq))+
-  stat_summary(fun="mean",geom="bar",color="grey50",fill="grey50")+
+  stat_summary(fun="mean",geom="bar",color="cornflowerblue",fill="cornflowerblue")+
   stat_summary(fun=mean,fun.min = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.max = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
-  geom_point(position=position_jitter(width=0.15))+
+  geom_point(position=position_jitter(width=0.15),size=3)+
   theme_bw()+
   coord_trans(y="sqrt")+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
-  scale_y_continuous("Proportion of Time",breaks = c(0,0.01,0.02,0.04,0.08,0.16),expand=c(0,0),limits=c(0,0.5))+
+  scale_y_continuous("Proportion of Time \nExhibiting Food Seeking Behavior",breaks = c(0,0.01,0.02,0.04,0.08,0.16),expand=c(0,0),limits=c(0,0.5))+
   #coord_cartesian(ylim=c(0,0.1))+
-  scale_x_discrete("Treatment")+
+  scale_x_discrete("Magnetic Field Treatment")+
   #labs(title="Canada Group") +
   theme(text=element_text(size=18,family="calibri"))+
   theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face = "plain"))+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
         axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"),
-        axis.text.x = element_text(angle=45,hjust = 1))+
+        axis.text.x = element_text(angle=45,hjust = 1,size=16),
+        axis.text.y = element_text(size=16))+
   theme(panel.border = element_blank(), 
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), 
@@ -165,15 +170,101 @@ plot<-ggplot(data,aes(x=field.type,y=freq))+
         panel.background = element_rect(fill = "transparent"))+
   theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())+
-  theme(axis.title.x = element_blank(),axis.title.y=element_blank())+
+  #theme(axis.title.x = element_text("Magnetic Field Treatment"),axis.title.y=element_text())+
+  #labs(y="Proportion of Time \nExhibiting Food Seeking Behavior")+
   geom_line(data=annotation_df1,aes(x=field.type,y=y))+
   geom_segment(data=annotation_df2,aes(x="conditioned",xend="control",y=0.17,yend=0.17))+
   geom_line(data=annotation_df3,aes(x=field.type,y=y))+
   annotate("text",
            x = c(1.5),
            y = c(0.19),
-           label = c("p = 0.004"),
+           label = c("p = 0.003"),
            family = "Calibri", fontface = 3, size=5)
 plot
 
-ggsave(plot, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/fall2020_plot.png",  bg = "white")
+ggsave(plot, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/fall2020_plot_forMeara.png",  bg = "white")
+
+
+
+
+greyplot<-ggplot(grey,aes(x=field.type,y=freq))+
+  stat_summary(fun="mean",geom="bar",color="green",fill="green")+
+  stat_summary(fun=mean,fun.min = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.max = function(x) mean(x) + sd(x)/sqrt(length(x)),
+               geom="errorbar",color="black")+
+  geom_point(position=position_jitter(width=0.15),size=3)+
+  theme_bw()+
+  coord_trans(y="sqrt")+
+  #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
+  scale_y_continuous("Proportion of Time \nExhibiting Food Seeking Behavior",breaks = c(0,0.01,0.02,0.04,0.08,0.16),expand=c(0,0),limits=c(0,0.5))+
+  #coord_cartesian(ylim=c(0,0.1))+
+  scale_x_discrete("Magnetic Field Treatment")+
+  #labs(title="Canada Group") +
+  theme(text=element_text(size=18,family="calibri"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face = "plain"))+
+  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"),
+        axis.text.x = element_text(angle=45,hjust = 1,size=14),
+        axis.text.y = element_text(size=14))+
+  theme(panel.border = element_blank(), 
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        panel.background = element_rect(fill = "transparent"))+
+  theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())+
+  #theme(axis.title.x = element_blank(),axis.title.y=element_blank())+
+  geom_line(data=annotation_df1,aes(x=field.type,y=y))+
+  geom_segment(data=annotation_df2,aes(x="conditioned",xend="control",y=0.17,yend=0.17))+
+  geom_line(data=annotation_df3,aes(x=field.type,y=y))+
+  annotate("text",
+           x = c(1.5),
+           y = c(0.19),
+           label = c("p = 0.007"),
+           family = "Calibri", fontface = 3, size=5)
+greyplot
+
+ggsave(greyplot, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/fall2020_greygroupplot_forMeara.png",  bg = "white")
+
+
+
+pinkplot<-ggplot(pink,aes(x=field.type,y=freq))+
+  stat_summary(fun="mean",geom="bar",color="pink",fill="pink")+
+  stat_summary(fun=mean,fun.min = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.max = function(x) mean(x) + sd(x)/sqrt(length(x)),
+               geom="errorbar",color="black")+
+  geom_point(position=position_jitter(width=0.15),size=3)+
+  theme_bw()+
+  coord_trans(y="sqrt")+
+  #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
+  scale_y_continuous("Proportion of Time \nExhibiting Food Seeking Behavior",breaks = c(0,0.01,0.02,0.04,0.08,0.16),expand=c(0,0),limits=c(0,0.5))+
+  #coord_cartesian(ylim=c(0,0.1))+
+  scale_x_discrete("Magnetic Field Treatment")+
+  #labs(title="Canada Group") +
+  theme(text=element_text(size=18,family="calibri"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face = "plain"))+
+  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"),
+        axis.text.x = element_text(angle=45,hjust = 1,size=14),
+        axis.text.y = element_text(size=14))+
+  theme(panel.border = element_blank(), 
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        panel.background = element_rect(fill = "transparent"))+
+  theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())+
+  #theme(axis.title.x = element_blank(),axis.title.y=element_blank())+
+  geom_line(data=annotation_df1,aes(x=field.type,y=y))+
+  geom_segment(data=annotation_df2,aes(x="conditioned",xend="control",y=0.17,yend=0.17))+
+  geom_line(data=annotation_df3,aes(x=field.type,y=y))+
+  annotate("text",
+           x = c(1.5),
+           y = c(0.19),
+           label = c("p = 0.16"),
+           family = "Calibri", fontface = 3, size=5)
+pinkplot
+
+ggsave(pinkplot, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/fall2020_pinkgroupplot_forMeara.png",  bg = "white")
+
+

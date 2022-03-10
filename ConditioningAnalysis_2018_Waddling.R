@@ -102,6 +102,9 @@ dfs_test<-dfs_behaviors %>% filter(minutes>=field.change)
 
 dfs_test<-dfs_test %>% filter(minutes <= (field.change+20))
 
+data_1_byobs <- dfs_test
+
+
 dfs_acclim_summary <- dfs_acclimation %>% group_by(date,id,observer.file,group,field,field.type) %>% summarise(total.time.el=sum(time.el))
 dfs_test_summary <- dfs_test %>% group_by(date,id,observer.file,group,field,field.type) %>% summarise(total.time.el=sum(time.el))
 
@@ -190,6 +193,7 @@ data2 <- data2 %>% mutate(trial.end=video.change+20)
 
 data2 <- data2 %>% filter(minutes>=video.change) %>% filter(minutes<=trial.end)
 
+data_2_byobs <- data2
 #data2 <- unique(data2)
 
 data2_obs <- data2 %>% group_by(date,turtle.id,observer,group,field,field.type)%>% summarise(mean.duration=sum(duration))
@@ -214,6 +218,17 @@ nov18_observers <- as.data.frame(nov18_observers)
 
 nov18_observers<- rbind(nov18_observers,data2_obs)
 
+#####
+
+names(data_1_byobs) <- c("turtle.id","date","start","observer","behavior","stop","group","field","field.type","duration","minutes","time.in","field.change1","video.change")
+
+data_1_byobs <- data_1_byobs %>% select(turtle.id,date,observer,minutes,start,stop,duration,group,field,field.type, video.change)
+
+data_2_byobs <- data_2_byobs %>% select(turtle.id,date,observer,minutes,start,stop,duration,group,field,field.type,video.change)
+
+data_byobs <- rbind(data_1_byobs,data_2_byobs)
+
+
 #L181_nov30 <- data2 %>% filter(turtle.id=="L181") %>% filter(observer != "KG")
 
 #L181_nov30 <- L181_nov30 %>% group_by(turtle.id,date) %>% summarize(duration=sum(duration))
@@ -221,6 +236,14 @@ nov18_observers<- rbind(nov18_observers,data2_obs)
 waddle_zero <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2018/Waddling_zero_2018.csv",header=T)
 
 waddle_zero$date <- as.Date(waddle_zero$date,format="%m/%d/%Y")
+
+waddle_zero2 <- waddle_zero %>% mutate(duration=mean.duration) %>% mutate(start=rep(NA)) %>% mutate(stop=rep(NA))
+
+waddle_zero2 <- waddle_zero2 %>% mutate(minutes=rep(NA)) %>% mutate(video.change=rep(NA)) %>% select(-c(mean.duration))
+
+data_byobs <- rbind(data_byobs,waddle_zero2)
+
+write.csv(data_byobs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Post-Hoc Analyses/data_all_byobs_2018.csv")
 
 nov18_observers <- rbind(nov18_observers,waddle_zero)
 

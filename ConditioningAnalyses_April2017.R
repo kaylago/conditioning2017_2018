@@ -137,13 +137,15 @@ mean(observer_difference$difference)#9 seconds
 
 write.csv(data_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2017/apr2017_dataobs_3-6-21.csv")
 
-apr2017_data <- data_obs %>% group_by(turtle.id,date,field,field.type,group) %>% summarise(mean.duration=mean(total.duration))
+apr2017_data<-read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2017/apr2017_dataobs_final_3-6-21.csv",header=T)
+
+apr2017_data <- apr2017_data %>% group_by(turtle.id,date,field,field.type,group) %>% summarise(mean.duration=mean(total.duration))
 
 apr2017_data <- apr2017_data %>% mutate(freq = mean.duration/1200)
 
 wilcox.test(freq~field.type,apr2017_data,paired=TRUE)
 
-wilcox.test(freq~field.type,apr2017_data)
+#wilcox.test(freq~field.type,apr2017_data)
 
 t.test(freq~field.type,apr2017_data)
 
@@ -161,7 +163,7 @@ data2017 <- data2017 %>% group_by(turtle.id,date,field,field.type,group) %>% sum
 
 data2017 <- data2017 %>% mutate(test=rep("original"))
 
-data2017$date <- as.Date(data2017$date,format= "%Y-%m-%d")
+#data2017$date <- as.Date(data2017$date,format= "%m/%d/%Y")
 
 data2017 <- data2017 %>% mutate(freq=mean.duration/1200)
 
@@ -190,6 +192,10 @@ pairwise.wilcox.test(freq,field.type2,paired=TRUE,data=cohort17)
 t.test(freq~test,cohort17_control)
 #plots
 
+fflux_tides$zone <- factor(efflux_tides$zone,levels=c("littoral","berm","dunes"),labels=c("Littoral","Berm","Dunes"))
+
+cohort17$field.type <- factor(cohort17$field.type,levels=c("conditioned","control"),labels=c("feeding\nmagnetic field","non-feeding\nmagnetic field"))
+
 library(ggplot2)
 library(ggpubr)
 library(extrafont)
@@ -210,24 +216,26 @@ annotation_df3 <- data.frame(field.type=rep(c("control","control")),
                              y=c(0.056,0.06))
 
 
-plot<-ggplot(apr2017_data,aes(x=field.type,y=freq))+
-  stat_summary(fun.y="mean",geom="bar",color="grey50",fill="grey50")+
+plot<-ggplot(subset(cohort17,test=="4mo"),aes(x=field.type,y=freq))+
+  stat_summary(fun.y="mean",geom="bar",color="plum3",fill="plum3")+
   stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   geom_point(position=position_jitter(width=0.15))+
   theme_bw()+
   coord_trans(y="sqrt")+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
-  scale_y_continuous("Proportion of Time",breaks = c(0,0.01,0.02,0.04,0.08,0.16),expand=c(0,0),limits=c(0,0.1))+
+  scale_y_continuous("Proportion of time\nexhibiting turtle dance",breaks = c(0,0.01,0.02,0.04,0.08,0.16),expand=c(0,0),limits=c(0,0.2))+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
   #labs(title="Canada Group") +
-  theme(text=element_text(size=18,family="calibri"))+
-  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face = "plain"))+
+  theme(text=element_text(size=12,family="Helvetica"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),
+                                  hjust=0.5,family = "Helvetica",size=12,face = "plain"))+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
-  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"),
-        axis.text.x = element_text(angle=45,hjust = 1))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Helvetica"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Helvetica"),
+        axis.text.x = element_text(angle=0,vjust = -.4),
+        axis.text = element_text(size=12,family="Helvetica"))+
   theme(panel.border = element_blank(), 
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), 
@@ -236,15 +244,72 @@ plot<-ggplot(apr2017_data,aes(x=field.type,y=freq))+
   theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())+
   theme(axis.title.x = element_blank(),axis.title.y=element_blank())+
-  geom_line(data=annotation_df1,aes(x=field.type,y=y))+
-  geom_segment(data=annotation_df2,aes(x="conditioned",xend="control",y=0.06,yend=0.06))+
-  geom_line(data=annotation_df3,aes(x=field.type,y=y))+
+  geom_segment(aes(x="feeding\nmagnetic field",xend="feeding\nmagnetic field"),y=.08,yend=.085)+
+  geom_segment(aes(x="feeding\nmagnetic field",xend="non-feeding\nmagnetic field"),y=0.085,yend=0.085)+
+  geom_segment(aes(x="non-feeding\nmagnetic field",xend="non-feeding\nmagnetic field"),y=.08,yend=.085)+
   annotate("text",
            x = c(1.5),
-           y = c(0.063),
-           label = c("p = 0.013"),
-           family = "Calibri", fontface = 3, size=5)
+           y = c(0.09),
+           label = c("p = 0.01"),
+           family = "Helvetica", fontface = 3, size=3.5)+
+  ggtitle("2017 - Four months")
 plot
+
+
+year17 <-ggplot(subset(cohort17,test=="original"),aes(x=field.type,y=freq))+
+  stat_summary(fun.y= mean,geom="bar",color="plum4",fill="plum4")+
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
+               geom="errorbar",color="black")+
+  #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
+  geom_point(position=position_jitter(width=0.1))+
+  theme_bw()+
+  coord_trans(y="sqrt")+
+  #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
+  scale_y_continuous("Proportion of time\nexhibiting turtle dance",breaks=c(0,0.01,0.02,0.04,0.08,0.16),expand=c(0,0),limits=c(0,0.2))+
+  #coord_cartesian(ylim=c(0,0.1))+
+  scale_x_discrete("Treatment")+
+  ggtitle("") +
+  theme(text=element_text(size=12,family="Helvetica"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Helvetica",size=12,face="plain"))+
+  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Helvetica"),
+        axis.text = element_text(size=12,family="Helvetica"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Helvetica",angle=45),
+        axis.text.x = element_text(angle=0,vjust = -.5,size=12,family="Helvetica"))+
+  theme(panel.border = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent"))+
+  theme(axis.title.y = element_blank(),axis.title.x = element_blank())+
+  geom_segment(aes(x="feeding\nmagnetic field",xend="feeding\nmagnetic field"),y=.08,yend=.085)+
+  geom_segment(aes(x="feeding\nmagnetic field",xend="non-feeding\nmagnetic field"),y=0.085,yend=0.085)+
+  geom_segment(aes(x="non-feeding\nmagnetic field",xend="non-feeding\nmagnetic field"),y=.08,yend=.085)+
+  annotate("text",
+           x = c(1.5),
+           y = c(0.09),
+           label = c("p = 0.0002"),
+           family = "Helvetica", fontface = 3, size=3.5)+
+  ggtitle("2017 - Original")
+year17
+
+figure17<-plot_grid(year17,plot,rel_widths = c(1,1),rel_heights = c(1,1),ncol=2,labels="AUTO",label_size = 9,label_fontfamily = "Helvetica")
+  
+#draw_label("A",fontfamily ="Helvetica",fontface="bold",size=9,x = 0.01,y = .983,hjust = 0.5, vjust = 1.5)+
+ # draw_label("B",fontfamily = "Helvetica",fontface="bold",size=9,x=0.54,y=.983,hjust=0.5,vjust=1.5)
+  
+
+
+figure17<-grid.arrange(arrangeGrob(figure17,
+                                     bottom = text_grob("Treatment", color = "black",
+                                                        hjust = 0.5, size = 12,family="Helvetica"),
+                                     left = text_grob("Proportion of time\nexhibiting turlte dance", color = "black",
+                                                      rot=90,size=12,family="Helvetica"),
+                                     top = text_grob("",size=12),padding=unit(2,"line")))
+
+figure17
+
+ggsave(figure17, dpi=300,width=8,height=6,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/2017_both_1-23-22.tiff",  bg = "white")
 
 
 redplot<-ggplot(red_apr17,aes(x=field.type,y=freq))+
@@ -259,12 +324,12 @@ redplot<-ggplot(red_apr17,aes(x=field.type,y=freq))+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
   #labs(title="Canada Group") +
-  theme(text=element_text(size=18,family="calibri"))+
+  theme(text=element_text(size=12,family="Helvetica"))+
   theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face = "plain"))+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
         axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"),
-        axis.text.x = element_text(angle=45,hjust = 1))+
+        axis.text.x = element_text(angle=-45,vjust = -0.4))+
   theme(panel.border = element_blank(), 
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), 
@@ -278,9 +343,9 @@ redplot<-ggplot(red_apr17,aes(x=field.type,y=freq))+
   geom_line(data=annotation_df3,aes(x=field.type,y=y))+
   annotate("text",
            x = c(1.5),
-           y = c(0.063),
-           label = c("p = 0.07"),
-           family = "Calibri", fontface = 3, size=5)
+           y = c(0.065),
+           label = c("p = 0.068"),
+           family = "Helvetica", fontface = 3, size=3.5)
 redplot
 
 
@@ -299,12 +364,12 @@ purplot<-ggplot(pur_apr17,aes(x=field.type,y=(freq)))+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
   #ggtitle("Bahamas Group") +
-  theme(text=element_text(size=18,family="calibri"))+
+  theme(text=element_text(size=12,family="Helvetica"))+
   theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face="plain"))+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
         axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"),
-        axis.text.x = element_text(angle=45,hjust = 1))+
+        axis.text.x = element_text(angle=-45,vjust = -.4))+
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), 
         axis.line = element_line(colour = "black"))+
   theme(panel.border = element_blank(), 
@@ -318,9 +383,9 @@ purplot<-ggplot(pur_apr17,aes(x=field.type,y=(freq)))+
   geom_line(data=annotation_df3,aes(x=field.type,y=y))+
   annotate("text",
            x = c(1.5),
-           y = c(0.063),
+           y = c(0.065),
            label = c("p = 0.14"),
-           family = "Calibri", fontface = 3, size=5)
+           family = "Helvetica", fontface = 3, size=3.5)
 purplot
   
   #stat_summary(fun.y= function (x) log(mean(x)),fun.ymin = function(x) 0,geom="bar",color="#CC99FF",fill="#CC99FF")
@@ -329,19 +394,19 @@ purplot
 
 
 figure6<-plot_grid(plot,redplot,purplot,rel_widths = c(1,1),rel_heights = c(1,1),ncol=3,nrow=1)+
-  draw_label("A",fontfamily = "Calibri Light", x = 0.01, y = 1, hjust = -0.5, vjust = 1.5)+
-  draw_label("B",fontfamily = "Calibri Light",x=0.35,y=1,hjust=0.5,vjust=1.5)+
-  draw_label("C",fontfamily = "Calibri Light",x=0.68,y=1,hjust=0.5,vjust=1.5)
+  draw_label("A",fontfamily = "Helvetica",fontface="bold",size=9, x = 0.01, y = 1, hjust = -0.5, vjust = 1.5)+
+  draw_label("B",fontfamily = "Helvetica",fontface="bold",size=9,x=0.35,y=1,hjust=0.5,vjust=1.5)+
+  draw_label("C",fontfamily = "Helvetica",fontface="bold",size=9,x=0.68,y=1,hjust=0.5,vjust=1.5)
   
 figure6 <- grid.arrange(arrangeGrob(figure6,
                          bottom = text_grob("Treatment", color = "black",
-                                            hjust = 0.5, size = 18,family="Calibri",face="bold"),
-                         left = text_grob("Proportion of Time", color = "black",
-                                          rot=90,size=18,family="Calibri",face="bold"),
+                                            hjust = 0.5, size = 12,family="Helvetica",face="bold"),
+                         left = text_grob("Proportion of time", color = "black",
+                                          rot=90,size=12,family="Helvetica",face="bold"),
                          padding=unit(1,"line")))
 figure6
 
-ggsave(figure6, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/april2017_plot.png",  bg = "white")
+ggsave(figure6, dpi=300,width=5,height=5,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/april2017_plot_11-29-21.png",  bg = "white")
 
 plota<-ggplot(cohort17,aes(x=field.type2,y=freq,group=field.type2))+
   stat_summary(fun.y="mean",geom="bar",color="grey50",fill=c("red","grey50","red","grey50"),position="dodge")+

@@ -39,19 +39,21 @@ library(dplyr)
 
 
 
-data <- data %>% select(-c("obs_date","media_file","length","fps","subject","behavior","delete","modifiers","type","comment_start","comment_stop","extra"))
+data <- data %>% dplyr::select(-c("obs_date","media_file","length","fps","subject","behavior","delete","modifiers","type","comment_start","comment_stop","extra"))
 
 
 
 library(tidyr)
 
-data <- data %>% separate(turtle_id, into = c('turtle.id','observer'),sep=-2,convert=TRUE)
+data <- data %>% separate(turtle_id, into = c('turtle.id','observer'),sep=-3,convert=TRUE)
 
-data <-data %>% separate(turtle.id, into = c('turtle.id','date'),sep=-7,convert=TRUE)
+data <-data %>% separate(turtle.id, into = c('turtle.id','date'),sep=4,convert=TRUE)
 
-data <- data %>% separate(date, into = c('date','delete1'),sep=-1,convert=TRUE)
+data <- data %>% separate(date, into = c('del1','date'),sep="_",convert=TRUE)
 
-data <- data %>% separate(date, into = c('delete2','date'),sep=1,convert=TRUE)
+data$observer <- ifelse(!grepl("_", data$observer), paste0("_", data$observer), as.character(data$observer))
+
+data <- data %>% separate(observer, into = c('delete2','observer'),sep="_",convert=TRUE)
 
 data <- data %>% mutate(year=rep(2020))
 
@@ -59,7 +61,7 @@ data$date <- paste(data$year,data$date,sep = "")
 
 data$date <- as.Date(data$date, format = "%Y%b%d")
 
-data <- data %>% select(-c("delete1","delete2","year"))
+data <- data %>% dplyr::select(-c("del1","delete2","year"))
 
 col_order <- c("turtle.id","date","observer","start","stop","duration")
 
@@ -82,7 +84,7 @@ groupdata <- groupdata %>% mutate(end.trial=video.change+20)
 
 groupdata$date <- as.Date(groupdata$date,format= "%d-%b-%y")
 
-groupdata <- groupdata %>% select(c("turtle.id","date","group","field","field.type","experiment","video.change","field.type","end.trial"))
+groupdata <- groupdata %>% dplyr::select(c("turtle.id","date","group","field","field.type","experiment","video.change","field.type","end.trial"))
 
 groupdata <- groupdata %>% drop_na()
 
@@ -120,7 +122,7 @@ nb <- data %>% filter(group.total=="maroon")
 
 
 attach(data_kg)
-pairwise.wilcox.test(mean.duration,field,data=obx,paired=TRUE)
+pairwise.wilcox.test(mean.duration,field,data=obx,paired=TRUE,p.adjust.method = "none")
 detach()
 
 attach(obx)
@@ -131,13 +133,22 @@ attach(nb)
 pairwise.wilcox.test(mean.duration,field,data=nb,paired=TRUE)
 detach()
 
+data2 <- data %>% filter(turtle.id!="L186") #%>% filter(turtle.id != "L195")
 attach(data)
-pairwise.wilcox.test(freq,field,data=data)
+pairwise.wilcox.test(freq,field,data=data,p.adjust.method = "BH")
 
-pairwise.wilcox.test(freq,field.type2,data=data,paired=TRUE)
+pairwise.wilcox.test(freq,field.type2,data=data,paired=TRUE,p.adjust.method = "BH")
+pairwise.wilcox.test(freq,field.type2,data=data,paired=TRUE,p.adjust.method = "none")
 detach()
 
-write.csv(data_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2020_Spring/DataSheets/observer_sens_data_9-28-21.csv")
+attach(data2)
+pairwise.wilcox.test(freq,field,data=data2,p.adjust.method = "BH")
+
+pairwise.wilcox.test(freq,field.type2,data=data2,paired=TRUE,p.adjust.method = "BH")
+pairwise.wilcox.test(freq,field.type2,data=data2,paired=TRUE,p.adjust.method = "none")
+detach()
+
+write.csv(data_obs,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2020_Spring/DataSheets/observer_sens_data_2-8-22.csv")
 
 
 library(ggplot2)
@@ -181,7 +192,7 @@ plot_nb<-ggplot(nb,aes(x=field.type2,y=freq))+
   #theme(axis.title.x = element_blank(),axis.title.y=element_blank())
 plot_nb
 
-ggsave(plot_nb, width = 10, height=8,units="in",filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2020_Spring/Figures/nb_sens.png",  bg = "transparent")
+ggsave(plot_nb, width = 10, height=8,units="in",filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/nb_sens_10-3-21.png",  bg = "transparent")
 
 
 plot_obx<-ggplot(obx,aes(x=field.type2,y=freq))+
@@ -212,7 +223,7 @@ plot_obx<-ggplot(obx,aes(x=field.type2,y=freq))+
  # theme(axis.title.x = element_blank(),axis.title.y=element_blank())
 plot_obx
 
-ggsave(plot_obx, width = 10, height=8,units="in",filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/2020_Spring/Figures/obx_sens.png",  bg = "transparent")
+ggsave(plot_obx, width = 10, height=8,units="in",filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/obx_sens_10-3-21.png",  bg = "transparent")
 
 
 plot<-ggplot(data,aes(x=field.type2,y=freq))+
