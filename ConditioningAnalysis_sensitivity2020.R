@@ -126,11 +126,11 @@ pairwise.wilcox.test(mean.duration,field,data=obx,paired=TRUE,p.adjust.method = 
 detach()
 
 attach(obx)
-pairwise.wilcox.test(mean.duration,field,data=obx,paired=TRUE)
+pairwise.wilcox.test(mean.duration,field,data=obx,paired=TRUE,p.adjust.method = "none")
 detach()
 
 attach(nb)
-pairwise.wilcox.test(mean.duration,field,data=nb,paired=TRUE)
+pairwise.wilcox.test(mean.duration,field,data=nb,paired=TRUE,p.adjust.method = "none")
 detach()
 
 data2 <- data %>% filter(turtle.id!="L186") #%>% filter(turtle.id != "L195")
@@ -161,10 +161,14 @@ require(scales)
 
 nb$field.type2 <- factor(nb$field.type2,levels=c("conditioned","sens1","sens2","sens3","sens4"))
 
+nb$field <- factor(nb$field,levels=c("NB","PEI","NOSCO","NH","NJ"),labels=c("New Brunswick","Prince Edward\nIsland","Nova Scotia","New Hampshire"," New Jersey"))
+
+
 obx$field.type2 <- factor(obx$field.type2,levels=c("conditioned","sens1","sens2","sens3","sens4"))
 
+obx$field <- factor(obx$field,levels=c("OBX","MD","NJ","NH","NOSCO"),labels=c("North Carolina","Maryland","New Jersey","New Hampshire","Nova Scotia"))
 
-plot_nb<-ggplot(nb,aes(x=field.type2,y=freq))+
+plot_nb<-ggplot(nb,aes(x=field,y=freq))+
   stat_summary(fun.y="mean",geom="bar",fill=c("violetred4","maroon4","deeppink3","violetred2","magenta"))+
   stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
@@ -192,10 +196,10 @@ plot_nb<-ggplot(nb,aes(x=field.type2,y=freq))+
   #theme(axis.title.x = element_blank(),axis.title.y=element_blank())
 plot_nb
 
-ggsave(plot_nb, width = 10, height=8,units="in",filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/nb_sens_10-3-21.png",  bg = "transparent")
+ggsave(plot_nb, width = 10, height=8,units="in",filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/nb_sens_5-10-22.tiff",  bg = "transparent")
 
 
-plot_obx<-ggplot(obx,aes(x=field.type2,y=freq))+
+plot_obx<-ggplot(obx,aes(x=field,y=freq))+
   stat_summary(fun.y="mean",geom="bar",fill= c("sienna4","darkorange3","sienna2","darkorange1","coral1"))+
   stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
@@ -223,11 +227,11 @@ plot_obx<-ggplot(obx,aes(x=field.type2,y=freq))+
  # theme(axis.title.x = element_blank(),axis.title.y=element_blank())
 plot_obx
 
-ggsave(plot_obx, width = 10, height=8,units="in",filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/obx_sens_10-3-21.png",  bg = "transparent")
+ggsave(plot_obx, width = 10, height=8,units="in",filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/obx_sens_5-10-22.tiff",  bg = "transparent")
 
 
 plot<-ggplot(data,aes(x=field.type2,y=freq))+
-  stat_summary(fun.y="mean",geom="bar",color="grey50",fill="grey50")+
+  stat_summary(fun.y="mean",geom="bar",color="seagreen3",fill="seagreen3")+
   stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   geom_point(position=position_jitter(width=0.15))+
@@ -238,11 +242,11 @@ plot<-ggplot(data,aes(x=field.type2,y=freq))+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
   #labs(title="Canada Group") +
-  theme(text=element_text(size=18,family="calibri"))+
-  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face = "plain"))+
+  theme(text=element_text(size=12,family="Helvetica"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Helvetica",size=12,face = "plain"))+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
-  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"),
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Helvetica"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Helvetica"),
         axis.text.x = element_text(angle=45,hjust = 1))+
   theme(panel.border = element_blank(), 
         panel.grid.major = element_blank(),
@@ -250,9 +254,12 @@ plot<-ggplot(data,aes(x=field.type2,y=freq))+
         axis.line = element_line(colour = "black"),
         panel.background = element_rect(fill = "transparent"))+
   theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank())+
-  theme(axis.title.x = element_blank(),axis.title.y=element_blank())
+        panel.grid.minor = element_blank())
+  #theme(axis.title.x = element_blank(),axis.title.y=element_blank())
 plot
+
+ggsave(plot, width = 10, height=8,units="in",filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/allsens_5-9-22.tiff",  bg = "transparent")
+
 
 plot<-ggplot(data,aes(x=field,y=freq))+
   stat_summary(fun.y="mean",geom="bar",color="grey50",fill="grey50")+

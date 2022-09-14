@@ -218,10 +218,58 @@ annotation_df3 <- data.frame(field.type=rep(c("control","control")),
                              y=c(0.15,0.17))
 
 
-data_comb$field.type2 <- factor(data_comb$field.type2, levels = c("conditioned-og","control-og","conditioned","inc-toggle","int-toggle","tot-toggle"))
+data_comb$field.type2 <- factor(data_comb$field.type2,levels=c("conditioned-og","control-og","conditioned","inc-toggle","int-toggle","tot-toggle") ,labels = c("magnetic field\nwith food original","magnetic field\nwithout food original","magnetic field\nwith food","inclination\ntoggle","intensity\ntoggle","total field\ntoggle"))
 
 plot<-ggplot(data_comb,aes(x=field.type2,y=freq))+
-  stat_summary(fun="mean",geom="bar",color="cornflowerblue",fill="cornflowerblue")+
+  stat_summary(fun="mean",geom="bar",color="turquoise4",fill="turquoise4")+
+  stat_summary(fun=mean,fun.min = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.max = function(x) mean(x) + sd(x)/sqrt(length(x)),
+               geom="errorbar",color="black")+
+  geom_point(position=position_jitter(width=0.15),size=3)+
+  theme_bw()+
+  coord_trans(y="sqrt")+
+  #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
+  scale_y_continuous("Proportion of time exhibiting \nfood seeking behavior",breaks = c(0,0.02,0.08,0.2,0.4,0.6,0.8),expand=c(0,0),limits=c(0,1))+
+  #coord_cartesian(ylim=c(0,0.1))+
+  scale_x_discrete("Magnetic Field Treatment")+
+  #labs(title="Canada Group") +
+  theme(text=element_text(size=12,family="calibri"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=12,face = "plain"))+
+  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Calibri"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Calibri"),
+        axis.text.x = element_text(size=12),
+        axis.text.y = element_text(size=12))+
+  theme(panel.border = element_blank(), 
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        panel.background = element_rect(fill = "transparent"))+
+  theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())+
+  geom_segment(aes(x="magnetic field\nwith food original",xend="magnetic field\nwith food original"),y=.4,yend=.42)+
+  geom_segment(aes(x="magnetic field\nwith food original",xend="magnetic field\nwithout food original"),y=0.42,yend=0.42)+
+  geom_segment(aes(x="magnetic field\nwithout food original",xend="magnetic field\nwithout food original"),y=.42,yend=.4)+
+  annotate("text",
+           x = c(1.5),
+           y = c(0.48),
+           label = c("p = 0.003"),
+           family = "Calibri", fontface = 3, size=4)+
+  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwith food"),y=.6,yend=.62)+
+  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwithout food original"),y=0.62,yend=0.62)+
+  geom_segment(aes(x="magnetic field\nwithout food original",xend="magnetic field\nwithout food original"),y=.62,yend=.6)+
+  annotate("text",
+           x = c(2.5),
+           y = c(0.69),
+           label = c("p = 0.04"),
+           family = "Calibri", fontface = 3, size=4)
+  
+plot
+
+ggsave(plot, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/toggle_experiments_5-20-22.tiff",  bg = "transparent")
+
+
+plot<-ggplot(data_og,aes(x=field.type,y=freq))+
+  stat_summary(fun="mean",geom="bar",color="olivedrab3",fill="olivedrab3")+
   stat_summary(fun=mean,fun.min = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.max = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   geom_point(position=position_jitter(width=0.15),size=3)+
@@ -246,23 +294,51 @@ plot<-ggplot(data_comb,aes(x=field.type2,y=freq))+
         panel.background = element_rect(fill = "transparent"))+
   theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())+
-  geom_segment(aes(x="conditioned-og",xend="conditioned-og"),y=.4,yend=.42)+
-  geom_segment(aes(x="conditioned-og",xend="control-og"),y=0.42,yend=0.42)+
-  geom_segment(aes(x="control-og",xend="control-og"),y=.42,yend=.4)+
+  geom_segment(aes(x="conditioned",xend="conditioned"),y=.4,yend=.42)+
+  geom_segment(aes(x="conditioned",xend="control"),y=0.42,yend=0.42)+
+  geom_segment(aes(x="control",xend="control"),y=.42,yend=.4)+
   annotate("text",
            x = c(1.5),
            y = c(0.48),
            label = c("p = 0.003"),
-           family = "Calibri", fontface = 3, size=4)+
-  geom_segment(aes(x="conditioned",xend="conditioned"),y=.6,yend=.62)+
-  geom_segment(aes(x="conditioned",xend="control-og"),y=0.62,yend=0.62)+
-  geom_segment(aes(x="control-og",xend="control-og"),y=.62,yend=.6)+
-  annotate("text",
-           x = c(2.5),
-           y = c(0.69),
-           label = c("p = 0.04"),
            family = "Calibri", fontface = 3, size=4)
-  
+
 plot
 
-ggsave(plot, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/toggle_experiments_3-8-22.jpg",  bg = "transparent")
+data_roc <- data_comb %>% filter(field.type2=="conditioned")
+
+data_roc2 <- data_comb %>% filter(field.type2=="tot-toggle")
+
+data_roc3 <- rbind(data_roc,data_roc2)
+
+data_roc3 <- data_roc3 %>% mutate(field.type3=ifelse(field.type2=="tot-toggle","fluctuating",as.character(field.type2)))
+
+plot<-ggplot(data_roc3,aes(x=field.type3,y=freq))+
+  stat_summary(fun="mean",geom="bar",color="darkolivegreen",fill="darkolivegreen")+
+  stat_summary(fun=mean,fun.min = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.max = function(x) mean(x) + sd(x)/sqrt(length(x)),
+               geom="errorbar",color="black")+
+  geom_point(position=position_jitter(width=0.15),size=3)+
+  theme_bw()+
+  coord_trans(y="sqrt")+
+  #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
+  scale_y_continuous("Proportion of time exhibiting \nfood seeking behavior",breaks = c(0,0.02,0.08,0.2,0.4,0.6,0.8),expand=c(0,0),limits=c(0,1))+
+  #coord_cartesian(ylim=c(0,0.1))+
+  scale_x_discrete("Magnetic Field Treatment")+
+  #labs(title="Canada Group") +
+  theme(text=element_text(size=12,family="calibri"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=12,face = "plain"))+
+  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Calibri"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Calibri"),
+        axis.text.x = element_text(angle=45,hjust = 1,size=12),
+        axis.text.y = element_text(size=12))+
+  theme(panel.border = element_blank(), 
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        panel.background = element_rect(fill = "transparent"))+
+  theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+
+plot
+

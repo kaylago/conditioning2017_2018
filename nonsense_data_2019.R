@@ -153,7 +153,7 @@ nov_data <- nov_data%>% mutate(treatment2=ifelse(field=="MA","conditioned",ifels
 class(nov_data$treatment)
 nov_data$treatment <- as.factor(as.character(nov_data$treatment))
 
-pairwise.wilcox.test(nov_data$freq,nov_data$treatment2,paired=TRUE,p.adjust.method = "none")
+pairwise.wilcox.test(nov_data$freq,nov_data$treatment2,paired=T,p.adjust.method = "BH")
 
 nov_data_og <- nov_data %>% filter(field!="FLint/Minc") %>% filter(field!="FLinc/Mint")
 
@@ -195,6 +195,10 @@ pairwise.wilcox.test(nonsense2$freq,nonsense2$treatment,paired=TRUE,p.adjust.met
 
 wilcox.test(freq~field,nov_data_og,paired=TRUE)
 
+attach(data)
+pairwise.wilcox.test(freq,field.type3,data=data,paired=T,p.adjust.method = "BH")
+pairwise.wilcox.test(freq,field.type4,data=data,p.adjust.method = "BH")
+detach()
 
 
 
@@ -222,8 +226,10 @@ annotation_df3 <- data.frame(field.type=rep(c("MA","MA")),
                              y=c(0.09,0.086))
 
 
+nov_data$field <- factor(nov_data$field,levels=c("MA","FL","FLinc/Mint","FLint/Minc"))
+
 nov_plot<-ggplot(nov_data,aes(x=field,y=freq))+
-  stat_summary(fun.y= mean,geom="bar",color="grey",fill="grey")+
+  stat_summary(fun.y= mean,geom="bar",color="olivedrab",fill="olivedrab")+
   stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
@@ -235,11 +241,11 @@ nov_plot<-ggplot(nov_data,aes(x=field,y=freq))+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
   ggtitle("") +
-  theme(text=element_text(size=22,family="calibri"))+
-  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face="plain"))+
+  theme(text=element_text(size=12,family="Helvetica"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Helvetica",size=12,face="plain"))+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
-  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Helvetica"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Helvetica"))+
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), 
         axis.line = element_line(colour = "black"))+
   theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),
@@ -249,12 +255,12 @@ nov_plot<-ggplot(nov_data,aes(x=field,y=freq))+
   geom_segment(data=annotation_df2,aes(x="FL",xend="MA",y=0.09,yend=0.09))+
   geom_line(data=annotation_df3,aes(x=field.type,y=y))+
   annotate("text",
-           x = c(2.5),
+           x = c(1.5),
            y = c(0.1),
            label = c("p = 0.001"),
-           family = "Calibri", fontface = 3, size=5)
+           family = "Helvetica", fontface = 3, size=3)
 nov_plot
 
-ggsave(nov_plot, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/nonsense_final_2019.png",  bg = "transparent")
+ggsave(nov_plot, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/nonsense2019_5-8-22.tiff",  bg = "transparent")
 
 

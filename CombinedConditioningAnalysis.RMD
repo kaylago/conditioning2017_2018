@@ -37,7 +37,7 @@ data2019 <- data2019 %>% mutate(field.type=ifelse(field=="MA","conditioned","con
 
 data2019 <- data2019 %>% mutate(group=rep("green"))
 
-data2020_fa <- data2020_fa %>% select(-c(group.total))
+data2020_fa <- data2020_fa %>% dplyr::select(-c(group.total))
 
 columns17 <- c("x","turtle.id","date","observer","field","field.type","mean.duration","group")
 columns18 <- c("x","date","turtle.id","observer","group","field","field.type","mean.duration")
@@ -184,7 +184,9 @@ detach()
 
 data_summarize <- data %>% group_by(group,year,field,field.type) %>% summarize(mean.duration=mean(mean.duration),mean.freq=mean(freq))
 
-write.csv(data,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/FinalData/Summarized_Data_AllYears_1-20-22.csv")
+data <- data %>% arrange(year)
+
+write.csv(data,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/FinalData/Summarized_Data_AllYears_5-24-22.csv")
 
 
 library(nlme)
@@ -258,6 +260,23 @@ lme_c <- lme(freq~(int.diff.acc)*(inc.diff.acc),random=~1|turtle.id,data=subset(
 summary(lme_c)
 anova(lme_c)
 
+qqnorm(residuals(lme_c,type="normalized"))
+qqline(residuals(lme_c,type="normalized"))
+
+library(ggpubr)
+ggdensity(data2$freq)
+ggqqplot(data2, x="freq",color="year")
+data2 <- data2 %>% mutate(log.freq=log(freq))
+
+library(MASS)
+library(vcd)
+library(pscl)
+library(jtools)
+plot(density(data2$freq))
+ggqqplot(data2$log(freq))
+
+shapiro.test(data2$freq)
+
 library(dplyr)
 data4 <- data4 %>% mutate(field=ifelse(year=="2017" & field=="NB","NS",field))
 data4 <- data4 %>% mutate(field=ifelse(field=="Cuba","CB",
@@ -275,6 +294,58 @@ data2$inc_pre <- predict(lme_a)
 
 ```
 
+```{r}
+data_exp <- data %>% filter(field.type=="conditioned")
+
+data_exp <- data_exp %>% mutate(duration.exp=mean.duration)
+
+data_exp <- data_exp %>% ungroup()%>% dplyr::select(c(turtle.id,year,group,duration.exp))
+
+data_exp <- data_exp %>% mutate(freq.exp=duration.exp/1200)
+
+data_cont <- data %>% filter(field.type=="control")
+
+data_cont <- data_cont %>% mutate(duration.cont=mean.duration)
+
+data_cont <- data_cont %>% ungroup()%>% dplyr::select(c(turtle.id,year,group,duration.cont))
+
+data_cont <- data_cont %>% mutate(freq.cont=duration.cont/1200)
+
+data_norm <- merge(data_cont,data_exp,by=c("turtle.id","year","group"))
+
+data_norm <- data_norm %>% mutate(duration.norm=((duration.exp-duration.cont)/duration.cont)*100)
+
+data_norm <- data_norm %>% mutate(freq.norm=((freq.exp-freq.cont)/freq.cont))
+#data_norm <- data_norm %>% mutate(duration.cont=duration.cont*100)
+
+data_norm <- data_norm %>% mutate(diff = duration.exp-duration.cont)
+
+library(tidyr)
+
+data_norm_dur <- data_norm %>% dplyr::select(c(turtle.id,year,group,duration.cont,duration.exp,duration.norm))
+
+data_norm_freq <- data_norm %>% dplyr::select(c(turtle.id,year,group,freq.cont,freq.exp,freq.norm))
+
+
+data_norm_dur <- data_norm_dur %>% gather(field,duration,duration.cont:duration.norm)
+
+data_norm_dur <- data_norm_dur %>% arrange(turtle.id,year,field)
+
+data_norm_freq <- data_norm_freq %>% gather(field,duration,freq.cont:freq.norm)
+
+data_norm_freq <- data_norm_freq %>% arrange(turtle.id,year,field)
+
+data_norm_dur2 <- data_norm_dur %>% filter (field!="duration.exp") 
+
+data_norm_freq2 <- data_norm_freq %>% filter (field!="freq.exp") 
+#data_norm2 <- data_norm2 %>% mutate
+
+#data_norm2 <- data_norm2 
+
+```
+
+
+
 ```{r ggplots, echo=TRUE}
 
 library(ggplot2)
@@ -285,10 +356,13 @@ library(ggpubr)
 library(extrafont)
 library(ggsignif)
 library(viridis)
+library(ggbreak)
+library(patchwork)
 
-inc_plot<-ggplot(data2_plot,aes(x=(inc.diff.acc),y=freq,color=field))+
+
+inc_plot<-ggplot(data2_plot,aes(x=(inc.diff.acc),y=log.freq,color=field))+
   #coord_trans(y="sqrt")+
-  geom_point(size=6)+
+  geom_point(size=6)
   scale_color_manual(values=c("darkseagreen4","lightgoldenrod3","coral2","pink3","maroon"))+
   geom_smooth(method=lm,se=F,color="black")+
   scale_y_continuous("Proportion of time",limits=c(0,0.45))+
@@ -376,7 +450,7 @@ legend_c <- get_legend(inc_plot + theme(legend.position="right"))
 
 p <- plot_grid(comp_plot,legend_c,ncol=2,rel_widths = c(1.4,0.2))
 p
-ggsave(p, dpi=300, width = 8, height=5,units="in",filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/comp_plot_incint_only2019-2020_2-1-22.tiff",  bg = "transparent")
+ggsave(p, dpi=300, width = 12, height=5,units="in",filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/comp_plot_incint_only2019-2020_5-8-22.tiff",  bg = "transparent")
 
 
 comp_plot2<-plot_grid(inc_plot2,int_plot2,rel_widths = c(1,1),rel_heights = c(1,1),ncol = 2,labels="AUTO",label_size = 9,label_fontfamily = "Helvetica")
@@ -410,7 +484,7 @@ apr2017_data_plot <- apr2017_data
 
 apr2017_data_plot$field.type <- factor(apr2017_data_plot$field.type,levels=c("conditioned","control"), labels=c("magnetic field\nwith food","magnetic field\nwithout food"))
 
-all_plot<-ggplot(data_plot,aes(x=field.type,y=freq))+
+all_plot<-ggplot(data_plot,aes(x=field.type,y=mean.duration))+
   stat_summary(fun.y= mean,geom="bar",color="steelblue3",fill="steelblue3",alpha=0.7)+
   stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
@@ -419,7 +493,7 @@ all_plot<-ggplot(data_plot,aes(x=field.type,y=freq))+
   theme_bw()+
   coord_trans(y="sqrt")+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
-  scale_y_continuous("Proportion of time\nexhibiting turtle dance",breaks = c(0,0.01,0.05,0.15,0.3,0.5),expand=c(0,0),limits=c(0,0.55))+
+ scale_y_continuous("Time exhibiting turtle dance\n(seconds)",breaks = c(0,100,200,300,400,500),expand=c(0,0),limits=c(0,550))+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
   ggtitle("") +
@@ -433,12 +507,12 @@ all_plot<-ggplot(data_plot,aes(x=field.type,y=freq))+
         panel.grid.minor = element_blank(), 
         axis.line = element_line(colour = "black"))+
   #theme(axis.title.x = element_blank(),axis.title.y=element_blank())+
-  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwith food"),y=.45,yend=.47)+
-  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwithout food"),y=0.47,yend=0.47)+
-  geom_segment(aes(x="magnetic field\nwithout food",xend="magnetic field\nwithout food"),y=.45,yend=.47)+
+  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwith food"),y=450,yend=470)+
+  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwithout food"),y=470,yend=470)+
+  geom_segment(aes(x="magnetic field\nwithout food",xend="magnetic field\nwithout food"),y=450,yend=470)+
   annotate("text",
            x = c(1.5),
-           y = c(0.52),
+           y = c(520),
            label = c("p = 5e-12"),
            family = "Helvetica", fontface = 3, size=4)+
   theme(
@@ -452,8 +526,125 @@ all_plot<-ggplot(data_plot,aes(x=field.type,y=freq))+
   )
 all_plot
 
-ggsave(all_plot, dpi=300, width = 5, height=5,units="in",filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/all_plot_2-1-22.tiff",  bg = "white")
+ggsave(all_plot, dpi=300, width = 5, height=5,units="in",filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/Figures 9-6-22/all_plot_seconds_logscale_9-6-22.tiff",  bg = "white")
 
+all_plot2<-ggplot(data_norm_dur2,aes(x=field,y=duration))+
+  #stat_summary(fun.y= mean,geom="boxplot",color="steelblue3",fill="steelblue3",alpha=0.7)+
+  #stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
+              # geom="errorbar",color="black")+
+  #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
+  geom_boxplot(fill="steelblue3",outlier.shape = NA)+
+  geom_point(position=position_jitter(width=0.2),size=2)+
+  theme_bw()+
+  #coord_trans(y="sqrt")+
+  #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
+ scale_y_continuous("",breaks=c(0,250,500,1000,2000,3000,4000,5000,13000,15000),limits=c(0,2000))+
+ #scale_y_break(c(5000,17000),scales=1)+
+  #coord_cartesian(ylim=c(0,0.1))+
+  scale_x_discrete("")+
+  ggtitle("") +
+  theme(text=element_text(size=12,family="Arial"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Arial",size=12,face="plain"))+
+  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Arial"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Arial"))+
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"))+
+  #theme(axis.title.x = element_blank(),axis.title.y=element_blank())+
+  theme(
+    rect = element_rect(fill = "transparent") # all rectangles
+  )+
+  theme(
+    panel.background = element_rect(fill = "transparent"), # bg of the panel
+    plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+    legend.background = element_rect(fill = "transparent"), # get rid of legend bg
+    legend.box.background = element_rect(fill = "transparent") # get rid of legend panel bg
+  )+
+  theme(axis.text.x = element_blank())
+all_plot2
+
+ggsave(all_plot2, dpi=300, width = 5, height=5,units="in",filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/all_plot2_diffbetween_lowerscale_6-14-22.png",  bg = "transparent")
+
+all_plot3<-ggplot(data_norm_dur2,aes(x=field,y=duration))+
+  #stat_summary(fun.y= mean,geom="bar",color="steelblue3",fill="steelblue3",alpha=0.7)+
+  #stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),geom="errorbar",color="black")+
+  #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
+  #geom_boxplot(fill="steelblue3")+
+  geom_point(position=position_jitter(width=0.2),size=2)+
+  theme_bw()+
+  #coord_trans(y="sqrt")+
+  #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
+ scale_y_continuous("",breaks=c(0,250,500,1000,2000,3000,4000,5000,13000,15000),limits=c(2000,5000))+
+ #scale_y_break(c(5000,17000),scales=1)+
+  #coord_cartesian(ylim=c(0,0.1))+
+  scale_x_discrete("")+
+  ggtitle("") +
+  theme(text=element_text(size=12,family="Helvetica"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Helvetica",size=12,face="plain"))+
+  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Helvetica"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Helvetica"))+
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"))+
+  #theme(axis.title.x = element_blank(),axis.title.y=element_blank())+
+  theme(
+    rect = element_rect(fill = "transparent") # all rectangles
+  )+
+  theme(
+    panel.background = element_rect(fill = "transparent"), # bg of the panel
+    plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+    legend.background = element_rect(fill = "transparent"), # get rid of legend bg
+    legend.box.background = element_rect(fill = "transparent") # get rid of legend panel bg
+  )+
+  theme(axis.line.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank())
+all_plot3
+
+data_plot<- data_plot %>% group_by(turtle.id,year) %>% arrange(turtle.id,year,field.type) %>% mutate(mean.duration2=-(lead(mean.duration)-mean.duration))
+
+data_plot$mean.duration2 <- ifelse(is.na(data_plot$mean.duration2), 0, data_plot$mean.duration2)
+
+all_plot4<-ggplot(data_plot,aes(x=field.type,y=mean.duration2))+
+  stat_summary(fun.y= mean,geom="bar",color="steelblue3",fill="steelblue3",alpha=0.7)+
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),geom="errorbar",color="black")+
+  #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
+  #geom_boxplot(fill="steelblue3",outlier.shape = NA)+
+  geom_point(position=position_jitter(width=0.2),size=2)+
+  theme_bw()+
+  #coord_trans(y="sqrt")+
+  #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
+ scale_y_continuous("",breaks=c(0,250,500,1000,2000,3000,4000,5000,13000,15000))+
+ #scale_y_break(c(5000,17000),scales=1)+
+  #coord_cartesian(ylim=c(0,0.1))+
+  #scale_x_discrete("")+
+  ggtitle("") +
+  theme(text=element_text(size=12,family="Arial"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Arial",size=12,face="plain"))+
+  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Arial"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Arial"))+
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"))+
+  #theme(axis.title.x = element_blank(),axis.title.y=element_blank())+
+  theme(
+    rect = element_rect(fill = "transparent") # all rectangles
+  )+
+  theme(
+    panel.background = element_rect(fill = "transparent"), # bg of the panel
+    plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+    legend.background = element_rect(fill = "transparent"), # get rid of legend bg
+    legend.box.background = element_rect(fill = "transparent") # get rid of legend panel bg
+  )
+all_plot4
+
+ggsave(all_plot4, dpi=300, width = 5, height=5,units="in",filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/all_plot4_diffbetween_controlas0_6-15-22.png",  bg = "transparent")
 
 red <-ggplot(subset(data,group=="red"),aes(x=field.type,y=freq))+
   stat_summary(fun.y= mean,geom="bar",color="#990000",fill="#990000")+
@@ -802,83 +993,89 @@ ggsave(figure6, dpi=300,width=15,height=15,units="in", filename = "C:/Users/kkmg
 
 
 
-year17 <-ggplot(subset(data_plot,year==2017),aes(x=field.type,y=freq))+
+year17 <-ggplot(subset(data_plot,year==2017),aes(x=field.type,y=mean.duration))+
   stat_summary(fun.y= mean,geom="bar",color="plum4",fill="plum4",alpha=0.8)+
   stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
-  geom_point(position=position_jitter(width=0.15))+
+  geom_point(position=position_jitter(width=0.2),size=4,alpha=0.8)+
   theme_bw()+
   coord_trans(y="sqrt")+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
-  scale_y_continuous("Proportion of Time",breaks=c(0,0.05,0.25,0.5),expand=c(0,0),limits=c(0,0.5))+
+  scale_y_continuous("Time exhibiting turtle dance\n(seconds)",breaks = c(0,100,200,300,400,500),expand=c(0,0),limits=c(0,550))+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
   ggtitle("") +
-  theme(text=element_text(size=12,family="Helvetica"))+
-  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Helvetica",size=12,face="plain"))+
+  theme(text=element_text(size=14,family="Arial"))+
+  theme(plot.title = element_blank())+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
-  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Helvetica"),
-        axis.text = element_text(size=12,family="Helvetica"),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Helvetica",angle=0),
-        axis.text.x = element_text(angle=0,vjust = -.5,size=12,family="Helvetica"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=14,family = "Arial"),
+        #axis.text = element_text(size=14,family="Arial"),
+        #axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=4,family = "Arial",angle=0),
+        axis.text.x = element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.x=element_blank())+
   theme(panel.border = element_blank(), 
         axis.line = element_line(colour = "black"),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.background = element_rect(fill = "transparent"))+
   theme(axis.title.y = element_blank(),axis.title.x = element_blank())+
-  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwith food"),y=.22,yend=.25)+
-  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwithout food"),y=0.25,yend=0.25)+
-  geom_segment(aes(x="magnetic field\nwithout food",xend="magnetic field\nwithout food"),y=.22,yend=.25)+
-  annotate("text",
-           x = c(1.5),
-           y = c(0.3),
-           label = c("p = 0.0002"),
-           family = "Helvetica", fontface = 3, size=3.5)+
-  ggtitle("Nova Scotia vs Bahamas\nOriginal")+
+  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwith food"),y=220,yend=250)+
+  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwithout food"),y=250,yend=250)+
+  geom_segment(aes(x="magnetic field\nwithout food",xend="magnetic field\nwithout food"),y=220,yend=250)+
+  #annotate("text",
+   #        x = c(1.5),
+    #       y = c(0.3),
+     #      label = c("p = 0.0002"),
+      #     family = "Arial", fontface = 3, size=5)+
+  #ggtitle("Nova Scotia vs Bahamas\nOriginal")+
   theme(plot.margin = unit(c(1,1,1,1), "lines"))
 year17
 
+ggsave(year17, dpi=300,width=4,height=4,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/Figures 9-6-22/2017_OGdata_9-6-22.tiff",  bg = "transparent")
 
 
-year17apr <-ggplot(apr2017_data_plot,aes(x=field.type,y=freq))+
+year17apr <-ggplot(apr2017_data_plot,aes(x=field.type,y=mean.duration))+
   stat_summary(fun.y= mean,geom="bar",color="plum3",fill="plum3",alpha=0.8)+
   stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
-  geom_point(position=position_jitter(width=0.15))+
+  geom_point(position=position_jitter(width=0.2),size=4,alpha=0.8)+
   theme_bw()+
   coord_trans(y="sqrt")+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
-  scale_y_continuous("Proportion of Time",breaks=c(0,0.05,0.25,0.5),expand=c(0,0),limits=c(0,0.5))+
+  scale_y_continuous("Time exhibiting turtle dance\n(seconds)",breaks = c(0,100,200,300,400,500),expand=c(0,0),limits=c(0,550))+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
   ggtitle("") +
-  theme(text=element_text(size=12,family="Helvetica"))+
-  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Helvetica",size=12,face="plain"))+
+  #theme(text=element_text(size=12,family="Helvetica"))+
+  theme(plot.title = element_blank())+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
-  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Helvetica"),
-        axis.text = element_text(size=12,family="Helvetica"),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Helvetica",angle=0),
-        axis.text.x = element_text(angle=0,vjust = -.5,size=12,family="Helvetica"))+
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank())+
+        #axis.text.x = element_text(angle=0,vjust = -.5,size=12,family="Helvetica"))+
   theme(panel.border = element_blank(), 
         axis.line = element_line(colour = "black"),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.background = element_rect(fill = "transparent"))+
-  theme(axis.title.y = element_blank(),axis.title.x = element_blank())+
-  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwith food"),y=.22,yend=.25)+
-  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwithout food"),y=0.25,yend=0.25)+
-  geom_segment(aes(x="magnetic field\nwithout food",xend="magnetic field\nwithout food"),y=.22,yend=.25)+
-  annotate("text",
-           x = c(1.5),
-           y = c(0.3),
-           label = c("p = 0.01"),
-           family = "Helvetica", fontface = 3, size=3.5)+
-  ggtitle("Nova Scotia vs Bahamas\n4 months")+
+  #theme(axis.title.y = element_blank(),axis.title.x = element_blank())+
+  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwith food"),y=220,yend=250)+
+  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwithout food"),y=250,yend=250)+
+  geom_segment(aes(x="magnetic field\nwithout food",xend="magnetic field\nwithout food"),y=220,yend=250)+
+  #annotate("text",
+   #        x = c(1.5),
+    #       y = c(0.3),
+     #      label = c("p = 0.01"),
+      #     family = "Helvetica", fontface = 3, size=3.5)+
+  #ggtitle("Nova Scotia vs Bahamas\n4 months")+
   theme(plot.margin = unit(c(1,1,1,1), "lines"))
 year17apr
+
+ggsave(year17apr, dpi=300,width=4,height=4,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/Figures 9-6-22/2017_APRdata_9-6-22.tiff",  bg = "transparent")
 
 figure17<-plot_grid(year17,year17apr,rel_widths = c(1,1),rel_heights = c(1,1),ncol=2,labels="AUTO",label_size = 9,label_fontfamily = "Helvetica")
   
@@ -898,162 +1095,168 @@ figure17
 
 ggsave(figure17, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/2017_all_plot_2-1-22.tiff",  bg = "transparent")
 
-year18 <-ggplot(subset(data_plot,year==2018),aes(x=field.type,y=freq))+
+year18 <-ggplot(subset(data_plot,year==2018),aes(x=field.type,y=mean.duration))+
   stat_summary(fun.y= mean,geom="bar",color="turquoise4",fill="turquoise4",alpha=0.8)+
   stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
-  geom_point(position=position_jitter(width=0.15))+
+  geom_point(position=position_jitter(width=0.2),size=4,alpha=0.8)+
   theme_bw()+
   coord_trans(y="sqrt")+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
-  scale_y_continuous("Proportion of Time",breaks=c(0,0.05,0.25,0.5),expand=c(0,0),limits=c(0,0.5))+
+  scale_y_continuous("Time exhibiting turtle dance\n(seconds)",breaks = c(0,100,200,300,400,500),expand=c(0,0),limits=c(0,550))+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
   ggtitle("") +
-  theme(text=element_text(size=12,family="Helvetica"))+
-  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Helvetica",size=12,face="plain"))+
+  theme(text=element_text(size=12,family="Arial"))+
+  theme(plot.title = element_blank())+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
-  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Helvetica"),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Helvetica"),
-        axis.text.x = element_text(angle=0,vjust = -.5,size = 12,family="Helvetica"),
-        axis.text = element_text(size=12,family="Helvetica"))+
+  theme(axis.title.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text = element_blank())+
   theme(panel.border = element_blank(), 
         axis.line = element_line(colour = "black"),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.background = element_rect(fill = "transparent"))+
   theme(axis.title.y = element_blank(),axis.title.x = element_blank())+
-  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwith food"),y=.22,yend=.25)+
-  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwithout food"),y=0.25,yend=0.25)+
-  geom_segment(aes(x="magnetic field\nwithout food",xend="magnetic field\nwithout food"),y=.22,yend=.25)+
-  annotate("text",
-           x = c(1.5),
-           y = c(0.3),
-           label = c("p = 6e-5"),
-           family = "Helvetica", fontface = 3, size=3.5)+
+  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwith food"),y=220,yend=250)+
+  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwithout food"),y=250,yend=250)+
+  geom_segment(aes(x="magnetic field\nwithout food",xend="magnetic field\nwithout food"),y=220,yend=250)+
+  #annotate("text",
+   #        x = c(1.5),
+    #       y = c(0.3),
+     #      label = c("p = 6e-5"),
+      #     family = "Helvetica", fontface = 3, size=3.5)+
   ggtitle("Cuba vs New York")+
   theme(plot.margin = unit(c(2,2,2,2), "lines"))
 year18
 
-ggsave(year18, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/2018_plot.png",  bg = "transparent")
+ggsave(year18, dpi=300,width=4,height=4,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/Figures 9-6-22/2018_plot_9-6-22.tiff",  bg = "transparent")
 
-year19 <-ggplot(subset(data_plot,year==2019),aes(x=field.type,y=freq))+
+year19 <-ggplot(subset(data_plot,year==2019),aes(x=field.type,y=mean.duration))+
   stat_summary(fun.y= mean,geom="bar",color="darkseagreen4",fill="darkseagreen4",alpha=0.8)+
   stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
-  geom_point(position=position_jitter(width=0.15))+
+  geom_point(position=position_jitter(width=0.2),size=4,alpha=0.8)+
   theme_bw()+
   coord_trans(y="sqrt")+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
-  scale_y_continuous("Proportion of Time",breaks=c(0,0.05,0.25,0.5),expand=c(0,0),limits=c(0,0.5))+
+  scale_y_continuous("Time exhibiting turtle dance\n(seconds)",breaks = c(0,100,200,300,400,500),expand=c(0,0),limits=c(0,550))+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
   ggtitle("") +
-  theme(text=element_text(size=12,family="Helvetica"))+
-  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Helvetica",size=12,face="plain"))+
+  theme(text=element_text(size=12,family="Arial"))+
+  theme(plot.title = element_blank())+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
-  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Helvetica"),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Helvetica",angle=0),
-        axis.text.x = element_text(angle=0,vjust = -.5),
-        axis.text = element_text(size=12,family="Helvetica"))+
+   theme(axis.title.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text = element_blank())+
   theme(panel.border = element_blank(), 
         axis.line = element_line(colour = "black"),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.background = element_rect(fill = "transparent"))+
-  theme(axis.title.y = element_blank(),axis.title.x = element_blank())+
-  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwith food"),y=.22,yend=.25)+
-  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwithout food"),y=0.25,yend=0.25)+
-  geom_segment(aes(x="magnetic field\nwithout food",xend="magnetic field\nwithout food"),y=.22,yend=.25)+
-  annotate("text",
-           x = c(1.5),
-           y = c(0.3),
-           label = c("p = 0.0006"),
-           family = "Helvetica", fontface = 3, size=3.5)+
+  #theme(axis.title.y = element_blank(),axis.title.x = element_blank())+
+  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwith food"),y=220,yend=250)+
+  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwithout food"),y=250,yend=250)+
+  geom_segment(aes(x="magnetic field\nwithout food",xend="magnetic field\nwithout food"),y=220,yend=250)+
+  #annotate("text",
+   #        x = c(1.5),
+    #       y = c(0.3),
+     #      label = c("p = 0.0006"),
+      #     family = "Helvetica", fontface = 3, size=3.5)+
   ggtitle("Massachusetts vs Florida")+
   theme(plot.margin = unit(c(2,2,2,2), "lines"))
 year19
 
-ggsave(year19, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/2019_plot.png",  bg = "transparent")
+ggsave(year19, dpi=300,width=4,height=4,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/Figures 9-6-22/2019_plot_9-6-22.tiff",  bg = "transparent")
 
-year20 <-ggplot(subset(data_plot,year=="2020_spr"),aes(x=field.type,y=freq))+
+year20 <-ggplot(subset(data_plot,year=="2020_spr"),aes(x=field.type,y=mean.duration))+
   stat_summary(fun.y= mean,geom="bar",color="lightgoldenrod3",fill="lightgoldenrod3",alpha=0.8)+
   stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
-  geom_point(position=position_jitter(width=0.15))+
+  geom_point(position=position_jitter(width=0.2),size=4,alpha=0.8)+
   theme_bw()+
   coord_trans(y="sqrt")+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
-  scale_y_continuous("Proportion of Time",breaks=c(0,0.05,0.25,0.5),expand=c(0,0),limits=c(0,0.5))+
+  scale_y_continuous("Time exhibiting turtle dance\n(seconds)",breaks = c(0,100,200,300,400,500),expand=c(0,0),limits=c(0,550))+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
   ggtitle("") +
-  theme(text=element_text(size=12,family="Helvetica"))+
-  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Helvetica",size=12,face="plain"))+
+  theme(text=element_text(size=12,family="Arial"))+
+  theme(plot.title = element_blank())+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
-  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Helvetica"),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Helvetica",angle=0),
-        axis.text.x = element_text(angle=0,vjust = -.5),
-        axis.text = element_text(size=12,family="Helvetica"))+
+   theme(axis.title.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text = element_blank())+
   theme(panel.border = element_blank(), 
         axis.line = element_line(colour = "black"),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.background = element_rect(fill = "transparent"))+
   theme(axis.title.y = element_blank(),axis.title.x = element_blank())+
- geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwith food"),y=.22,yend=.25)+
-  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwithout food"),y=0.25,yend=0.25)+
-  geom_segment(aes(x="magnetic field\nwithout food",xend="magnetic field\nwithout food"),y=.22,yend=.25)+
-  annotate("text",
-           x = c(1.5),
-           y = c(0.3),
-           label = c("p = 0.002"),
-           family = "Helvetica", fontface = 3, size=3.5)+
+ geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwith food"),y=220,yend=250)+
+  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwithout food"),y=250,yend=250)+
+  geom_segment(aes(x="magnetic field\nwithout food",xend="magnetic field\nwithout food"),y=220,yend=250)+
+ # annotate("text",
+  #         x = c(1.5),
+   #        y = c(0.3),
+    #       label = c("p = 0.002"),
+     #      family = "Helvetica", fontface = 3, size=3.5)+
   ggtitle("North Carolina vs New Brunswick")+
   theme(plot.margin = unit(c(2,2,2,2), "lines"))
 year20
 
-ggsave(year20, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/2020_plot.png",  bg = "transparent")
+ggsave(year20, dpi=300,width=4,height=4,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/Figures 9-6-22/2020_plot_9-6-22.tiff",  bg = "transparent")
 
-year20_fa <-ggplot(subset(data_plot,year=="2020_fall"),aes(x=field.type,y=freq))+
+year20_fa <-ggplot(subset(data_plot,year=="2020_fall"),aes(x=field.type,y=mean.duration))+
   stat_summary(fun.y= mean,geom="bar",color="lightpink3",fill="lightpink3",alpha=0.8)+
   stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
-  geom_point(position=position_jitter(width=0.15))+
+  geom_point(position=position_jitter(width=0.2),size=4,alpha=0.8)+
   theme_bw()+
   coord_trans(y="sqrt")+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
-  scale_y_continuous("Proportion of Time",breaks=c(0,0.05,0.25,0.5),expand=c(0,0),limits=c(0,0.5))+
+  scale_y_continuous("Time exhibiting turtle dance\n(seconds)",breaks = c(0,100,200,300,400,500),expand=c(0,0),limits=c(0,550))+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment") +
-  theme(text=element_text(size=12,family="Helvetica"))+
-  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Helvetica",size=12,face="plain"))+
+  theme(text=element_text(size=12,family="Arial"))+
+  theme(plot.title = element_blank())+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
-  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Helvetica"),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Helvetica",angle = 0),
-        axis.text.x = element_text(angle=0,vjust = -.5),
-        axis.text = element_text(size=12,family="Helvetica"))+
+   theme(axis.title.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text = element_blank())+
   theme(panel.border = element_blank(), 
         axis.line = element_line(colour = "black"),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.background = element_rect(fill = "transparent"))+
   theme(axis.title.y = element_blank(),axis.title.x = element_blank())+
- geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwith food"),y=.22,yend=.25)+
-  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwithout food"),y=0.25,yend=0.25)+
-  geom_segment(aes(x="magnetic field\nwithout food",xend="magnetic field\nwithout food"),y=.22,yend=.25)+
-  annotate("text",
-           x = c(1.5),
-           y = c(0.3),
-           label = c("p = 0.003"),
-           family = "Helvetica", fontface = 3, size=3.5)+
+ geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwith food"),y=220,yend=250)+
+  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwithout food"),y=250,yend=250)+
+  geom_segment(aes(x="magnetic field\nwithout food",xend="magnetic field\nwithout food"),y=220,yend=250)+
+  #annotate("text",
+   #        x = c(1.5),
+    #       y = c(0.3),
+     ##      label = c("p = 0.003"),
+       #    family = "Helvetica", fontface = 3, size=3.5)+
   ggtitle("Turks & Caicos vs Haiti")+
   theme(plot.margin = unit(c(2,2,2,2), "lines"))
 year20_fa
+
+ggsave(year20_fa, dpi=300,width=4,height=4,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/Figures 9-6-22/2020_fa_plot_9-6-22.tiff",  bg = "transparent")
 
 figureyear2<-plot_grid(year18,year19,year20,year20_fa,rel_widths = c(1,1),rel_heights = c(1,1),ncol = 2,labels="AUTO",label_size = 9,label_fontfamily = "Helvetica")
 figureyear2

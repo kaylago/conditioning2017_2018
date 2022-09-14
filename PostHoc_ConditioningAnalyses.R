@@ -66,6 +66,14 @@ allyears_cond <- allyears_cond %>% mutate(time.category=ifelse(trialmins.ceiling
                                                                                  "16-20"))))
 #allyears_cond <- allyears_cond %>% group_by(turtle.id,date,year,observer,time.category)%>% mutate(event.count=rep(1))
 
+allyears_control <- allyears %>% filter(field.type=="control")
+
+allyears_control <- allyears_control %>% mutate(time.category=ifelse(trialmins.ceiling<=5,"1-5",
+                                                               ifelse(trialmins.ceiling>5 & trialmins.ceiling<=10,"6-10",
+                                                                      ifelse(trialmins.ceiling>10 & trialmins.ceiling<=15,"11-15",
+                                                                             "16-20"))))
+#allyears_cond <- allyears_cond
+
 library(plyr)
 allyears_cond1_alt <- allyears_cond %>% group_by(turtle.id,date,year,observer) %>% mutate(trialmins.round=round_any(trial.minutes,0.2,f=ceiling))
 detach(package:plyr)
@@ -73,6 +81,24 @@ detach(package:plyr)
 allyears_cond1_alt <- allyears_cond1_alt %>% group_by(turtle.id,date,year,observer,field,field.type,trialmins.round) %>% summarize(duration=sum(duration))
 
 allyears_cond1_alt <- allyears_cond1_alt %>% mutate(trialmins.ceiling=ceiling(trialmins.round))
+
+####
+library(plyr)
+allyears_control_alt <- allyears_control %>% group_by(turtle.id,date,year,observer) %>% mutate(trialmins.round=round_any(trial.minutes,0.2,f=ceiling))
+detach(package:plyr)
+
+allyears_control_alt <- allyears_control_alt %>% group_by(turtle.id,date,year,observer,field,field.type,trialmins.round) %>% summarize(duration=sum(duration))
+
+allyears_control_alt <- allyears_control_alt %>% mutate(trialmins.ceiling=ceiling(trialmins.round))
+
+allyears_control_alt2 <- allyears_control_alt %>% group_by(turtle.id,date,year,field,field.type,trialmins.round) %>% summarize(duration=mean(duration))
+
+allyears_control_alt2 <- allyears_control_alt2 %>% mutate(trialmins.ceiling=ceiling(trialmins.round))
+
+allyears_control_alt2 <- allyears_control_alt2 %>% mutate(log.duration=log(duration))
+
+####
+
 
 allyears_cond1_alt2 <- allyears_cond1_alt %>% group_by(turtle.id,date,year,field,field.type,trialmins.round) %>% summarize(duration=mean(duration))
 
@@ -228,6 +254,7 @@ library(pscl)
 library(jtools)
 library(lme4)
 library(nlme)
+library(emmeans)
 #detach(package:lme4)
 
 
@@ -271,7 +298,7 @@ plot(density(allyears4$log.duration))
 
 #plot(density(allyears_cond2$log.duration))
 
-library(emmeans)
+
 lme1 <- lme(log(duration)~as.factor(trialmins.ceiling)*field,random=~1|observer/turtle.id,data=allyears_cond)
 summary(lme1)
 anova(lme1)
@@ -279,8 +306,8 @@ emmeans(lme1, list(pairwise ~ field), adjust = "tukey")
 
 mean(allyears7$trial.minutes)
 
-library(emmeans)
-lme2 <- lme(log.duration~as.factor(trialmins.ceiling),random=list(turtle.id=~1,observer=~1),data=allyears4)
+
+lme2 <- lme(duration~as.factor(trialmins.ceiling),random=list(turtle.id=~1,observer=~1),data=allyears4)
 summary(lme2) ###minute 2 is significant factor, p= 0.0058
 anova(lme2) ##anova p=0.04 with log.duration
 emmeans(lme2,list(pairwise ~ as.factor(trialmins.ceiling)))
@@ -289,8 +316,7 @@ lme3 <- lme(log.duration~((trialmins.ceiling))+color,random=list(turtle.id=~1,ob
 summary(lme3)
 anova(lme3)
 
-library(nlme)
-library(emmeans)
+
 lme4 <- lme(trialmins.ceiling~color*log.duration,random=~1|turtle.id,data=allyears7)
 summary(lme4)
 anova(lme4)
@@ -304,8 +330,14 @@ emmeans(lme5,list(pairwise~trialmins.ceiling))
 
 
 lme5.1 <- lme(log.duration~as.factor(trialmins.ceiling),random = ~1|turtle.id,data=subset(allyears_cond1_alt2,duration>=2))
+summary(lme5.1) ##min 13 sig at 0.01
+anova(lme5.1) ##NOTSIG AT 0.075
+emmeans(lme5.1,list(pairwise~as.factor(trialmins.ceiling)))
+
+lme5.1 <- lme(log.duration~as.factor(trialmins.ceiling),random = ~1|turtle.id,data=subset(allyears_control_alt2,duration>=2))
 summary(lme5.1) ##2 MINS SIG AT 0.0489
 anova(lme5.1) ##SIG AT 0.02
+emmeans(lme5.1,list(pairwise~as.factor(trialmins.ceiling)))
 
 lme5.2 <- lme(log.duration~as.factor(trialmins.ceiling),random = ~1|turtle.id,data=subset(allyears_cond1_alt2,duration>=1))
 summary(lme5.2)
@@ -319,7 +351,7 @@ glm1 <- lmer(duration~as.factor(trialmins.ceiling)+(1|turtle.id),data=allyears_c
 summary(glm1)
 anova(glm1)
 #chisq.test(glm1)
-emmeans(glm1,list(pairwise~time.category),adjust="tukey")
+emmeans(glm1,list(pairwise~trialmins.ceiling),adjust="tukey")
 
 #glm <- glm(Y ~  X1 + X2 + X3, data = simdata, family = Gamma("inverse"))
 
@@ -403,21 +435,22 @@ getmode <- function(v) {
 getmode(allyears_cond1_alt2$duration)
 
 #####PLOTS
-plot17<-ggplot(subset(allyears_cond1_alt2,duration>=1),aes(x=trialmins.ceiling,y=duration))+
+plot17<-ggplot(subset(allyears_cond1_alt2,duration>=2),aes(x=trialmins.ceiling,y=duration))+
   stat_summary(fun= mean,geom="bar")+
-  geom_point(aes(size=duration,color=turtle.id),position=position_jitter(width=0.2))+
+  geom_point(aes(size=duration),position=position_jitter(width=0.2),color="goldenrod")+
   #geom_point(data = allyears_alt2,aes(x=trialmins.ceiling,y=mean(mean.duration),color="red"),size=2)+
   scale_size_continuous(breaks=c(5,10,20,40,80))+
   #geom_smooth(method="loess",se=F)+
   theme_bw()+
   coord_trans(y="sqrt")+
-  scale_x_continuous(breaks=c(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20))+
+  scale_x_continuous(breaks=c(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),"Trial Minutes")+
+  scale_y_continuous("Duration of Turtle Dancing Event",breaks=c(5,10,20,30,40,50),limits = c(0,50))+
   ggtitle("") +
-  theme(text=element_text(size=18,family="calibri"))+
-  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face="plain"))+
+  theme(text=element_text(size=12,family="Helvetica"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Helvetica",size=12,face="plain"))+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
-  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Helvetica"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Helvetica"))+
   theme(panel.border = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), 
@@ -425,6 +458,7 @@ plot17<-ggplot(subset(allyears_cond1_alt2,duration>=1),aes(x=trialmins.ceiling,y
   theme(
     rect = element_rect(fill = "transparent") # all rectangles
   )+
+  labs(size="Duration")+
   theme(
     panel.background = element_rect(fill = "transparent"), # bg of the panel
     plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
@@ -433,7 +467,41 @@ plot17<-ggplot(subset(allyears_cond1_alt2,duration>=1),aes(x=trialmins.ceiling,y
   )
 plot17
 
-ggsave(plot17, width = 8, height=6,units="in",bg="white",filename="C:/Users/kkmgo/Dropbox/Conditioning_MagFields_project/Post-Hoc Analyses/Figures/SummedBetween0.2MinData_AveragedAcrossObservers_GreaterThan1Sec.png")
+ggsave(plot17, width = 10, height=8,units="in",bg="white",filename="C:/Users/kkmgo/Dropbox/Conditioning_MagFields_project/Post-Hoc Analyses/Figures/CONDITIONEDSummedBetween0.2MinData_AveragedAcrossObservers_GreaterThan2Sec.tiff")
+
+plot17_control<-ggplot(subset(allyears_control_alt2,duration>=2),aes(x=trialmins.ceiling,y=duration))+
+  stat_summary(fun= mean,geom="bar")+
+  geom_point(aes(size=duration),position=position_jitter(width=0.2),color="darkolivegreen3")+
+  #geom_point(data = allyears_alt2,aes(x=trialmins.ceiling,y=mean(mean.duration),color="red"),size=2)+
+  scale_size_continuous(breaks=c(5,10,20,40,80))+
+  #geom_smooth(method="loess",se=F)+
+  theme_bw()+
+  coord_trans(y="sqrt")+
+  scale_x_continuous(breaks=c(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20),"Trial Minutes")+
+  scale_y_continuous("Duration of Turtle Dancing Event",breaks=c(5,10,20,30,40,50),limits = c(0,50))+
+  ggtitle("") +
+  theme(text=element_text(size=12,family="Helvetica"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Helvetica",size=12,face="plain"))+
+  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Helvetica"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Helvetica"))+
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"))+
+  theme(
+    rect = element_rect(fill = "transparent") # all rectangles
+  )+
+  labs(size="Duration")+
+  theme(
+    panel.background = element_rect(fill = "transparent"), # bg of the panel
+    plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+    legend.background = element_rect(fill = "transparent"), # get rid of legend bg
+    legend.box.background = element_rect(fill = "transparent") # get rid of legend panel bg
+  )
+plot17_control
+
+ggsave(plot17_control, width = 10, height=8,units="in",bg="white",filename="C:/Users/kkmgo/Dropbox/Conditioning_MagFields_project/Post-Hoc Analyses/Figures/CONTROLSummedBetween0.2MinData_AveragedAcrossObservers_GreaterThan2Sec.tiff")
 
 
 plot18<-ggplot(allyears_alt2.2,aes(x=trialmins.ceiling,y=mean.duration))+
