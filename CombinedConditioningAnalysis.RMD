@@ -95,6 +95,21 @@ data <- data %>% mutate(geography=ifelse(group=="purple","southern",ifelse(group
                                                                           
 ```
 
+```{r}
+data_pub <- data
+
+data_pub$field.type <- factor(data_pub$field.type,levels=c("conditioned","control"), labels=c("magnetic field\nwith food","magnetic field\nwithout food"))
+
+data_pub$field<- factor(data_pub$field,levels=c("NB","BH","Cuba","New England","FL","MA","OBX","TC","HT"),labels=c("New Hampshire, USA","Mexico","Cuba","Delaware, USA","Florida, USA","Maine, USA","Virginia, USA","Turks & Caicos","Haiti"))
+
+data_pub <- data_pub %>% mutate(field=ifelse(year=="2020_spr"& field=="New Hampshire","Newfoundland,Canada",as.character(field)))
+
+data_pub <- data_pub %>% arrange(year,turtle.id) %>% select(-c(geography,freq))
+
+write.csv(data_pub,"C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/CompactObserverData_AllYears/alldata_forpublication_11-2-22.csv")
+
+```
+
 ```{r statistical tests and models, echo=TRUE}
 wilcox.test(freq~field.type,subset(data,year==2019),paired=TRUE)#0.00057
 

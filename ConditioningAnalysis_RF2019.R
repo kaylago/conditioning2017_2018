@@ -141,7 +141,7 @@ mean(observer_difference$difference)
 library(car)
 leveneTest(mean.duration~field,data=rf_data) #passes
 
-wilcox.test(freq~field,rf_data)
+#wilcox.test(freq~field,rf_data)
 
 wilcox.test(freq~field,rf_data,paired=TRUE)
 
@@ -274,7 +274,7 @@ nov_plot<-ggplot(nov_data,aes(x=field,y=freq))+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
   scale_y_continuous("Proportion of Time",breaks = c(0,0.01,0.02,0.04,0.08,0.16),expand=c(0,0),limits=c(0,0.16))+
   #coord_cartesian(ylim=c(0,0.1))+
-  scale_x_discrete("Treatment",labels=c("FL"="Florida \n(control)","MA"="Massachusetts \n(conditioned)"))+
+  scale_x_discrete("Treatment",labels=c("FL"="Florida \n(control)","MA"="Maine \n(conditioned)"))+
   ggtitle("") +
   theme(text=element_text(size=22,family="calibri"))+
   theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face="plain"))+
@@ -303,7 +303,7 @@ anno<- data.frame(field=c("FL","MA-1","MA-2","MA-RF"),
                              y=c(0.086,0.09,0.1,0))
 
 
-all_plot<-ggplot(alldata,aes(x=field,y=freq),group=exper)+
+all_plot<-ggplot(alldata,aes(x=field,y=mean.duration),group=exper)+
   stat_summary(fun.y= mean,geom="bar",color="black",fill=c("goldenrod","springgreen4","olivedrab","palegreen3"))+
   stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
@@ -312,47 +312,47 @@ all_plot<-ggplot(alldata,aes(x=field,y=freq),group=exper)+
   theme_bw()+
   coord_trans(y="sqrt")+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
-  scale_y_continuous("Proportion of Time",breaks = c(0,0.01,0.02,0.04,0.08,0.16),expand=c(0,0),limits=c(0,0.2))+
+  scale_y_continuous("Time spent exhibiting \nfood-seeking behavior (seconds)",breaks = c(0,25,50,100,200),expand=c(0,0),limits=c(0,200))+
   #coord_cartesian(ylim=c(0,0.1))+
-  scale_x_discrete("Treatment",labels=c("FL"="Florida \n(control)","MA-1"="Massachusetts-1","MA-2"="Massachusetts-2","MA-RF"="Massachusetts-RF"))+
+  scale_x_discrete("Treatment",labels=c("FL"="Florida \n(control)","MA-1"="Maine \n(conditioned)","MA-2"="Maine \n(RF exp)","MA-RF"="Maine with RF \n(RF exp)"))+
   ggtitle("") +
-  theme(text=element_text(size=22,family="calibri"))+
-  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=18,face="plain"))+
+  theme(text=element_text(size=12,family="calibri"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=12,face="plain"))+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
-  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=20,family = "Calibri"),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=20,family = "Calibri"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Calibri"),
+        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Calibri"))+
   theme(panel.border = element_blank(), 
         axis.line = element_line(colour = "black"),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.background = element_rect(fill = "transparent", color = NA))+
-  geom_segment(aes(x="FL",xend="MA-1"),y=0.08,yend=0.08)+
-  geom_segment(aes(x="FL",xend="FL"),y=0.075,yend=0.08)+
-  geom_segment(aes(x="MA-1",xend="MA-1"),y=0.075,yend=0.08)+
-  geom_segment(aes(x="MA-1",xend="MA-2"),y=0.13,yend=0.13)+
-  geom_segment(aes(x="MA-1",xend="MA-1"),y=0.13,yend=0.125)+
-  geom_segment(aes(x="MA-2",xend="MA-2"),y=0.13,yend=0.125)+
-  geom_segment(aes(x="MA-2",xend="MA-RF"),y=0.16,yend=0.16)+
-  geom_segment(aes(x="MA-2",xend="MA-2"),y=0.155,yend=0.16)+
-  geom_segment(aes(x="MA-RF",xend="MA-RF"),y=0.16,yend=0.155)+
+  geom_segment(aes(x="FL",xend="MA-1"),y=88,yend=88)+
+  geom_segment(aes(x="FL",xend="FL"),y=83,yend=88)+
+  geom_segment(aes(x="MA-1",xend="MA-1"),y=83,yend=88)+
+  geom_segment(aes(x="MA-1",xend="MA-2"),y=130,yend=130)+
+  geom_segment(aes(x="MA-1",xend="MA-1"),y=130,yend=125)+
+  geom_segment(aes(x="MA-2",xend="MA-2"),y=130,yend=125)+
+  geom_segment(aes(x="MA-2",xend="MA-RF"),y=160,yend=160)+
+  geom_segment(aes(x="MA-2",xend="MA-2"),y=155,yend=160)+
+  geom_segment(aes(x="MA-RF",xend="MA-RF"),y=160,yend=155)+
   #geom_segment(aes(x="MA-RF",xend="MA-RF"),y=0.15,yend=0.155)+
   annotate("text",
            x = c(1.5),
-           y = c(0.09),
+           y = c(98),
            label = c("p = 0.002*"),
-           family = "Calibri", fontface = 3, size=5)+
+           family = "Calibri", fontface = 3, size=3)+
   annotate("text",
          x = c(2.5),
-         y = c(0.14),
+         y = c(140),
          label = c("p = 0.9"),
-         family = "Calibri", fontface = 3, size=5)+
+         family = "Calibri", fontface = 3, size=3)+
   annotate("text",
            x = c(3.5),
-           y = c(0.175),
+           y = c(175),
            label = c("p = 0.9"),
-           family = "Calibri", fontface = 3, size=5)
+           family = "Calibri", fontface = 3, size=3)
 
 
 all_plot
 
-ggsave(all_plot, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/rf_all_2019_12-15-21.png",  bg = "transparent")
+ggsave(all_plot, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/rf_all_2019_9-18-22.png",  bg = "transparent")
