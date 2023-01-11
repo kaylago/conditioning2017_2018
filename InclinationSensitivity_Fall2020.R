@@ -140,6 +140,29 @@ lm <- lmer(round(freq)~field.type4+(1|turtle.id),family="poisson",data=data)
 anova(lm)
 summary(lm)
 
+#ORIGINAL EXP
+og_data <- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/CompactObserverData_AllYears/2020fall_data_observers_FINAL_12-2-21.csv")
+
+og_data <- og_data %>% select(-c(X))
+
+og_data <- og_data %>% group_by(turtle.id,date,field,field.type,group) %>% summarise(mean.duration=mean(total.duration))
+
+og_data <- og_data %>% mutate(exper=rep("OG"))
+
+og_data <- og_data %>% mutate(freq=mean.duration/1200)
+
+og_data$date <- as.Date(og_data$date,format= "%Y-%m-%d")
+
+og_data <- og_data %>% mutate(field.type2=ifelse(field.type=="conditioned","magnetic field\nwith food","magnetic field\nwithout food"))
+
+og_data <- og_data %>% mutate(field.type3=as.character(field.type2)) %>% mutate(field.type4=as.character(field.type2)) 
+
+data <- data %>% mutate(exper=rep("INCSENS"))
+
+all_data <- rbind(og_data,data)
+
+wilcox.test(freq~field.type,og_data,paired=TRUE)
+
 library(ggplot2)
 library(ggpubr)
 library(extrafont)
@@ -242,26 +265,25 @@ plotTC
 
 ggsave(plotTC, dpi=300,width=6,height=6,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/2020_TCIncSens_5-10-22.tiff",  bg = "transparent")
 
-data$field.type3 <- factor(data$field.type3,levels=c("conditioned","1deg","2deg"))
+all_data$field.type3 <- factor(all_data$field.type3,levels=c("magnetic field\nwith food","magnetic field\nwithout food","conditioned","1deg","2deg"),labels=c("initial experiments\nrewarded\nmagnetic field","initial experiments\nunrewarded\nmagnetic field","rewarded\nmagnetic field","1 degree\ndifference","2 degree\ndifference"))
 
-plot<-ggplot(data,aes(x=field.type3,y=freq))+
-  stat_summary(fun.y="mean",geom="bar",fill="forestgreen")+
+plot<-ggplot(all_data,aes(x=field.type3,y=mean.duration))+
+  stat_summary(fun.y="mean",geom="bar",fill=c("maroon","maroon","coral","coral","coral"))+
   stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   geom_point(position=position_jitter(width=0.15))+
   theme_bw()+
   coord_trans(y="sqrt")+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
-  scale_y_continuous("Proportion of Time",expand=c(0,0),limits=c(0,0.5),breaks= c(0.05,0.1,0.2,0.3,0.4,0.5))+
+  scale_y_continuous("Time spent exhibiting the turtle dance (seconds)",expand=c(0,0),limits=c(0,350),breaks=c(0.1,100,200,300))+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
   #labs(title="Canada Group") +
-  theme(text=element_text(size=12,family="Helvetica"))+
+  theme(text=element_text(size=16,family="Helvetica"))+
   theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Helvetica",size=12,face = "plain"))+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
-  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Helvetica"),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Helvetica"),
-        axis.text.x = element_text(angle=45,hjust = 1))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=16,family = "Helvetica"),
+        axis.title.x = element_blank())+
   theme(panel.border = element_blank(), 
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), 
@@ -269,25 +291,84 @@ plot<-ggplot(data,aes(x=field.type3,y=freq))+
         panel.background = element_rect(fill = "transparent"))+
   theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())+
-  geom_segment(aes(x="conditioned",xend="conditioned"),y=.4,yend=.42)+
-  geom_segment(aes(x="conditioned",xend="1deg"),y=0.42,yend=0.42)+
-  geom_segment(aes(x="1deg",xend="1deg"),y=.42,yend=.4)+
+  geom_segment(aes(x="rewarded\nmagnetic field",xend="rewarded\nmagnetic field"),y=200,yend=220)+
+  geom_segment(aes(x="rewarded\nmagnetic field",xend="1 degree\ndifference"),y=220,yend=220)+
+  geom_segment(aes(x="1 degree\ndifference",xend="1 degree\ndifference"),y=200,yend=220)+
+  annotate("text",
+           x = c(3.5),
+           y = c(240),
+           label = c("p = 0.02"),
+           family = "Helvetica", fontface = 1, size=4)+
+  geom_segment(aes(x="rewarded\nmagnetic field",xend="rewarded\nmagnetic field"),y=270,yend=290)+
+  geom_segment(aes(x="rewarded\nmagnetic field",xend="2 degree\ndifference"),y=290,yend=290)+
+  geom_segment(aes(x="2 degree\ndifference",xend="2 degree\ndifference"),y=290,yend=270)+
+  annotate("text",
+           x = c(4),
+           y = c(310),
+           label = c("p = 0.02"),
+           family = "Helvetica", fontface = 1, size=4)+
+  geom_segment(aes(x="initial experiments\nrewarded\nmagnetic field",xend="initial experiments\nrewarded\nmagnetic field"),y=270,yend=290)+
+  geom_segment(aes(x="initial experiments\nrewarded\nmagnetic field",xend="initial experiments\nunrewarded\nmagnetic field"),y=290,yend=290)+
+  geom_segment(aes(x="initial experiments\nunrewarded\nmagnetic field",xend="initial experiments\nunrewarded\nmagnetic field"),y=290,yend=270)+
   annotate("text",
            x = c(1.5),
-           y = c(0.45),
-           label = c("p = 0.02"),
-           family = "Calibri", fontface = 3, size=4)+
-  geom_segment(aes(x="conditioned",xend="conditioned"),y=.2,yend=.22)+
-  geom_segment(aes(x="conditioned",xend="2deg"),y=0.22,yend=0.22)+
-  geom_segment(aes(x="2deg",xend="2deg"),y=.22,yend=.2)+
-  annotate("text",
-           x = c(2),
-           y = c(0.25),
-           label = c("p = 0.02"),
-           family = "Helvetica", fontface = 3, size=4)
+           y = c(310),
+           label = c("p = 0.003"),
+           family = "Helvetica", fontface = 1, size=4)
 #theme(axis.title.x = element_blank(),axis.title.y=element_blank())
 plot
 
-ggsave(plot, dpi=300,width=6,height=6,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/2020_IncSens_5-22-22.tiff",  bg = "transparent")
+ggsave(plot, dpi=300,width=9,height=6,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/2020_IncSens_12-13-22.tiff",  bg = "transparent")
+
+plot<-ggplot(all_data,aes(x=field.type3,y=mean.duration))+
+  stat_summary(fun.y="mean",geom="bar",fill=c("maroon","maroon","coral","coral","coral"))+
+  stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
+               geom="errorbar",color="black")+
+  geom_point(position=position_jitter(width=0.15))+
+  theme_bw()+
+  coord_trans(y="sqrt")+
+  #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
+  scale_y_continuous("Time spent exhibiting\nfood anticipatory behavior (seconds)",expand=c(0,0),limits=c(0,350))+
+  #coord_cartesian(ylim=c(0,0.1))+
+  scale_x_discrete("Treatment")+
+  #labs(title="Canada Group") +
+  theme(text=element_text(size=12,family="Helvetica"))+
+  theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Helvetica",size=12,face = "plain"))+
+  theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Helvetica"),
+        axis.title.x = element_blank())+
+  theme(panel.border = element_blank(), 
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        panel.background = element_rect(fill = "transparent"))+
+  theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())+
+  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwith food"),y=200,yend=220)+
+  geom_segment(aes(x="magnetic field\nwith food",xend="1 degree\ndifference"),y=220,yend=220)+
+  geom_segment(aes(x="1 degree\ndifference",xend="1 degree\ndifference"),y=200,yend=220)+
+  annotate("text",
+           x = c(3.5),
+           y = c(230),
+           label = c("p = 0.02"),
+           family = "Calibri", fontface = 3, size=4)+
+  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwith food"),y=270,yend=290)+
+  geom_segment(aes(x="magnetic field\nwith food",xend="2 degree\ndifference"),y=290,yend=290)+
+  geom_segment(aes(x="2 degree\ndifference",xend="2 degree\ndifference"),y=290,yend=270)+
+  annotate("text",
+           x = c(4),
+           y = c(300),
+           label = c("p = 0.02"),
+           family = "Helvetica", fontface = 3, size=4)+
+  geom_segment(aes(x="initial experiments\nmagnetic field\nwith food",xend="initial experiments\nmagnetic field\nwith food"),y=270,yend=290)+
+  geom_segment(aes(x="initial experiments\nmagnetic field\nwith food",xend="initial experiments\nmagnetic field\nwithout food"),y=290,yend=290)+
+  geom_segment(aes(x="initial experiments\nmagnetic field\nwithout food",xend="initial experiments\nmagnetic field\nwithout food"),y=290,yend=270)+
+  annotate("text",
+           x = c(1.5),
+           y = c(300),
+           label = c("p = 0.003"),
+           family = "Helvetica", fontface = 3, size=4)
+#theme(axis.title.x = element_blank(),axis.title.y=element_blank())
+plot
 
 

@@ -92,6 +92,7 @@ leveneTest(freq~field,data=subset(data,year="2020_fall"))
 
 data <- data %>% mutate(geography=ifelse(group=="purple","southern",ifelse(group=="blue","southern",ifelse(group=="red","northern",ifelse(group=="maroon","northern",ifelse(group=="green","mid-north",ifelse(group=="grey","southern",ifelse(group=="pink","southern","mid"))))))))
 
+
                                                                           
 ```
 
@@ -508,15 +509,17 @@ all_plot<-ggplot(data_plot,aes(x=field.type,y=mean.duration))+
   theme_bw()+
   coord_trans(y="sqrt")+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
- scale_y_continuous("Time exhibiting turtle dance\n(seconds)",breaks = c(0,100,200,300,400,500),expand=c(0,0),limits=c(0,550))+
+ scale_y_continuous("",breaks = c(0,100,200,300,400,500),expand=c(0,0),limits=c(0,550))+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment")+
   ggtitle("") +
   theme(text=element_text(size=12,family="Helvetica"))+
   theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Helvetica",size=12,face="plain"))+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
-  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Helvetica"),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Helvetica"))+
+  theme(axis.title.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank())+
   theme(panel.border = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), 
@@ -525,11 +528,11 @@ all_plot<-ggplot(data_plot,aes(x=field.type,y=mean.duration))+
   geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwith food"),y=450,yend=470)+
   geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwithout food"),y=470,yend=470)+
   geom_segment(aes(x="magnetic field\nwithout food",xend="magnetic field\nwithout food"),y=450,yend=470)+
-  annotate("text",
-           x = c(1.5),
-           y = c(520),
-           label = c("p = 5e-12"),
-           family = "Helvetica", fontface = 3, size=4)+
+  #annotate("text",
+   #        x = c(1.5),
+    #       y = c(520),
+     #      label = c("p = 5e-12"),
+      #     family = "Helvetica", fontface = 1, size=4)+
   theme(
     rect = element_rect(fill = "transparent") # all rectangles
   )+
@@ -541,7 +544,7 @@ all_plot<-ggplot(data_plot,aes(x=field.type,y=mean.duration))+
   )
 all_plot
 
-ggsave(all_plot, dpi=300, width = 5, height=5,units="in",filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/Figures 9-6-22/all_plot_seconds_logscale_9-6-22.tiff",  bg = "white")
+ggsave(all_plot, dpi=300, width = 5, height=5,units="in",filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/Figures 11-25-22/all_plot_seconds_logscale_11-29-22.tiff",  bg = "white")
 
 all_plot2<-ggplot(data_norm_dur2,aes(x=field,y=duration))+
   #stat_summary(fun.y= mean,geom="boxplot",color="steelblue3",fill="steelblue3",alpha=0.7)+
@@ -1048,11 +1051,11 @@ year17 <-ggplot(subset(data_plot,year==2017),aes(x=field.type,y=mean.duration))+
   theme(plot.margin = unit(c(1,1,1,1), "lines"))
 year17
 
-ggsave(year17, dpi=300,width=4,height=4,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/Figures 9-6-22/2017_OGdata_9-6-22.tiff",  bg = "transparent")
+ggsave(year17, dpi=300,width=4,height=4,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/Figures 9-6-22/2017_OGdata_11-25-22.tiff",  bg = "transparent")
 
 
 year17apr <-ggplot(apr2017_data_plot,aes(x=field.type,y=mean.duration))+
-  stat_summary(fun.y= mean,geom="bar",color="plum3",fill="plum3",alpha=0.8)+
+  stat_summary(fun.y= mean,geom="bar",color="plum",fill="plum",alpha=0.8)+
   stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
@@ -1090,7 +1093,7 @@ year17apr <-ggplot(apr2017_data_plot,aes(x=field.type,y=mean.duration))+
   theme(plot.margin = unit(c(1,1,1,1), "lines"))
 year17apr
 
-ggsave(year17apr, dpi=300,width=4,height=4,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/Figures 9-6-22/2017_APRdata_9-6-22.tiff",  bg = "transparent")
+ggsave(year17apr, dpi=300,width=4,height=4,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/Figures 9-6-22/2017_APRdata_11-25-22.tiff",  bg = "transparent")
 
 figure17<-plot_grid(year17,year17apr,rel_widths = c(1,1),rel_heights = c(1,1),ncol=2,labels="AUTO",label_size = 9,label_fontfamily = "Helvetica")
   
@@ -1111,7 +1114,7 @@ figure17
 ggsave(figure17, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/2017_all_plot_2-1-22.tiff",  bg = "transparent")
 
 year18 <-ggplot(subset(data_plot,year==2018),aes(x=field.type,y=mean.duration))+
-  stat_summary(fun.y= mean,geom="bar",color="turquoise4",fill="turquoise4",alpha=0.8)+
+  stat_summary(fun.y= mean,geom="bar",color="turquoise3",fill="turquoise3",alpha=0.8)+
   stat_summary(fun.y=mean,fun.ymin = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.ymax = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   #geom_bar(data=purstats,aes(x=field.type,y=meanfreq),stat="identity")+
@@ -1149,7 +1152,7 @@ year18 <-ggplot(subset(data_plot,year==2018),aes(x=field.type,y=mean.duration))+
   theme(plot.margin = unit(c(2,2,2,2), "lines"))
 year18
 
-ggsave(year18, dpi=300,width=4,height=4,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/Figures 9-6-22/2018_plot_9-6-22.tiff",  bg = "transparent")
+ggsave(year18, dpi=300,width=4,height=4,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/Figures 9-6-22/2018_plot_11-25-22.tiff",  bg = "transparent")
 
 year19 <-ggplot(subset(data_plot,year==2019),aes(x=field.type,y=mean.duration))+
   stat_summary(fun.y= mean,geom="bar",color="darkseagreen4",fill="darkseagreen4",alpha=0.8)+

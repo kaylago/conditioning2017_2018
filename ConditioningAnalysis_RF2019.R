@@ -316,11 +316,13 @@ all_plot<-ggplot(alldata,aes(x=field,y=mean.duration),group=exper)+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Treatment",labels=c("FL"="Florida \n(control)","MA-1"="Maine \n(conditioned)","MA-2"="Maine \n(RF exp)","MA-RF"="Maine with RF \n(RF exp)"))+
   ggtitle("") +
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank())+
   theme(text=element_text(size=12,family="calibri"))+
   theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=12,face="plain"))+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
-  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Calibri"),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Calibri"))+
   theme(panel.border = element_blank(), 
         axis.line = element_line(colour = "black"),
         panel.grid.major = element_blank(),
@@ -334,25 +336,25 @@ all_plot<-ggplot(alldata,aes(x=field,y=mean.duration),group=exper)+
   geom_segment(aes(x="MA-2",xend="MA-2"),y=130,yend=125)+
   geom_segment(aes(x="MA-2",xend="MA-RF"),y=160,yend=160)+
   geom_segment(aes(x="MA-2",xend="MA-2"),y=155,yend=160)+
-  geom_segment(aes(x="MA-RF",xend="MA-RF"),y=160,yend=155)+
+  geom_segment(aes(x="MA-RF",xend="MA-RF"),y=160,yend=155)
   #geom_segment(aes(x="MA-RF",xend="MA-RF"),y=0.15,yend=0.155)+
-  annotate("text",
-           x = c(1.5),
-           y = c(98),
-           label = c("p = 0.002*"),
-           family = "Calibri", fontface = 3, size=3)+
-  annotate("text",
-         x = c(2.5),
-         y = c(140),
-         label = c("p = 0.9"),
-         family = "Calibri", fontface = 3, size=3)+
-  annotate("text",
-           x = c(3.5),
-           y = c(175),
-           label = c("p = 0.9"),
-           family = "Calibri", fontface = 3, size=3)
+  #annotate("text",
+   #        x = c(1.5),
+    #       y = c(98),
+     #      label = c("p = 0.002*"),
+      #     family = "Calibri", fontface = 3, size=3)+
+  #annotate("text",
+   #      x = c(2.5),
+    #     y = c(140),
+     #    label = c("p = 0.9"),
+      #   family = "Calibri", fontface = 3, size=3)+
+#  annotate("text",
+ #          x = c(3.5),
+  #         y = c(175),
+   #        label = c("p = 0.9"),
+    #       family = "Calibri", fontface = 3, size=3)
 
 
 all_plot
 
-ggsave(all_plot, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/rf_all_2019_9-18-22.png",  bg = "transparent")
+ggsave(all_plot, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/rf_all_2019_12-19-22.tiff",  bg = "transparent")

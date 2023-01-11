@@ -189,9 +189,9 @@ cond_map17<- ggplot(data = world) +
   geom_sf(fill="antiquewhite",color="black") +
   #geom_sf(data = sites, size = 1, shape = 16, fill = "black") +
   geom_point(data=subset(cond_sites,year=="2017"),aes(x=long,y=lat,color=field),size=10)+
-  scale_color_manual(values = c("plum4","plum4","turquoise4","turquoise4","darkseagreen4","darkseagreen4","goldenrod3","goldenrod3","pink3","pink3"))+
+  scale_color_manual(values = c("orchid4","orchid4","turquoise4","turquoise4","darkseagreen4","darkseagreen4","goldenrod3","goldenrod3","pink3","pink3"))+
   #geom_text(data=labels,aes(x=long,y=lat,label=label),size=4,fontface="bold",family=c("Helvetica"),color="black")+
-  geom_label(data=subset(labels2, year=="2017"),aes(x=long,y=lat,label=label),size=4,fontface="bold",family=c("Arial"),alpha=0.8)+
+  geom_label(data=subset(labels2, year=="2017"),aes(x=long,y=lat,label=label),size=6,fontface="bold",family=c("Helvetica"),alpha=0.8)+
   #geom_text(data=anno,aes(x=long,y=lat,label="Florida"),size=4,fontface="bold",family=c("Helvetica"),color="black")+
   coord_sf(xlim = c(-100, -45), ylim = c(8, 53), expand = FALSE)+
   labs(x="Longitude",y="Latitude")+
@@ -217,7 +217,7 @@ cond_map17<- ggplot(data = world) +
 
 cond_map17
 
-ggsave(cond_map17, dpi=300,width=6,height=6,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/map2017_9-6-2022.tiff",  bg = "white")
+ggsave(cond_map17, dpi=300,width=6,height=6,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/map2017_11-25-2022.tiff",  bg = "white")
 
 cond_map18<- ggplot(data = world) +
   geom_sf(fill="antiquewhite",color="black") +
@@ -225,7 +225,7 @@ cond_map18<- ggplot(data = world) +
   geom_point(data=subset(cond_sites,year=="2018"),aes(x=long,y=lat,color=field),size=10)+
   scale_color_manual(values = c("turquoise4","turquoise4","darkseagreen4","darkseagreen4","goldenrod3","goldenrod3","pink3","pink3"))+
   #geom_text(data=labels,aes(x=long,y=lat,label=label),size=4,fontface="bold",family=c("Helvetica"),color="black")+
-  geom_label(data=subset(labels2,year=="2018"),aes(x=long,y=lat,label=label),size=4,fontface="bold",family=c("Arial"),alpha=0.8)+
+  geom_label(data=subset(labels2,year=="2018"),aes(x=long,y=lat,label=label),size=6,fontface="bold",family=c("Helvetica"),alpha=0.8)+
   #geom_text(data=anno,aes(x=long,y=lat,label="Florida"),size=4,fontface="bold",family=c("Helvetica"),color="black")+
   coord_sf(xlim = c(-100, -45), ylim = c(8, 53), expand = FALSE)+
   labs(x="Longitude",y="Latitude")+
@@ -250,15 +250,15 @@ cond_map18<- ggplot(data = world) +
         axis.ticks = element_blank())# bg of the plot
 
 cond_map18
-ggsave(cond_map18, dpi=300,width=6,height=6,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/map2018_9-6-2022.tiff",  bg = "white")
+ggsave(cond_map18, dpi=300,width=6,height=6,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/map2018_11-25-2022.tiff",  bg = "white")
 
 cond_map19<- ggplot(data = world) +
   geom_sf(fill="antiquewhite",color="black") +
   #geom_sf(data = sites, size = 1, shape = 16, fill = "black") +
   geom_point(data=subset(cond_sites,year=="2019"),aes(x=long,y=lat,color=field),size=10)+
-  scale_color_manual(values = c("darkseagreen4","darkseagreen4","goldenrod3","goldenrod3","pink3","pink3"))+
+  scale_color_manual(values = c("seagreen","seagreen","goldenrod3","goldenrod3","pink3","pink3"))+
   #geom_text(data=labels,aes(x=long,y=lat,label=label),size=4,fontface="bold",family=c("Helvetica"),color="black")+
-  geom_label(data=subset(labels2,year=="2019"),aes(x=long,y=lat,label=label),size=4,fontface="bold",family=c("Arial"),alpha=0.8)+
+  geom_label(data=subset(labels2,year=="2019"),aes(x=long,y=lat,label=label),size=6,fontface="bold",family=c("Helvetica"),alpha=0.8)+
   #geom_text(data=anno,aes(x=long,y=lat,label="Florida"),size=4,fontface="bold",family=c("Helvetica"),color="black")+
   coord_sf(xlim = c(-100, -45), ylim = c(8, 53), expand = FALSE)+
   labs(x="Longitude",y="Latitude")+
@@ -283,15 +283,15 @@ cond_map19<- ggplot(data = world) +
         axis.ticks = element_blank())# bg of the plot
 
 cond_map19
-ggsave(cond_map19, dpi=300,width=6,height=6,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/map2019_9-6-2022.tiff",  bg = "white")
+ggsave(cond_map19, dpi=300,width=6,height=6,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/map2019_pres_11-30-2022.tiff",  bg = "white")
 
 cond_map20sp<- ggplot(data = world) +
   geom_sf(fill="antiquewhite",color="black") +
   #geom_sf(data = sites, size = 1, shape = 16, fill = "black") +
   geom_point(data=subset(cond_sites,year=="2020spr"),aes(x=long,y=lat,color=field),size=10)+
-  scale_color_manual(values = c("goldenrod3","goldenrod3","pink3","pink3"))+
+  scale_color_manual(values = c("darkgoldenrod4","darkgoldenrod4","pink3","pink3"))+
   #geom_text(data=labels,aes(x=long,y=lat,label=label),size=4,fontface="bold",family=c("Helvetica"),color="black")+
-  geom_label(data=subset(labels2,year=="2020spr"),aes(x=long,y=lat,label=label),size=4,fontface="bold",family=c("Arial"),alpha=0.8)+
+  geom_label(data=subset(labels2,year=="2020spr"),aes(x=long,y=lat,label=label),size=6,fontface="bold",family=c("Helvetica"),alpha=0.8)+
   #geom_text(data=anno,aes(x=long,y=lat,label="Florida"),size=4,fontface="bold",family=c("Helvetica"),color="black")+
   coord_sf(xlim = c(-100, -45), ylim = c(8, 53), expand = FALSE)+
   labs(x="Longitude",y="Latitude")+
@@ -316,16 +316,16 @@ cond_map20sp<- ggplot(data = world) +
         axis.ticks = element_blank())# bg of the plot
 
 cond_map20sp
-ggsave(cond_map20sp,dpi=300,width=6,height=6,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/map2020spr_9-6-2022.tiff",  bg = "white")
+ggsave(cond_map20sp,dpi=300,width=6,height=6,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/map2020spr_11-25-2022.tiff",  bg = "white")
 
 
 cond_map20fa <- ggplot(data = world) +
   geom_sf(fill="antiquewhite",color="black") +
   #geom_sf(data = sites, size = 1, shape = 16, fill = "black") +
   geom_point(data=subset(cond_sites,year=="2020fa"),aes(x=long,y=lat,color=field),size=10)+
-  scale_color_manual(values = c("pink3","pink3"))+
+  scale_color_manual(values = c("hotpink3","hotpink3"))+
   #geom_text(data=labels,aes(x=long,y=lat,label=label),size=4,fontface="bold",family=c("Helvetica"),color="black")+
-  geom_label(data=subset(labels2,year=="2020fa"),aes(x=long,y=lat,label=label),size=4,fontface="bold",family=c("Arial"))+
+  geom_label(data=subset(labels2,year=="2020fa"),aes(x=long,y=lat,label=label),size=6,fontface="bold",family=c("Helvetica"))+
   coord_sf(xlim = c(-100, -45), ylim = c(8, 53), expand = FALSE)+
   labs(x="Longitude",y="Latitude")+
   #scale_fill_continuous(name="Zones")+
@@ -350,7 +350,7 @@ cond_map20fa <- ggplot(data = world) +
 
 cond_map20fa
 
-ggsave(cond_map20fa, dpi=300,width=6,height=6,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/map2020fa_9-6-2022.tiff",  bg = "white")
+ggsave(cond_map20fa, dpi=300,width=6,height=6,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/map2020fa_11-25-2022.tiff",  bg = "white")
 
 
 #################Spring 2020 conditioning map
@@ -400,6 +400,40 @@ sensplot
 
 ggsave(sensplot,dpi=600, width = 8, height=8,units="in",filename="C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/sens_2020_map_5-10-22.tiff")
 
+cond_map20fa_pres <- ggplot(data = world) +
+  geom_sf(fill="antiquewhite",color="black") +
+  #geom_sf(data = sites, size = 1, shape = 16, fill = "black") +
+  geom_point(data=subset(cond_sites,year=="2020fa"),aes(x=long,y=lat,color=field),size=10)+
+  scale_color_manual(values = c("violetred4","darkorange3"))+
+  #geom_text(data=labels,aes(x=long,y=lat,label=label),size=4,fontface="bold",family=c("Helvetica"),color="black")+
+  geom_label(data=subset(labels2,year=="2020fa"),aes(x=long,y=lat,label=label),size=6,fontface="bold",family=c("Helvetica"))+
+  coord_sf(xlim = c(-100, -45), ylim = c(8, 53), expand = FALSE)+
+  labs(x="Longitude",y="Latitude")+
+  #scale_fill_continuous(name="Zones")+
+  guides(alpha=FALSE,size=FALSE,color=FALSE)+
+  theme(panel.grid.major = element_line(color = "white", linetype = "dashed", 
+                                        size = 0.5), panel.background = element_rect(fill = alpha('slategray1', 0.5)),axis.line = element_line(color="black"))+
+  theme(axis.title=element_text(size=12,family="Helvetica"),
+        axis.text = element_text(color="black",size=12,family="Helvetica"),
+        plot.margin = unit(c(1,1,1,1),"cm"),axis.text.x = element_text(angle=45,hjust=1,size=10),
+        axis.text.y = element_text(size=10))+
+  #annotation_scale(location = "br", width_hint = 0.5) +
+  annotation_north_arrow(location = "tl", which_north = "true", 
+                         pad_x = unit(.1, "in"), pad_y = unit(0.08, "in"),
+                         style = north_arrow_fancy_orienteering)+
+  theme(
+    plot.background = element_rect(fill = "transparent", color = NA))+
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.ticks = element_blank())# bg of the plot
+
+cond_map20fa_pres
+
+ggsave(cond_map20fa_pres, dpi=300,width=6,height=6,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/map2020fa_pres_12-2-2022.tiff",  bg = "white")
+
+###########
 
 
 obx<-ggplot(data = world) +
@@ -444,7 +478,187 @@ nb
 ggsave(obx,dpi=600, width = 6, height=6,units="in",filename="C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/obx_2020_map.png")
 
 ggsave(nb,dpi=600, width = 6, height=6,units="in",filename="C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/nb_2020_map.png")
+####################################
 
+
+inc_sens<- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/MagneticFieldInfo/InclinationSensitivityDots.csv",header=T)
+
+
+inc_sens_labs<- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/MagneticFieldInfo/InclinationSensitivityLabels.csv",header=T)
+
+inc_sens$location <- factor(inc_sens$location,levels=c("Turks & Caicos","Haiti","TC+2","TC-2","TC+1","TC-1","HT+2","HT-2","HT+1","HT-1"))
+
+inc_sens$color <- factor(inc_sens$color,levels=c("Turks & Caicos",
+                                                 "Turks & Caicos - 1 degree difference",
+                                                 "Turks & Caicos - 2 degree difference",
+                                                 "Haiti",
+                                                 "Haiti - 1 degree difference",
+                                                 "Haiti - 2 degree difference"
+                                                 ))
+
+#cols <- c("8" = "red", "4" = "blue", "6" = "darkgreen", "10" = "orange")
+
+cond_map_inc <- ggplot() +
+  geom_sf(data=land,fill="antiquewhite")+
+  geom_sf(data = coastlines, fill="grey16",color="black",size=.5)+
+  #geom_sf(fill="antiquewhite",color="black") +
+  #geom_sf(data = sites, size = 1, shape = 16, fill = "black") +
+  geom_point(data=inc_sens,aes(x=long,y=lat,color=as.factor(color)),size=8)+
+  scale_color_manual(values = c("violetred4","violetred2","pink1","darkorange4","darkorange2","orange1"))+
+  geom_contour(data=wmm_incl_data,aes(x=long,y=lat,z=incl),breaks=c(38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57),color="black")+
+  #geom_text(data=labels,aes(x=long,y=lat,label=label),size=4,fontface="bold",family=c("Helvetica"),color="black")+
+  geom_label(data=inc_sens_labs,aes(x=long,y=lat,label=label),size=6,fontface="bold",family=c("Helvetica"))+
+  coord_sf(xlim = c(-85, -65), ylim = c(16, 28), expand = FALSE)+
+  labs(x="Longitude",y="Latitude",color="Treatment")+
+  #scale_fill_continuous(name="Zones")+
+  guides(alpha=FALSE,size=FALSE)+
+  #theme(legend.position = "none"),
+  theme(panel.grid.major = element_blank(), panel.background = element_rect(fill = alpha('lightskyblue1', 0.5)),axis.line = element_line(color="black"))+
+  theme(axis.title=element_text(size=12,family="Helvetica"),
+        legend.text = element_text(size=14,family="Helvetica"),
+        legend.title = element_text(size=14,family="Helvetica"),
+        axis.text = element_text(color="black",size=12,family="Helvetica"),
+        plot.margin = unit(c(1,1,1,1),"cm"),axis.text.x = element_text(angle=45,hjust=1,size=10),
+        axis.text.y = element_text(size=10))+
+  annotation_scale(location = "br", width_hint = 0.25) +
+  annotation_north_arrow(location = "tl", which_north = "true", 
+                         pad_x = unit(.1, "in"), pad_y = unit(0.08, "in"),
+                         style = north_arrow_fancy_orienteering)+
+  theme(
+    plot.background = element_rect(fill = "transparent", color = NA))+
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.ticks = element_blank())# bg of the plot
+
+cond_map_inc
+
+library(ggpubr)
+leg <- get_legend(cond_map_inc)
+leg<-as_ggplot(leg)
+leg
+
+cond_map_inc_plot <- cond_map_inc+theme(legend.position = "none")
+cond_map_inc_plot
+ggsave(cond_map_inc_plot,dpi=300, width = 8, height=5,units="in",filename="C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/inc_sens_12-1-22.tiff",bg = "white")
+
+
+ggsave(leg,dpi=300, width = 4, height=2.5,units="in",filename="C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/inc_sens_legend_12-1-22.tiff",bg = "white")
+
+
+cond_map_inc2 <- ggplot() +
+  geom_raster(data=wmm_incl_data,aes(x=long,y=lat,group=incl,fill=incl),color = '#00000000',interpolate = T)+
+  scale_fill_viridis_c(option = "turbo", trans = "sqrt",limits=c(38,58))+
+  geom_sf(data=land,fill="antiquewhite")+
+  geom_sf(data = coastlines, fill="grey16",color="black",size=.5)+
+  #scale_color_manual(values = c("violetred4","darkorange3","violetred2","violetred2","violetred2","violetred2","darkorange1","darkorange1","darkorange1","darkorange1"))+
+  geom_contour(data=wmm_incl_data,aes(x=long,y=lat,z=incl),breaks=c(38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57),color="black")+
+  #geom_text(data=labels,aes(x=long,y=lat,label=label),size=4,fontface="bold",family=c("Helvetica"),color="black")+
+  #geom_label(data=inc_sens_labs,aes(x=long,y=lat,label=label),size=6,fontface="bold",family=c("Helvetica"))+
+  coord_sf(xlim = c(-85, -65), ylim = c(16, 28), expand = FALSE)+
+  labs(x="Longitude",y="Latitude",fill="Inclination Angle")+
+  #scale_fill_continuous(name="Zones")+
+  guides(alpha=FALSE,size=FALSE,color=FALSE)+
+  theme(panel.grid.major = element_blank(), 
+        panel.background = element_rect(fill = alpha('lightskyblue1', 0.5)),
+        panel.border=element_rect(color="black",fill=NA,size=1),
+        axis.line = element_line(color="black"))+
+  theme(axis.title=element_text(size=12,family="Helvetica"),
+        axis.text = element_text(color="black",size=12,family="Helvetica"),
+        plot.margin = unit(c(1,1,1,1),"cm"),axis.text.x = element_text(angle=45,hjust=1,size=10),
+        axis.text.y = element_text(size=10))+
+  annotation_scale(location = "br", width_hint = 0.1) +
+  annotation_north_arrow(location = "tl", which_north = "true", 
+                         pad_x = unit(.1, "in"), pad_y = unit(0.08, "in"),
+                         style = north_arrow_fancy_orienteering)+
+  theme(
+    plot.background = element_rect(fill = "transparent", color = NA))+
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.ticks = element_blank())# bg of the plot
+
+cond_map_inc2
+
+ggsave(cond_map_inc2,dpi=300, width = 8, height=8,units="in",filename="C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/inc_sens_distance_12-1-22.tiff",bg = "white")
+
+cond_map_inc3 <- ggplot() +
+  geom_sf(data=land,fill="antiquewhite")+
+  geom_sf(data = coastlines, fill="grey16",color="black",size=.5)+
+  #geom_sf(fill="antiquewhite",color="black") +
+  #geom_sf(data = sites, size = 1, shape = 16, fill = "black") +
+  #geom_point(data=inc_sens,aes(x=long,y=lat,color=location),size=8)+
+  scale_color_manual(values = c("violetred4","darkorange3","violetred2","violetred2","violetred2","violetred2","darkorange1","darkorange1","darkorange1","darkorange1"))+
+  geom_contour(data=wmm_incl_data,aes(x=long,y=lat,z=incl),breaks=c(38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57),color="black")+
+  geom_contour(data=wmm_incl_data,aes(x=long,y=lat,z=incl),breaks=40,color="red")+
+  #geom_text(data=labels,aes(x=long,y=lat,label=label),size=4,fontface="bold",family=c("Helvetica"),color="black")+
+  #geom_label(data=inc_sens_labs,aes(x=long,y=lat,label=label),size=6,fontface="bold",family=c("Helvetica"))+
+  coord_sf(xlim = c(-85, -65), ylim = c(16, 28), expand = FALSE)+
+  labs(x="Longitude",y="Latitude")+
+  #scale_fill_continuous(name="Zones")+
+  guides(alpha=FALSE,size=FALSE,color=FALSE)+
+  theme(panel.grid.major = element_blank(), panel.background = element_rect(fill = alpha('lightskyblue1', 0.5)),axis.line = element_line(color="black"))+
+  theme(axis.title=element_text(size=12,family="Helvetica"),
+        axis.text = element_text(color="black",size=12,family="Helvetica"),
+        plot.margin = unit(c(1,1,1,1),"cm"),axis.text.x = element_text(angle=45,hjust=1,size=10),
+        axis.text.y = element_text(size=10))+
+  annotation_scale(location = "br", width_hint = 0.25) +
+  annotation_north_arrow(location = "tl", which_north = "true", 
+                         pad_x = unit(.1, "in"), pad_y = unit(0.08, "in"),
+                         style = north_arrow_fancy_orienteering)+
+  theme(
+    plot.background = element_rect(fill = "transparent", color = NA))+
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.ticks = element_blank())# bg of the plot
+
+cond_map_inc3
+
+ggsave(cond_map_inc3,dpi=300, width = 8, height=5,units="in",filename="C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/inc_sens_justisolines_12-1-22.tiff",bg = "white")
+
+
+avging<- read.csv("C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/MagneticFieldInfo/AveragingExperiment2021Dots.csv",header=T)
+
+avging$location <- factor(avging$location,levels=c("Turks & Caicos","Haiti","TC+1","TC-1","HT+1","HT-1"))
+
+cond_map_inc3 <- ggplot() +
+  geom_sf(data=land,fill="antiquewhite")+
+  geom_sf(data = coastlines, fill="grey16",color="black",size=.5)+
+  #geom_sf(fill="antiquewhite",color="black") +
+  #geom_sf(data = sites, size = 1, shape = 16, fill = "black") +
+  geom_point(data=avging,aes(x=long,y=lat,color=location),size=10)+
+  scale_color_manual(values = c("violetred4","chartreuse4","violetred2","violetred2","chartreuse3","chartreuse3"))+
+  geom_contour(data=wmm_incl_data,aes(x=long,y=lat,z=incl),breaks=c(38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57),color="black")+
+  #geom_text(data=labels,aes(x=long,y=lat,label=label),size=4,fontface="bold",family=c("Helvetica"),color="black")+
+  #geom_label(data=subset(labels2,year=="2020fa"),aes(x=long,y=lat,label=label),size=6,fontface="bold",family=c("Helvetica"))+
+  coord_sf(xlim = c(-85, -65), ylim = c(16, 28), expand = FALSE)+
+  labs(x="Longitude",y="Latitude")+
+  #scale_fill_continuous(name="Zones")+
+  guides(alpha=FALSE,size=FALSE,color=FALSE)+
+  theme(panel.grid.major = element_blank(), panel.background = element_rect(fill = alpha('lightskyblue1', 0.5)),axis.line = element_line(color="black"))+
+  theme(axis.title=element_text(size=12,family="Helvetica"),
+        axis.text = element_text(color="black",size=12,family="Helvetica"),
+        plot.margin = unit(c(1,1,1,1),"cm"),axis.text.x = element_text(angle=45,hjust=1,size=10),
+        axis.text.y = element_text(size=10))+
+  #annotation_scale(location = "br", width_hint = 0.5) +
+  annotation_north_arrow(location = "tl", which_north = "true", 
+                         pad_x = unit(.1, "in"), pad_y = unit(0.08, "in"),
+                         style = north_arrow_fancy_orienteering)+
+  theme(
+    plot.background = element_rect(fill = "transparent", color = NA))+
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.ticks = element_blank())# bg of the plot
+
+cond_map_inc3
+
+ggsave(cond_map_inc3,dpi=300, width = 8, height=8,units="in",filename="C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/averaging2021.tiff",bg = "white")
 
 
 ###########Inclination maps
@@ -453,17 +667,17 @@ incl_data <- read.csv("C:/Users/kkmgo/Dropbox/JCP Magnetic Maps Review/inclinati
 
 names(incl_data) <- c("dec.date","lat","long","elev","incl","incl_del")
 
-wmm_incl_data <- read.csv("C:/Users/kkmgo/Dropbox/JCP Magnetic Maps Review/WMM_WORLD_GRID_INCL.csv",skip=16,header=F)
+wmm_incl_data <- read.csv("C:/Users/kkmgo/OneDrive - University of North Carolina at Chapel Hill/Documents/JCP Magnetic Maps Review/WMM_WORLD_GRID_INCL.csv",skip=16,header=F)
 names(wmm_incl_data) <- c("dec.date","lat","long","elev","incl","incl_del","na")
 
-wmm_int_data <- read.csv("C:/Users/kkmgo/Dropbox/JCP Magnetic Maps Review/WMM_WORLD_GRID_INT.csv",skip=16,header=F)
+wmm_int_data <- read.csv("C:/Users/kkmgo/OneDrive - University of North Carolina at Chapel Hill/Documents/JCP Magnetic Maps Review/WMM_WORLD_GRID_INT.csv",skip=16,header=F)
 names(wmm_int_data) <- c("dec.date","lat","long","elev","int","int_del","na")
 
 detach(package:raster)
 library(dplyr)
 incl_data <- incl_data %>% select(-c("elev","incl_del"))
 
-int_data <- read.csv("C:/Users/kkmgo/Dropbox/JCP Magnetic Maps Review/florida_intensity_2015.csv",skip=14,header=F)
+int_data <- read.csv("C:/Users/kkmgo/OneDrive - University of North Carolina at Chapel Hill/Documents/JCP Magnetic Maps Review/florida_intensity_2015.csv",skip=14,header=F)
 
 names(int_data) <- c("dec.date","lat","long","elev","int","int_del")
 
@@ -896,4 +1110,8 @@ sargassosea_map<- ggplot(data = world) +
 sargassosea_map
 
 ggsave(sargassosea_map, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Biol395_Data/Isabel/sargassosea_map.png",  bg = "transparent")
+
+
+
+
 

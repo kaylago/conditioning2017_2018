@@ -105,7 +105,7 @@ data <- data %>% mutate(field.type2 = ifelse(field.type=="ht-static"|field.type=
                                                     ifelse(field.type=="ht-int"|field.type=="tc-int","int-toggle","tot-toggle"))))
 
 
-data_kg <- data_obs %>% filter(observer=="KG") %>% group_by(turtle.id,date,field,field.type,group,group.total) %>% summarise(mean.duration=mean(total.duration))
+#data_kg <- data_obs %>% filter(observer=="KG") %>% group_by(turtle.id,date,field,field.type,group,group.total) %>% summarise(mean.duration=mean(total.duration))
 
 pink <- data %>% filter(group == "pink")
 grey <- data %>% filter(group == "grey")
@@ -160,7 +160,7 @@ data_comb_condres<- data_comb_condres %>% group_by(turtle.id) %>% mutate(timepoi
 
 
 attach(data_comb_condres)
-pairwise.wilcox.test(freq,timepoint,data=data_comb_condres,paired=TRUE,p.adjust.method = "BH")
+pairwise.wilcox.test(freq,field.type2,data=data_comb_condres,paired=TRUE,p.adjust.method = "BH")
 detach()
 
 library(datarium)
@@ -218,17 +218,17 @@ annotation_df3 <- data.frame(field.type=rep(c("control","control")),
                              y=c(0.15,0.17))
 
 
-data_comb$field.type2 <- factor(data_comb$field.type2,levels=c("conditioned-og","control-og","conditioned","inc-toggle","int-toggle","tot-toggle") ,labels = c("magnetic field\nwith food original","magnetic field\nwithout food original","magnetic field\nwith food","inclination\ntoggle","intensity\ntoggle","total field\ntoggle"))
+data_comb$field.type2 <- factor(data_comb$field.type2,levels=c("conditioned-og","control-og","conditioned","inc-toggle","int-toggle","tot-toggle") ,labels = c("initial experiments\nrewarded\nmagnetic field","initial experiments\nunrewarded\nmagnetic field","rewarded\nmagnetic field\n(static)","rewarded\ninclination\ntoggle","rewarded\nintensity\ntoggle","total rewarded\nfield toggle"))
 
-plot<-ggplot(data_comb,aes(x=field.type2,y=freq))+
-  stat_summary(fun="mean",geom="bar",color="turquoise4",fill="turquoise4")+
+plot<-ggplot(data_comb,aes(x=field.type2,y=mean.duration))+
+  stat_summary(fun="mean",geom="bar",color="turquoise4",fill=c("turquoise4","turquoise4","seagreen4","seagreen4","seagreen4","seagreen4"))+
   stat_summary(fun=mean,fun.min = function(x) mean(x)-sd(x)/sqrt(length(x)),fun.max = function(x) mean(x) + sd(x)/sqrt(length(x)),
                geom="errorbar",color="black")+
   geom_point(position=position_jitter(width=0.15),size=3)+
   theme_bw()+
   coord_trans(y="sqrt")+
   #scale_y_sqrt(breaks= c(0.01,0.02,0.04,0.08,0.16),limits=c(0,0.1),expand=c(0,0))+
-  scale_y_continuous("Proportion of time exhibiting \nfood seeking behavior",breaks = c(0,0.02,0.08,0.2,0.4,0.6,0.8),expand=c(0,0),limits=c(0,1))+
+  scale_y_continuous("Time exhibiting turtle dance behavior (seconds)",expand=c(0,0),limits=c(0,1000))+
   #coord_cartesian(ylim=c(0,0.1))+
   scale_x_discrete("Magnetic Field Treatment")+
   #labs(title="Canada Group") +
@@ -236,7 +236,7 @@ plot<-ggplot(data_comb,aes(x=field.type2,y=freq))+
   theme(plot.title = element_text(margin = margin(t = 0, r = 0, b = 20, l = 0),hjust=0.5,family = "Calibri Light",size=12,face = "plain"))+
   theme(plot.margin = unit(c(0.2,0.2,0.3,0.2),"cm"))+
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0),size=12,family = "Calibri"),
-        axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0),size=12,family = "Calibri"),
+        axis.title.x = element_blank(),
         axis.text.x = element_text(size=12),
         axis.text.y = element_text(size=12))+
   theme(panel.border = element_blank(), 
@@ -246,26 +246,36 @@ plot<-ggplot(data_comb,aes(x=field.type2,y=freq))+
         panel.background = element_rect(fill = "transparent"))+
   theme(panel.border = element_blank(), axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())+
-  geom_segment(aes(x="magnetic field\nwith food original",xend="magnetic field\nwith food original"),y=.4,yend=.42)+
-  geom_segment(aes(x="magnetic field\nwith food original",xend="magnetic field\nwithout food original"),y=0.42,yend=0.42)+
-  geom_segment(aes(x="magnetic field\nwithout food original",xend="magnetic field\nwithout food original"),y=.42,yend=.4)+
+  geom_segment(aes(x="initial experiments\nrewarded\nmagnetic field",xend="initial experiments\nrewarded\nmagnetic field"),y=400,yend=420)+
+  geom_segment(aes(x="initial experiments\nrewarded\nmagnetic field",xend="initial experiments\nunrewarded\nmagnetic field"),y=420,yend=420)+
+  geom_segment(aes(x="initial experiments\nunrewarded\nmagnetic field",xend="initial experiments\nunrewarded\nmagnetic field"),y=420,yend=400)+
   annotate("text",
            x = c(1.5),
-           y = c(0.48),
+           y = c(450),
            label = c("p = 0.003"),
            family = "Calibri", fontface = 3, size=4)+
-  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwith food"),y=.6,yend=.62)+
-  geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwithout food original"),y=0.62,yend=0.62)+
-  geom_segment(aes(x="magnetic field\nwithout food original",xend="magnetic field\nwithout food original"),y=.62,yend=.6)+
+  #geom_segment(aes(x="magnetic field\nwith food",xend="magnetic field\nwith food"),y=600,yend=620)+
+  #geom_segment(aes(x="magnetic field\nwith food",xend="initial experiments\nmagnetic field\nwithout food"),y=620,yend=620)+
+  #geom_segment(aes(x="initial experiments\nmagnetic field\nwithout food",xend="initial experiments\nmagnetic field\nwithout food"),y=620,yend=600)+
+  #annotate("text",
+   #        x = c(2.5),
+    #       y = c(660),
+     #      label = c("p = 0.04"),
+      #     family = "Calibri", fontface = 3, size=4)+
+  geom_segment(aes(x="rewarded\nmagnetic field\n(static)",xend="rewarded\nmagnetic field\n(static)"),y=750,yend=780)+
+  geom_segment(aes(x="rewarded\nmagnetic field\n(static)",xend="total rewarded\nfield toggle"),y=780,yend=780)+
+  geom_segment(aes(x="rewarded\ninclination\ntoggle",xend="rewarded\ninclination\ntoggle"),y=750,yend=780)+
+  geom_segment(aes(x="rewarded\nintensity\ntoggle",xend="rewarded\nintensity\ntoggle"),y=750,yend=780)+
+  geom_segment(aes(x="total rewarded\nfield toggle",xend="total rewarded\nfield toggle"),y=750,yend=780)+
   annotate("text",
-           x = c(2.5),
-           y = c(0.69),
-           label = c("p = 0.04"),
+           x = c(4.5),
+           y = c(820),
+           label = c("p = 0.95"),
            family = "Calibri", fontface = 3, size=4)
   
 plot
 
-ggsave(plot, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/toggle_experiments_5-20-22.tiff",  bg = "transparent")
+ggsave(plot, dpi=300,width=10,height=8,units="in", filename = "C:/Users/kkmgo/Dropbox/Conditioning_MagFields_Project/Figures/Updated_Figures/toggle_experiments_12-14-22.tiff",  bg = "transparent")
 
 
 plot<-ggplot(data_og,aes(x=field.type,y=freq))+
@@ -299,7 +309,7 @@ plot<-ggplot(data_og,aes(x=field.type,y=freq))+
   geom_segment(aes(x="control",xend="control"),y=.42,yend=.4)+
   annotate("text",
            x = c(1.5),
-           y = c(0.48),
+           y = c(),
            label = c("p = 0.003"),
            family = "Calibri", fontface = 3, size=4)
 
